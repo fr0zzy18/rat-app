@@ -1,0 +1,77 @@
+# Visual Studio
+.vs/
+*.suo
+*.user
+*.pdb
+*.obj
+*.o
+*.exe
+*.dll
+*.ilk
+*.idb
+*.opt
+*.aps
+*.bsc
+*.ncb
+*.sbr
+*.res
+*.pch
+*.lib
+*.exp
+*.map
+*.ipch
+*.log
+*.bak
+*.old
+*.tmp
+*.vspscc
+*.vssscc
+*.vspcc
+*.vsscc
+*.builds
+*.opendb
+*.VC.db
+*.VC.opendb
+*.sdf
+*.cache
+*.dbmdl
+*.mdf
+*.ldf
+
+# Build results
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+build/
+bld/
+bin/
+obj/
+
+# Packages
+*.nupkg
+packages/
+*.orig
+
+# Rider
+.idea/
+.Rider/
+
+# Resharper
+*.DotSettings.user
+
+# Azure Functions
+local.settings.json
+
+# Test Results
+TestResults/
+
+# User secrets
+appsettings.Development.json
+appsettings.json
+UserSecrets/
+
+# EF Migrations history
+*.Designer.cs
+*.cs.bak
+[0-9]*_*.cs

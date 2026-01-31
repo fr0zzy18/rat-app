@@ -1,0 +1,6 @@
+@RatApp.Api_HostAddress = http://localhost:5211
+
+GET {{RatApp.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
