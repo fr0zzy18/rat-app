@@ -12,7 +12,7 @@ namespace RatApp.Infrastructure.Persistence
         public DbSet<User> Users { get; set; }
         public DbSet<Role> Roles { get; set; }
         public DbSet<UserRole> UserRoles { get; set; }
-        public DbSet<Player> Players { get; set; }
+        public DbSet<Player> Players { get; set; } // Re-added Player DbSet
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -32,11 +32,7 @@ namespace RatApp.Infrastructure.Persistence
                 .WithMany(r => r.UserRoles)
                 .HasForeignKey(ur => ur.RoleId);
 
-            // Seed initial roles
-            modelBuilder.Entity<Role>().HasData(
-                new Role { Id = 1, Name = "Admin" },
-                new Role { Id = 2, Name = "User" }
-            );
+
         }
     }
 }

@@ -13,6 +13,7 @@ using System.Linq; // For Any
 using System.Threading.Tasks; // For async/await
 using RatApp.Core.Entities; // Added for User, Role, UserRole
 using System.Text.Json.Serialization; // Added for ReferenceHandler
+using Npgsql.EntityFrameworkCore.PostgreSQL; // Added for UseNpgsql
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,7 +23,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
     var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-    options.UseSqlServer(connectionString);
+    options.UseNpgsql(connectionString); // Changed from UseSqlServer to UseNpgsql
 });
 
 builder.Services.AddControllers().AddJsonOptions(x =>
@@ -47,7 +48,8 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<AuthService>();
-builder.Services.AddScoped<PlayerService>(); // Register PlayerService
+builder.Services.AddScoped<PlayerService>(); // Re-register PlayerService
+builder.Services.AddHttpClient(); // Add HttpClient for PlayerService
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -87,7 +89,7 @@ using (var scope = app.Services.CreateScope())
     {
         var context = services.GetRequiredService<AppDbContext>();
         // Ensure the database is created and migrations are applied (optional, but good for dev)
-        context.Database.Migrate();
+        // context.Database.Migrate();
 
         // Seed roles if they don't exist
         var adminRole = await context.Roles.SingleOrDefaultAsync(r => r.Name == "Admin");
@@ -118,7 +120,7 @@ using (var scope = app.Services.CreateScope())
             var adminUser = new User
             {
                 Username = "admin",
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword(""), // Default password for testing (should be handled securely)
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword("123123"), // Changed password to "123123"
                 IsActive = true
             };
             context.Users.Add(adminUser);

@@ -26,7 +26,7 @@ namespace RatApp.Infrastructure.Services
             var claims = new List<Claim>
             {
                 new Claim(JwtRegisteredClaimNames.NameId, user.Id.ToString()),
-                new Claim(JwtRegisteredClaimNames.UniqueName, user.Username),
+                new Claim(JwtRegisteredClaimNames.UniqueName, user.Username ?? string.Empty), // Handle possible null Username
             };
 
             // Add role claims
@@ -34,7 +34,10 @@ namespace RatApp.Infrastructure.Services
             {
                 foreach (var userRole in user.UserRoles)
                 {
-                    claims.Add(new Claim(ClaimTypes.Role, userRole.Role.Name));
+                    if (userRole.Role != null && userRole.Role.Name != null) // Explicit null checks for Role and Role.Name
+                    {
+                        claims.Add(new Claim(ClaimTypes.Role, userRole.Role.Name));
+                    }
                 }
             }
             

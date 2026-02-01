@@ -21,14 +21,14 @@ namespace RatApp.Application.Services
             _tokenService = tokenService;
         }
 
-        public async Task<UserDto> Login(LoginDto loginDto)
+        public async Task<UserDto?> Login(LoginDto loginDto) // Changed to UserDto?
         {
             var user = await _context.Users
-                .Include(u => u.UserRoles)
-                .ThenInclude(ur => ur.Role)
+                .Include(u => u.UserRoles!) // Added ! for non-nullable property
+                .ThenInclude(ur => ur.Role!) // Added ! for non-nullable property
                 .SingleOrDefaultAsync(u => u.Username == loginDto.Username);
 
-            if (user == null || !BCrypt.Net.BCrypt.Verify(loginDto.Password, user.PasswordHash))
+            if (user == null || user.PasswordHash == null || !BCrypt.Net.BCrypt.Verify(loginDto.Password, user.PasswordHash)) // Added null check for PasswordHash
             {
                 return null; // Invalid credentials
             }
@@ -46,7 +46,7 @@ namespace RatApp.Application.Services
                 Id = user.Id, // Added Id
                 Username = user.Username,
                 Token = token,
-                Roles = user.UserRoles.Select(ur => ur.Role.Name).ToList()
+                Roles = user.UserRoles?.Select(ur => ur.Role?.Name!).ToList() // Added null conditional and !
             };
         }
 
@@ -55,9 +55,9 @@ namespace RatApp.Application.Services
             return await _context.Users.AnyAsync(u => u.Username == username);
         }
 
-        public async Task<User> Register(RegisterWithRoleDto registerDto)
+        public async Task<User?> Register(RegisterWithRoleDto registerDto) // Changed to User?
         {
-            if (await UserExists(registerDto.Username))
+            if (await UserExists(registerDto.Username!)) // Added !
             {
                 return null;
             }
@@ -80,7 +80,7 @@ namespace RatApp.Application.Services
                 roleToAssign = await _context.Roles.SingleAsync(r => r.Name == "Player");
             }
 
-            _context.UserRoles.Add(new UserRole { UserId = user.Id, RoleId = roleToAssign.Id });
+            _context.UserRoles!.Add(new UserRole { UserId = user.Id, RoleId = roleToAssign.Id }); // Added !
             await _context.SaveChangesAsync();
 
             return user;
@@ -88,24 +88,24 @@ namespace RatApp.Application.Services
 
         public async Task<List<string>> GetRolesAsync()
         {
-            return await _context.Roles.Select(r => r.Name).ToListAsync();
+            return await _context.Roles.Select(r => r.Name!).ToListAsync(); // Added !
         }
 
         public async Task<List<UserDto>> GetAllUsersAsync()
         {
             return await _context.Users
-                .Include(u => u.UserRoles)
-                .ThenInclude(ur => ur.Role)
+                .Include(u => u.UserRoles!) // Added !
+                .ThenInclude(ur => ur.Role!) // Added !
                 .Select(u => new UserDto
                 {
                     Id = u.Id,
                     Username = u.Username,
-                    Roles = u.UserRoles.Select(ur => ur.Role.Name).ToList()
+                    Roles = u.UserRoles!.Select(ur => ur.Role!.Name!).ToList() // Added !
                 })
                 .ToListAsync();
         }
 
-        public async Task<UserDto> UpdateUserUsernameAsync(UpdateUserDto updateUserDto)
+        public async Task<UserDto?> UpdateUserUsernameAsync(UpdateUserDto updateUserDto) // Changed to UserDto?
         {
             var user = await _context.Users.FindAsync(updateUserDto.UserId);
             if (user == null)
@@ -113,7 +113,7 @@ namespace RatApp.Application.Services
                 return null; // User not found
             }
 
-            if (await UserExists(updateUserDto.Username))
+            if (await UserExists(updateUserDto.Username!)) // Added !
             {
                 return null; // New username already exists
             }
@@ -123,22 +123,22 @@ namespace RatApp.Application.Services
 
             // Return updated UserDto
             return await _context.Users
-                .Include(u => u.UserRoles)
-                .ThenInclude(ur => ur.Role)
+                .Include(u => u.UserRoles!) // Added !
+                .ThenInclude(ur => ur.Role!) // Added !
                 .Where(u => u.Id == user.Id)
                 .Select(u => new UserDto
                 {
                     Id = u.Id,
                     Username = u.Username,
-                    Roles = u.UserRoles.Select(ur => ur.Role.Name).ToList()
+                    Roles = u.UserRoles!.Select(ur => ur.Role!.Name!).ToList() // Added !
                 })
                 .SingleOrDefaultAsync();
         }
 
-        public async Task<UserDto> UpdateUserRoleAsync(UpdateUserRoleDto updateUserRoleDto)
+        public async Task<UserDto?> UpdateUserRoleAsync(UpdateUserRoleDto updateUserRoleDto) // Changed to UserDto?
         {
             var user = await _context.Users
-                .Include(u => u.UserRoles)
+                .Include(u => u.UserRoles!) // Added !
                 .SingleOrDefaultAsync(u => u.Id == updateUserRoleDto.UserId);
             if (user == null)
             {
@@ -152,22 +152,22 @@ namespace RatApp.Application.Services
             }
 
             // Remove existing roles
-            _context.UserRoles.RemoveRange(user.UserRoles);
+            _context.UserRoles!.RemoveRange(user.UserRoles!); // Added !
             
             // Add new role
-            user.UserRoles.Add(new UserRole { UserId = user.Id, RoleId = newRole.Id });
+            user.UserRoles!.Add(new UserRole { UserId = user.Id, RoleId = newRole.Id }); // Added !
             await _context.SaveChangesAsync();
 
             // Return updated UserDto
             return await _context.Users
-                .Include(u => u.UserRoles)
-                .ThenInclude(ur => ur.Role)
+                .Include(u => u.UserRoles!) // Added !
+                .ThenInclude(ur => ur.Role!) // Added !
                 .Where(u => u.Id == user.Id)
                 .Select(u => new UserDto
                 {
                     Id = u.Id,
                     Username = u.Username,
-                    Roles = u.UserRoles.Select(ur => ur.Role.Name).ToList()
+                    Roles = u.UserRoles!.Select(ur => ur.Role!.Name!).ToList() // Added !
                 })
                 .SingleOrDefaultAsync();
         }
@@ -181,8 +181,8 @@ namespace RatApp.Application.Services
             }
 
             // Delete associated UserRoles first
-            var userRoles = await _context.UserRoles.Where(ur => ur.UserId == userId).ToListAsync();
-            _context.UserRoles.RemoveRange(userRoles);
+            var userRoles = await _context.UserRoles!.Where(ur => ur.UserId == userId).ToListAsync(); // Added !
+            _context.UserRoles!.RemoveRange(userRoles); // Added !
             await _context.SaveChangesAsync();
 
             _context.Users.Remove(user);

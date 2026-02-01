@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -10,7 +9,7 @@ namespace RatApp.Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize] // All endpoints require authentication by default
+    [Authorize(Roles = "Admin,Manager")] // All player management endpoints require Admin or Manager roles
     public class PlayersController : ControllerBase
     {
         private readonly PlayerService _playerService;
@@ -21,40 +20,30 @@ namespace RatApp.Api.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<PlayerDto>>> GetPlayers()
+        public async Task<ActionResult<IEnumerable<PlayerDto>>> GetAllPlayers()
         {
-            var players = await _playerService.GetAllPlayers();
+            var players = await _playerService.GetAllPlayersAsync();
             return Ok(players);
         }
 
-        [HttpPost]
-        [Authorize(Roles = "Admin,Manager")] // Admin and Manager can add players
-        public async Task<ActionResult<PlayerDto>> AddPlayer(AddPlayerDto dto)
+        [HttpPost("import")]
+        public async Task<ActionResult<PlayerDto>> ImportPlayer(AddPlayerRequestDto dto)
         {
-            var newPlayer = await _playerService.AddPlayer(dto);
-            return CreatedAtAction(nameof(GetPlayers), new { id = newPlayer.Id }, newPlayer);
-        }
-
-        [HttpPut]
-        [Authorize(Roles = "Admin,Manager")] // Admin and Manager can update players
-        public async Task<ActionResult<PlayerDto>> UpdatePlayer(PlayerDto dto)
-        {
-            var updatedPlayer = await _playerService.UpdatePlayer(dto);
-            if (updatedPlayer == null)
+            var newPlayer = await _playerService.AddPlayerAsync(dto);
+            if (newPlayer == null)
             {
-                return NotFound($"Player with ID {dto.Id} not found.");
+                return BadRequest("Player not found on Raider.IO or could not be imported.");
             }
-            return Ok(updatedPlayer);
+            return CreatedAtAction(nameof(GetAllPlayers), new { id = newPlayer.Id }, newPlayer);
         }
 
         [HttpDelete("{id}")]
-        [Authorize(Roles = "Admin,Manager")] // Admin and Manager can delete players
         public async Task<IActionResult> DeletePlayer(int id)
         {
-            var deleted = await _playerService.DeletePlayer(id);
+            var deleted = await _playerService.DeletePlayerAsync(id);
             if (!deleted)
             {
-                return NotFound($"Player with ID {id} not found.");
+                return NotFound($"Player with ID {id} not found in local storage.");
             }
             return NoContent();
         }
