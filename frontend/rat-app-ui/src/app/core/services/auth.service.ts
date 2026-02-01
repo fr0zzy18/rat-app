@@ -99,4 +99,8 @@ export class AuthService {
     deleteUser(userId: number): Observable<any> {
         return this.http.delete(`${this.API_URL}/auth/users/${userId}`, { headers: this.getAuthHeaders() });
     }
+
+    changePassword(userId: number, newPassword: string): Observable<any> {
+        return this.http.put(`${this.API_URL}/auth/change-password`, { userId, newPassword }, { headers: this.getAuthHeaders() });
+    }
 }

@@ -12,5 +12,10 @@ namespace RatApp.Core.Entities
         public string ActiveSpecRole { get; set; } = string.Empty;
         public string Faction { get; set; } = string.Empty;
         public string ThumbnailUrl { get; set; } = string.Empty;
+        public DateTime LastUpdated { get; set; } = DateTime.UtcNow;
+        public string ProfileUrl { get; set; } = string.Empty;
+        public string GuildName { get; set; } = string.Empty;
+        public double MythicPlusScore { get; set; } = 0.0;
+        public string Category { get; set; } = string.Empty;
     }
 }

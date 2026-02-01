@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
@@ -9,6 +10,7 @@ using RatApp.Core.Entities;
 using RatApp.Infrastructure.Persistence;
 using System.Text.Json; // For JsonSerializerOptions
 using System.Text.Json.Serialization; // Required for JsonPropertyName
+using RatApp.Application.Models; // Add this line
 
 namespace RatApp.Application.Services
 {
@@ -28,24 +30,32 @@ namespace RatApp.Application.Services
         {
             try
             {
-                var response = await _httpClient.GetAsync($"{RaiderIoApiBaseUrl}?region={region}&realm={realm}&name={name}");
+                var response = await _httpClient.GetAsync($"{RaiderIoApiBaseUrl}?region={region}&realm={realm}&name={name}&fields=guild,mythic_plus_scores_by_season:current");
                 response.EnsureSuccessStatusCode(); // Throws an exception if the HTTP response status is an error code
 
                 var raiderIoPlayer = await response.Content.ReadFromJsonAsync<RaiderIoPlayerResponse>();
 
                 if (raiderIoPlayer == null) return null;
 
+                // Extract 'all' score from mythic_plus_scores_by_season:current
+                var mythicPlusScoreAll = raiderIoPlayer.MythicPlusScoresBySeason?
+                                                        .FirstOrDefault(s => s.season == "season-tww-3") // Assuming "current" resolves to a specific season
+                                                        ?.scores?.all ?? 0;
+
                 return new PlayerDto
                 {
                     Name = raiderIoPlayer.name,
                     Race = raiderIoPlayer.race,
-                    Class = raiderIoPlayer.Class, // Changed from raiderIoPlayer.player_class
+                    Class = raiderIoPlayer.Class, 
                     ActiveSpecName = raiderIoPlayer.active_spec_name,
                     ActiveSpecRole = raiderIoPlayer.active_spec_role,
                     Faction = raiderIoPlayer.faction,
                     Region = raiderIoPlayer.region,
                     Realm = raiderIoPlayer.realm,
-                    ThumbnailUrl = raiderIoPlayer.thumbnail_url
+                    ThumbnailUrl = raiderIoPlayer.thumbnail_url,
+                    ProfileUrl = raiderIoPlayer.profile_url,
+                    GuildName = raiderIoPlayer.guild?.name ?? string.Empty,
+                    MythicPlusScore = mythicPlusScoreAll
                 };
             }
             catch (HttpRequestException ex)
@@ -78,6 +88,11 @@ namespace RatApp.Application.Services
                 existingPlayer.ActiveSpecRole = raiderIoDetails.ActiveSpecRole;
                 existingPlayer.Faction = raiderIoDetails.Faction;
                 existingPlayer.ThumbnailUrl = raiderIoDetails.ThumbnailUrl;
+                existingPlayer.LastUpdated = DateTime.UtcNow; // Update timestamp
+                existingPlayer.ProfileUrl = raiderIoDetails.ProfileUrl; // Update ProfileUrl
+                existingPlayer.GuildName = raiderIoDetails.GuildName; // Update GuildName
+                existingPlayer.MythicPlusScore = raiderIoDetails.MythicPlusScore; // Update MythicPlusScore
+                existingPlayer.Category = dto.Category; // Update Category
                 
                 await _context.SaveChangesAsync();
                 raiderIoDetails.Id = existingPlayer.Id;
@@ -94,7 +109,12 @@ namespace RatApp.Application.Services
                 ActiveSpecName = raiderIoDetails.ActiveSpecName,
                 ActiveSpecRole = raiderIoDetails.ActiveSpecRole,
                 Faction = raiderIoDetails.Faction,
-                ThumbnailUrl = raiderIoDetails.ThumbnailUrl
+                ThumbnailUrl = raiderIoDetails.ThumbnailUrl,
+                LastUpdated = DateTime.UtcNow, // Set timestamp for new player
+                ProfileUrl = raiderIoDetails.ProfileUrl,
+                GuildName = raiderIoDetails.GuildName,
+                MythicPlusScore = raiderIoDetails.MythicPlusScore, // Set MythicPlusScore
+                Category = dto.Category // Set Category
             };
 
             _context.Players.Add(playerEntity);
@@ -105,14 +125,43 @@ namespace RatApp.Application.Services
             return raiderIoDetails;
         }
 
-        public async Task<IEnumerable<PlayerDto>> GetAllPlayersAsync()
+        public async Task<IEnumerable<PlayerDto>> GetAllPlayersAsync(string? category = null) // Optional category parameter
         {
-            var storedPlayers = await _context.Players.ToListAsync();
+            IQueryable<Player> playersQuery = _context.Players;
+
+            if (!string.IsNullOrWhiteSpace(category) && !category.Equals("All", StringComparison.OrdinalIgnoreCase))
+            {
+                playersQuery = playersQuery.Where(p => p.Category == category);
+            }
+
+            var storedPlayers = await playersQuery.ToListAsync();
             var playerDtos = new List<PlayerDto>();
 
             foreach (var storedPlayer in storedPlayers)
             {
-                // Now retrieve details from the stored player entity instead of re-fetching from Raider.IO
+                // Check if player data needs to be refreshed
+                if ((DateTime.UtcNow - storedPlayer.LastUpdated).TotalHours > 1)
+                {
+                    Console.WriteLine($"Refreshing data for player: {storedPlayer.Name}");
+                    var raiderIoDetails = await GetPlayerDetailsFromRaiderIO(storedPlayer.Region, storedPlayer.Realm, storedPlayer.Name);
+                    if (raiderIoDetails != null)
+                    {
+                        // Update stored player entity with new data
+                        storedPlayer.Race = raiderIoDetails.Race;
+                        storedPlayer.Class = raiderIoDetails.Class;
+                        storedPlayer.ActiveSpecName = raiderIoDetails.ActiveSpecName;
+                        storedPlayer.ActiveSpecRole = raiderIoDetails.ActiveSpecRole;
+                        storedPlayer.Faction = raiderIoDetails.Faction;
+                        storedPlayer.ThumbnailUrl = raiderIoDetails.ThumbnailUrl;
+                        storedPlayer.LastUpdated = DateTime.UtcNow; // Update timestamp
+                        storedPlayer.ProfileUrl = raiderIoDetails.ProfileUrl; // Update ProfileUrl
+                        storedPlayer.GuildName = raiderIoDetails.GuildName; // Update GuildName
+                        storedPlayer.MythicPlusScore = raiderIoDetails.MythicPlusScore; // Update MythicPlusScore
+                        // Category is not refreshed from Raider.IO, it's set during import
+                        await _context.SaveChangesAsync();
+                    }
+                }
+
                 playerDtos.Add(new PlayerDto
                 {
                     Id = storedPlayer.Id,
@@ -124,7 +173,11 @@ namespace RatApp.Application.Services
                     Faction = storedPlayer.Faction,
                     Region = storedPlayer.Region,
                     Realm = storedPlayer.Realm,
-                    ThumbnailUrl = storedPlayer.ThumbnailUrl
+                    ThumbnailUrl = storedPlayer.ThumbnailUrl,
+                    ProfileUrl = storedPlayer.ProfileUrl,
+                    GuildName = storedPlayer.GuildName,
+                    MythicPlusScore = storedPlayer.MythicPlusScore,
+                    Category = storedPlayer.Category // Include Category
                 });
             }
             return playerDtos;
@@ -142,25 +195,5 @@ namespace RatApp.Application.Services
             await _context.SaveChangesAsync();
             return true;
         }
-    }
-
-    // Helper class to map Raider.IO API response
-    public class RaiderIoPlayerResponse
-    {
-        public string name { get; set; } = string.Empty;
-        public string race { get; set; } = string.Empty;
-        [JsonPropertyName("class")] // Corrected JsonProperty Name
-        public string Class { get; set; } = string.Empty; // Corrected property name
-        public string active_spec_name { get; set; } = string.Empty;
-        public string active_spec_role { get; set; } = string.Empty;
-        public string gender { get; set; } = string.Empty;
-        public string faction { get; set; } = string.Empty;
-        public string region { get; set; } = string.Empty;
-        public string realm { get; set; } = string.Empty;
-        public string thumbnail_url { get; set; } = string.Empty;
-        public int achievement_points { get; set; }
-        public string last_crawled_at { get; set; } = string.Empty;
-        public string profile_url { get; set; } = string.Empty;
-        public string profile_banner { get; set; } = string.Empty;
     }
 }

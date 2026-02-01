@@ -189,5 +189,18 @@ namespace RatApp.Application.Services
             await _context.SaveChangesAsync();
             return true;
         }
+
+        public async Task<bool> ChangePasswordAsync(int userId, string newPassword)
+        {
+            var user = await _context.Users.FindAsync(userId);
+            if (user == null)
+            {
+                return false; // User not found
+            }
+
+            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
+            await _context.SaveChangesAsync();
+            return true;
+        }
     }
 }

@@ -1,4 +1,4 @@
-import { Component, ChangeDetectorRef } from '@angular/core';
+import { Component, ChangeDetectorRef, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router'; // Import Router
@@ -78,12 +78,19 @@ import { AuthService } from '../../core/services/auth.service'; // Import AuthSe
     }
   `]
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit { // Implement OnInit
   username = '';
   password = '';
   errorMessage: string | null = null;
 
   constructor(private authService: AuthService, private router: Router, private cdr: ChangeDetectorRef) { } // Inject AuthService, Router, and ChangeDetectorRef
+
+  ngOnInit(): void {
+    // Redirect to dashboard if already logged in
+    if (this.authService.isAuthenticated()) {
+      this.router.navigate(['/dashboard']);
+    }
+  }
 
   onSubmit() {
     this.errorMessage = null;

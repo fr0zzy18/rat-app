@@ -3,11 +3,12 @@ import { CommonModule } from '@angular/common';
 import { AuthService } from '../../core/services/auth.service';
 import { User } from '../../core/models/user.model';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { ChangePasswordModalComponent } from '../change-password-modal/change-password-modal.component'; // Import ChangePasswordModalComponent
 
 @Component({
   selector: 'app-manage-users',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, ChangePasswordModalComponent], // Add ChangePasswordModalComponent to imports
   templateUrl: './manage-users.component.html',
   styleUrls: ['./manage-users.component.css']
 })
@@ -18,6 +19,9 @@ export class ManageUsersComponent implements OnInit {
   editUserForm: FormGroup;
   errorMessage: string | null = null;
   successMessage: string | null = null;
+
+  showChangePasswordModal: boolean = false;
+  selectedUserIdForPasswordChange: number | null = null;
 
   constructor(
     private authService: AuthService,
@@ -74,6 +78,8 @@ export class ManageUsersComponent implements OnInit {
   cancelEdit(): void {
     this.editingUser = null;
     this.editUserForm.reset();
+    this.errorMessage = null;
+    this.successMessage = null;
   }
 
   saveUser(): void {
@@ -83,8 +89,12 @@ export class ManageUsersComponent implements OnInit {
 
     const { id, username, roleName } = this.editUserForm.value;
 
+    let usernameUpdated = false;
+    let roleUpdated = false;
+
     // Update Username
     if (this.editingUser?.username !== username) {
+      usernameUpdated = true;
       this.authService.updateUsername(id, username).subscribe({
         next: () => {
           this.successMessage = `User ${this.editingUser?.username} username updated to ${username}.`;
@@ -99,6 +109,7 @@ export class ManageUsersComponent implements OnInit {
 
     // Update Role
     if (this.editingUser?.roles && this.editingUser?.roles[0] !== roleName) {
+      roleUpdated = true;
       this.authService.updateRole(id, roleName).subscribe({
         next: () => {
           this.successMessage = `User ${username} role updated to ${roleName}.`;
@@ -111,7 +122,11 @@ export class ManageUsersComponent implements OnInit {
       });
     }
 
-    this.cancelEdit();
+    if (usernameUpdated || roleUpdated) {
+      this.cancelEdit();
+    } else {
+      this.errorMessage = 'No changes detected to save.';
+    }
   }
 
   deleteUser(userId: number, username: string): void {
@@ -127,5 +142,23 @@ export class ManageUsersComponent implements OnInit {
         }
       });
     }
+  }
+
+  openChangePasswordModal(userId: number): void {
+    this.selectedUserIdForPasswordChange = userId;
+    this.showChangePasswordModal = true;
+  }
+
+  closeChangePasswordModal(): void {
+    this.showChangePasswordModal = false;
+    this.selectedUserIdForPasswordChange = null;
+    this.successMessage = null; // Clear success message if any
+    this.errorMessage = null; // Clear error message if any
+  }
+
+  onPasswordChanged(): void {
+    this.successMessage = 'Password changed successfully for user ID ' + this.selectedUserIdForPasswordChange + '.';
+    this.closeChangePasswordModal();
+    this.loadUsers(); // Refresh user list just in case
   }
 }

@@ -20,6 +20,7 @@
         <td>{{ user.roles?.join(', ') }}</td>
         <td>
           <button (click)="editUser(user)" class="btn btn-edit">Edit</button>
+          <button (click)="openChangePasswordModal(user.id)" class="btn btn-change-password">Change Password</button>
           <button (click)="deleteUser(user.id, user.username)" class="btn btn-delete">Delete</button>
         </td>
       </tr>
@@ -44,3 +45,10 @@
     </form>
   </div>
 </div>
+
+<app-change-password-modal
+  *ngIf="showChangePasswordModal"
+  [userId]="selectedUserIdForPasswordChange!"
+  (closeModal)="closeChangePasswordModal()"
+  (passwordChanged)="onPasswordChanged()"
+></app-change-password-modal>

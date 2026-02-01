@@ -17,8 +17,6 @@ import { Router, RouterLink } from '@angular/router'; // Import RouterLink
         <a *ngIf="authService.hasRole('Manager')" routerLink="/register" class="nav-button">Register User</a>
         <a *ngIf="authService.hasRole('Manager')" routerLink="/manage-users" class="nav-button">Manage Users</a>
       </nav>
-
-      <button (click)="logout()">Logout</button>
     </div>
   `,
   styles: [`
@@ -71,9 +69,4 @@ import { Router, RouterLink } from '@angular/router'; // Import RouterLink
 })
 export class DashboardComponent {
   constructor(public authService: AuthService, private router: Router) { }
-
-  logout() {
-    this.authService.logout();
-    this.router.navigate(['/login']);
-  }
 }

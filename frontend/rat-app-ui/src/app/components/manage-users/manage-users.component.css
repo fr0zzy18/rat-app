@@ -76,6 +76,15 @@ h2 {
     background-color: #c82333;
 }
 
+.btn-change-password {
+    background-color: #ffc107; /* Yellow/Orange */
+    color: #212529; /* Dark text */
+}
+
+.btn-change-password:hover {
+    background-color: #e0a800;
+}
+
 .edit-user-form {
     margin-top: 20px;
     padding: 20px;
