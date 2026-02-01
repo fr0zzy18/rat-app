@@ -1,0 +1,84 @@
+.app-header {
+  background-color: #333;
+  color: white;
+  padding: 10px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+.header-content {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.app-title {
+  font-size: 1.5em;
+  font-weight: bold;
+  cursor: pointer; /* Add cursor pointer for better UX */
+}
+.app-title-link {
+    color: inherit; /* Inherit color from parent */
+    text-decoration: none; /* Remove underline */
+}
+.user-section {
+  position: relative;
+}
+.username {
+  cursor: pointer;
+  font-weight: bold;
+  padding: 5px 10px;
+  border-radius: 4px;
+  background-color: #555;
+}
+.username:hover {
+  background-color: #777;
+}
+.logout-popup {
+  position: absolute;
+  top: 40px;
+  right: 0;
+  background-color: white;
+  color: #333;
+  padding: 15px;
+  border-radius: 5px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+  z-index: 1000;
+  text-align: center;
+  min-width: 200px;
+  display: flex; /* Use flexbox for button layout */
+  flex-direction: column; /* Stack buttons vertically */
+  gap: 10px; /* Space between buttons */
+}
+.logout-popup p {
+  margin-bottom: 10px;
+  font-size: 0.9em;
+}
+.logout-popup button {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85em;
+  width: 100%; /* Make buttons full width */
+  margin: 0; /* Reset margin */
+}
+.logout-popup button:hover {
+  background-color: #c82333;
+}
+.logout-popup button:last-child {
+  background-color: #6c757d;
+}
+.logout-popup button:last-child:hover {
+  background-color: #5a6268;
+}
+/* Style for the new Change Password button */
+.logout-popup button:nth-child(3) { /* Assuming "Change Password" is the third button */
+  background-color: #007bff; /* Blue color for change password */
+}
+.logout-popup button:nth-child(3):hover {
+  background-color: #0056b3;
+}
