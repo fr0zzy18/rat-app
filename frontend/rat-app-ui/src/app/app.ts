@@ -15,6 +15,10 @@ import { ChangePasswordModalComponent } from './components/change-password-modal
         <a routerLink="/dashboard" class="app-title-link">
           <span class="app-title">RatApp</span>
         </a>
+        <nav *ngIf="authService.isAuthenticated()">
+          <a routerLink="/players" class="nav-link">Players</a>
+          <a routerLink="/bingo" class="nav-link">Bingo</a>
+        </nav>
         <div *ngIf="authService.isAuthenticated()" class="user-section">
           <span class="username" (click)="toggleLogoutPopup()">{{ authService.currentUserValue?.username }}</span>
           <div *ngIf="showLogoutPopup" class="logout-popup">

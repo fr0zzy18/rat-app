@@ -4,6 +4,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { User } from '../../core/models/user.model';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ChangePasswordModalComponent } from '../change-password-modal/change-password-modal.component'; // Import ChangePasswordModalComponent
+import { Role } from '../../core/entities/role';
 
 @Component({
   selector: 'app-manage-users',
@@ -14,7 +15,7 @@ import { ChangePasswordModalComponent } from '../change-password-modal/change-pa
 })
 export class ManageUsersComponent implements OnInit {
   users: User[] = [];
-  roles: string[] = [];
+  roles: Role[] = [];
   editingUser: User | null = null;
   editUserForm: FormGroup;
   errorMessage: string | null = null;

@@ -22,6 +22,26 @@
     color: inherit; /* Inherit color from parent */
     text-decoration: none; /* Remove underline */
 }
+
+/* Styling for navigation links */
+nav {
+  display: flex;
+  gap: 15px; /* Space between navigation items */
+  margin-left: 20px; /* Adjust spacing from title */
+}
+
+.nav-link {
+  color: white;
+  text-decoration: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+}
+
+.nav-link:hover {
+  background-color: #555;
+}
+
 .user-section {
   position: relative;
 }

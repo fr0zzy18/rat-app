@@ -1,106 +1,106 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
+import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
+import { catchError, map, tap } from 'rxjs/operators';
 import { jwtDecode } from 'jwt-decode';
-import { User } from '../models/user.model';
+import { UserDto } from '../dtos/user-dto';
+import { Role } from '../entities/role';
 
-@Injectable({ providedIn: 'root' })
+@Injectable({
+  providedIn: 'root'
+})
 export class AuthService {
-    private currentUserSubject: BehaviorSubject<User | null>;
-    public currentUser: Observable<User | null>;
-    public errorMessage: string | null = null; // Add errorMessage property
-    private readonly API_URL = 'http://localhost:5211/api';
+  private apiUrl = 'http://localhost:5211/api/auth';
+  private currentUserSubject: BehaviorSubject<UserDto | null>;
+  public currentUser: Observable<UserDto | null>;
+  public errorMessage: string | null = null;
 
-    constructor(private http: HttpClient) {
-        const storedUser = localStorage.getItem('currentUser');
-        this.currentUserSubject = new BehaviorSubject<User | null>(storedUser ? JSON.parse(storedUser) : null);
-        this.currentUser = this.currentUserSubject.asObservable();
+  constructor(private http: HttpClient) {
+    const token = localStorage.getItem('token');
+    let user: UserDto | null = null;
+    if (token) {
+      const decodedToken: any = jwtDecode(token);
+      // Map JWT claims to UserDto
+      user = {
+        id: +decodedToken.sub, // 'sub' is usually the user ID
+        username: decodedToken.unique_name || decodedToken.name, // Prioritize unique_name, fallback to name
+        roles: Array.isArray(decodedToken.role) ? decodedToken.role : [decodedToken.role] // 'role' can be string or array
+      };
     }
+    this.currentUserSubject = new BehaviorSubject<UserDto | null>(user);
+    this.currentUser = this.currentUserSubject.asObservable();
+  }
 
-    public get currentUserValue(): User | null {
-        return this.currentUserSubject.value;
-    }
+  public get currentUserValue(): UserDto | null {
+    return this.currentUserSubject.value;
+  }
 
-    private getAuthHeaders(): HttpHeaders {
-        const token = this.getToken();
-        return new HttpHeaders({
-            'Authorization': `Bearer ${token}`
-        });
-    }
+  login(credentials: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/login`, credentials, { responseType: 'text' }).pipe(
+      tap((token: any) => {
+        localStorage.setItem('token', token);
+        const decodedToken: any = jwtDecode(token);
+        const user: UserDto = {
+          id: +decodedToken.sub,
+          username: decodedToken.unique_name || decodedToken.name, // Prioritize unique_name, fallback to name
+          roles: Array.isArray(decodedToken.role) ? decodedToken.role : [decodedToken.role]
+        };
+        this.currentUserSubject.next(user);
+        this.errorMessage = null;
+      }),
+      catchError((error: HttpErrorResponse) => {
+        this.errorMessage = error.error;
+        return throwError(() => error);
+      })
+    );
+  }
 
-    login(username: string, password: string) {
-        return this.http.post<any>(`${this.API_URL}/auth/login`, { username, password })
-            .pipe(map(user => {
-                if (user && user.token) {
-                    localStorage.setItem('currentUser', JSON.stringify(user));
-                    this.currentUserSubject.next(user);
-                    this.errorMessage = null; // Clear error message on successful login
-                } else {
-                    this.errorMessage = 'Login failed. Please check your credentials.'; // Set generic error message
-                }
-                return user;
-            }));
-    }
+  logout(): void {
+    localStorage.removeItem('token');
+    this.currentUserSubject.next(null);
+  }
 
-    logout() {
-        localStorage.removeItem('currentUser');
-        this.currentUserSubject.next(null);
-    }
+  isAuthenticated(): boolean {
+    return this.currentUserValue !== null;
+  }
 
-    isAuthenticated(): boolean {
-        return this.currentUserValue !== null && this.currentUserValue.token !== undefined;
-    }
+  hasRole(role: string): boolean {
+    return this.currentUserValue?.roles?.includes(role) ?? false;
+  }
 
-    getToken(): string | null {
-        return this.currentUserValue?.token || null;
-    }
+  getToken(): string | null {
+    return localStorage.getItem('token');
+  }
 
-    getDecodedToken(): any {
-        const token = this.currentUserValue?.token;
-        if (token) {
-            try {
-                return jwtDecode(token);
-            } catch (Error) {
-                return null;
-            }
-        }
-        return null;
-    }
+  changePassword(userId: number, newPassword: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/change-password`, { userId, newPassword });
+  }
 
-    hasRole(role: string): boolean {
-        const user = this.currentUserValue;
-        if (user && user.roles) {
-            return user.roles.includes(role);
-        }
-        return false;
-    }
+  getAllUsers(): Observable<UserDto[]> {
+    return this.http.get<UserDto[]>(`${this.apiUrl}/users`);
+  }
 
-    register(username: string, password: string, roleName: string) {
-        return this.http.post(`${this.API_URL}/auth/register`, { username, password, roleName }, { headers: this.getAuthHeaders() });
-    }
+  getRoles(): Observable<Role[]> {
+    return this.http.get<Role[]>(`${this.apiUrl}/roles`);
+  }
 
-    getRoles(): Observable<string[]> {
-        return this.http.get<string[]>(`${this.API_URL}/auth/roles`, { headers: this.getAuthHeaders() });
-    }
+  updateUsername(id: number, username: string): Observable<any> {
+    return this.http.put(`${this.apiUrl}/users/${id}/username`, { username });
+  }
 
-    getAllUsers(): Observable<User[]> {
-        return this.http.get<User[]>(`${this.API_URL}/auth/users`, { headers: this.getAuthHeaders() });
-    }
+  updateRole(userId: number, roleName: string): Observable<any> {
+    return this.http.put(`${this.apiUrl}/users/role`, { userId, roleName });
+  }
 
-    updateUsername(userId: number, newUsername: string): Observable<User> {
-        return this.http.put<User>(`${this.API_URL}/auth/users/username`, { userId, username: newUsername }, { headers: this.getAuthHeaders() });
-    }
+  deleteUser(userId: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/users/${userId}`);
+  }
 
-    updateRole(userId: number, newRoleName: string): Observable<User> {
-        return this.http.put<User>(`${this.API_URL}/auth/users/role`, { userId, roleName: newRoleName }, { headers: this.getAuthHeaders() });
-    }
+  register(username: string, password: string, roleName: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/register`, { username, password, roleName });
+  }
 
-    deleteUser(userId: number): Observable<any> {
-        return this.http.delete(`${this.API_URL}/auth/users/${userId}`, { headers: this.getAuthHeaders() });
-    }
-
-    changePassword(userId: number, newPassword: string): Observable<any> {
-        return this.http.put(`${this.API_URL}/auth/change-password`, { userId, newPassword }, { headers: this.getAuthHeaders() });
-    }
+  getUser(): any {
+    return this.currentUserSubject.value;
+  }
 }

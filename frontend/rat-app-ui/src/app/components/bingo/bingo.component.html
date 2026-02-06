@@ -1,0 +1,22 @@
+<div class="container">
+  <h1>Bingo Cards</h1>
+
+  <div *ngIf="successMessage" class="alert alert-success">
+    {{ successMessage }}
+  </div>
+  <div *ngIf="errorMessage" class="alert alert-danger">
+    {{ errorMessage }}
+  </div>
+
+  <div *ngIf="canCreate" class="create-card-form">
+    <input type="text" [(ngModel)]="newCardPhrase" placeholder="Enter a phrase">
+    <button (click)="createBingoCard()">Create Card</button>
+  </div>
+
+  <div class="card-list">
+    <div *ngFor="let card of bingoCards" class="card">
+      <span>{{ card.phrase }}</span>
+      <button *ngIf="canDelete" (click)="deleteBingoCard(card.id)" class="delete-button">Delete</button>
+    </div>
+  </div>
+</div>

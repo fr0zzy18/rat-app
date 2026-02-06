@@ -20,16 +20,16 @@ namespace RatApp.Api.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<ActionResult<UserDto>> Login(LoginDto loginDto)
+        public async Task<IActionResult> Login(LoginDto loginDto) // Changed return type
         {
-            var userDto = await _authService.Login(loginDto);
+            var token = await _authService.Login(loginDto); // Changed variable name and expected return
 
-            if (userDto == null)
+            if (token == null)
             {
                 return Unauthorized("Invalid credentials or inactive user.");
             }
 
-            return Ok(userDto);
+            return Ok(token); // Return the raw token
         }
 
         [HttpPost("register")]

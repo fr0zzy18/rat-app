@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { CommonModule } from '@angular/common';
+import { Role } from '../../core/entities/role';
 
 @Component({
   selector: 'app-register',
@@ -13,7 +14,7 @@ import { CommonModule } from '@angular/common';
 })
 export class RegisterComponent implements OnInit {
   registerForm: FormGroup;
-  roles: string[] = [];
+  roles: Role[] = [];
   selectedRole: string = 'Player'; // Default role
   error = '';
   successMessage: string | null = null;
@@ -34,8 +35,8 @@ export class RegisterComponent implements OnInit {
     this.authService.getRoles().subscribe({
       next: (roles) => {
         this.roles = roles;
-        if (roles.length > 0 && !roles.includes(this.selectedRole)) {
-          this.selectedRole = roles[0]; // Set default if 'Player' is not available
+        if (roles.length > 0 && !roles.some(r => r.name === this.selectedRole)) {
+          this.selectedRole = roles[0].name; // Set default if 'Player' is not available
           this.registerForm.get('roleName')?.setValue(this.selectedRole);
         }
       },

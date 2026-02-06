@@ -43,7 +43,7 @@ export class LoginComponent implements OnInit { // Implement OnInit
 
   onSubmit() {
     this.errorMessage = null;
-    this.authService.login(this.username, this.password).subscribe(
+    this.authService.login({ username: this.username, password: this.password }).subscribe(
       user => {
         if (user) {
           console.log('Login successful');

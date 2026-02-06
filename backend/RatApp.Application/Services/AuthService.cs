@@ -21,7 +21,7 @@ namespace RatApp.Application.Services
             _tokenService = tokenService;
         }
 
-        public async Task<UserDto?> Login(LoginDto loginDto) // Changed to UserDto?
+        public async Task<string?> Login(LoginDto loginDto) // Changed to string?
         {
             var user = await _context.Users
                 .Include(u => u.UserRoles!) // Added ! for non-nullable property
@@ -41,13 +41,7 @@ namespace RatApp.Application.Services
 
             var token = _tokenService.CreateToken(user);
 
-            return new UserDto
-            {
-                Id = user.Id, // Added Id
-                Username = user.Username,
-                Token = token,
-                Roles = user.UserRoles?.Select(ur => ur.Role?.Name!).ToList() // Added null conditional and !
-            };
+            return token; // Return the raw token string
         }
 
         public async Task<bool> UserExists(string username)

@@ -14,6 +14,7 @@ using System.Threading.Tasks; // For async/await
 using RatApp.Core.Entities; // Added for User, Role, UserRole
 using System.Text.Json.Serialization; // Added for ReferenceHandler
 using Npgsql.EntityFrameworkCore.PostgreSQL; // Added for UseNpgsql
+using System.Security.Claims; // Required for ClaimTypes
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -49,6 +50,7 @@ builder.Services.AddCors(options =>
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<PlayerService>(); // Re-register PlayerService
+builder.Services.AddScoped<BingoService>();
 builder.Services.AddHttpClient(); // Add HttpClient for PlayerService
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -60,7 +62,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT Key not configured"))),
             ValidateIssuer = true,
             ValidIssuer = builder.Configuration["Jwt:Issuer"],
-            ValidateAudience = false // For now, we are not validating audience
+            ValidateAudience = false, // For now, we are not validating audience
+            RoleClaimType = ClaimTypes.Role // Explicitly set the role claim type
         };
     });
 builder.Services.AddAuthorization();
