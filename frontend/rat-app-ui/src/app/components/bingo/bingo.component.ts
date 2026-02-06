@@ -4,6 +4,8 @@ import { BingoService } from '../../core/services/bingo.service';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../core/services/auth.service';
+import { Router } from '@angular/router'; // Import Router
+import { GameService } from '../../core/services/game.service'; // Import GameService
 
 @Component({
   selector: 'app-bingo',
@@ -19,11 +21,14 @@ export class BingoComponent implements OnInit {
   canDelete: boolean = false; // New property
   successMessage: string | null = null;
   errorMessage: string | null = null;
+  selectedCards: BingoCard[] = []; // New: Array to hold selected cards
 
   constructor(
     private bingoService: BingoService,
     private authService: AuthService,
-    private cdr: ChangeDetectorRef // Inject ChangeDetectorRef
+    private cdr: ChangeDetectorRef, // Inject ChangeDetectorRef
+    private router: Router, // Inject Router
+    private gameService: GameService // Inject GameService
   ) { }
 
   ngOnInit(): void {
@@ -92,5 +97,38 @@ export class BingoComponent implements OnInit {
   checkRoles(): void {
     this.canCreate = this.authService.hasRole('Admin') || this.authService.hasRole('Manager');
     this.canDelete = this.authService.hasRole('Admin') || this.authService.hasRole('Manager');
+  }
+
+  // New: Toggle card selection
+  toggleCardSelection(card: BingoCard): void {
+    const index = this.selectedCards.findIndex(c => c.id === card.id);
+    if (index > -1) {
+      this.selectedCards.splice(index, 1); // Deselect
+    } else if (this.selectedCards.length < 24) {
+      this.selectedCards.push(card); // Select, if less than 24 selected
+    } else {
+      this.errorMessage = 'You can select a maximum of 24 cards.';
+    }
+    this.cdr.detectChanges(); // Update view
+  }
+
+  // New: Check if a card is selected
+  isCardSelected(card: BingoCard): boolean {
+    return this.selectedCards.some(c => c.id === card.id);
+  }
+
+  // New: Check if game can be started
+  get canStartGame(): boolean {
+    return this.selectedCards.length === 24;
+  }
+
+  // New: Start game
+  startGame(): void {
+    if (this.canStartGame) {
+      this.gameService.setSelectedCards(this.selectedCards); // Store selected cards in service
+      this.router.navigate(['/game-room']); // Navigate to game room
+    } else {
+      this.errorMessage = 'Please select exactly 24 cards to start the game.';
+    }
   }
 }

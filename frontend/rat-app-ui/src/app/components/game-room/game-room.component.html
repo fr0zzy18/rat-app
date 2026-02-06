@@ -1,0 +1,16 @@
+<div class="game-room-container">
+  <h1>Bingo Game</h1>
+  <div class="game-board">
+    <div *ngFor="let row of gameBoard; let i = index" class="board-row">
+      <div
+        *ngFor="let cell of row; let j = index"
+        class="board-cell"
+        [class.empty]="cell.isEmpty"
+        [class.checked]="cell.isChecked"
+        (click)="toggleCellChecked(cell)">
+        <span *ngIf="cell.phrase">{{ cell.phrase }}</span>
+        <span *ngIf="cell.isEmpty" class="empty-text">FREE</span>
+      </div>
+    </div>
+  </div>
+</div>

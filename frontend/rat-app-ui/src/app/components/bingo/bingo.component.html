@@ -13,10 +13,19 @@
     <button (click)="createBingoCard()">Create Card</button>
   </div>
 
+  <div class="selection-info">
+    Selected Cards: {{ selectedCards.length }} / 24
+    <button [disabled]="!canStartGame" (click)="startGame()">Start Game</button>
+  </div>
+
   <div class="card-list">
-    <div *ngFor="let card of bingoCards" class="card">
+    <div
+      *ngFor="let card of bingoCards"
+      class="card"
+      [class.selected]="isCardSelected(card)"
+      (click)="toggleCardSelection(card)">
       <span>{{ card.phrase }}</span>
-      <button *ngIf="canDelete" (click)="deleteBingoCard(card.id)" class="delete-button">Delete</button>
+      <button *ngIf="canDelete" (click)="deleteBingoCard(card.id); $event.stopPropagation()" class="delete-button">Delete</button>
     </div>
   </div>
 </div>

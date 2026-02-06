@@ -1,0 +1,69 @@
+.game-room-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+}
+
+h1 {
+  margin-bottom: 30px;
+  color: #333;
+}
+
+.game-board {
+  display: grid;
+  grid-template-columns: repeat(5, 100px); /* 5 columns, each 100px wide */
+  grid-template-rows: repeat(5, 100px); /* 5 rows, each 100px high */
+  border: 2px solid #333;
+  gap: 5px; /* Space between cells */
+  background-color: #eee;
+}
+
+.board-row {
+  display: contents; /* Allows grid items to be direct children of .game-board */
+}
+
+.board-cell {
+  width: 100px;
+  height: 100px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid #ccc;
+  background-color: #f9f9f9;
+  font-size: 0.9em;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+  text-align: center;
+  padding: 5px;
+  box-sizing: border-box; /* Include padding in cell's total width and height */
+  word-break: break-word; /* Break long words */
+}
+
+.board-cell:hover:not(.empty) {
+  background-color: #e0e0e0;
+}
+
+.board-cell.empty {
+  background-color: #d0e0f0;
+  cursor: default;
+  font-style: italic;
+  color: #555;
+}
+
+.board-cell.checked {
+  background-color: #c8e6c9; /* Light green for checked */
+  border-color: #4CAF50;
+  color: #1b5e20;
+}
+
+.board-cell.checked.empty {
+  background-color: #aed581; /* Darker green for checked empty cell */
+  border-color: #689f38;
+}
+
+.empty-text {
+  font-size: 1.2em;
+  color: #007bff;
+}

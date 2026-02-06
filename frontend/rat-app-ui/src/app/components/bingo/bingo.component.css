@@ -19,6 +19,9 @@
   background-color: #f8d7da;
   color: #721c24;
   border: 1px solid #f5c6cb;
+  max-width: fit-content; /* Adjust width to content */
+  margin-left: auto; /* Center align */
+  margin-right: auto; /* Center align */
 }
 
 .create-card-form {
@@ -35,6 +38,34 @@
   padding: 10px 20px;
 }
 
+.selection-info {
+  margin-bottom: 20px;
+  font-size: 1.1em;
+  font-weight: bold;
+  display: flex; /* Use flexbox for alignment */
+  align-items: center; /* Vertically align items */
+  gap: 15px; /* Space between items */
+}
+
+.selection-info button {
+  padding: 8px 15px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.selection-info button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.selection-info button:hover:not(:disabled) {
+  background-color: #0056b3;
+}
+
 .card-list {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -46,12 +77,24 @@
   border: 1px solid #ccc;
   border-radius: 5px;
   text-align: center;
-  position: relative; /* Added for delete button positioning */
+  position: relative;
+  cursor: pointer; /* Indicate clickable */
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.card.selected {
+  border-color: #007bff; /* Highlight color */
+  background-color: #e6f2ff; /* Light background for selected */
+  box-shadow: 0 0 8px rgba(0, 123, 255, 0.4);
+}
+
+.card:hover {
+  border-color: #0056b3;
 }
 
 .card span {
-  display: block; /* Ensure phrase takes full width */
-  margin-bottom: 10px; /* Space between phrase and button */
+  display: block;
+  margin-bottom: 10px;
 }
 
 .delete-button {
@@ -62,9 +105,9 @@
   border-radius: 4px;
   cursor: pointer;
   font-size: 0.8em;
-  position: absolute; /* Position the button */
-  bottom: 10px; /* Adjust as needed */
-  right: 10px; /* Adjust as needed */
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
 }
 
 .delete-button:hover {

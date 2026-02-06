@@ -7,6 +7,7 @@ import { RegisterComponent } from './components/register/register.component';
 import { managerGuard } from './core/guards/manager.guard';
 import { ManageUsersComponent } from './components/manage-users/manage-users.component';
 import { BingoComponent } from './components/bingo/bingo.component';
+import { GameRoomComponent } from './components/game-room/game-room.component'; // Import GameRoomComponent
 
 export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
@@ -14,6 +15,7 @@ export const routes: Routes = [
   { path: 'dashboard', component: DashboardComponent, canActivate: [authGuard] },
   { path: 'players', component: PlayersComponent, canActivate: [authGuard] }, // Protected Players route
   { path: 'bingo', component: BingoComponent, canActivate: [authGuard] },
+  { path: 'game-room', component: GameRoomComponent, canActivate: [authGuard] }, // New Game Room route
   { path: 'register', component: RegisterComponent, canActivate: [authGuard, managerGuard] },
   { path: 'manage-users', component: ManageUsersComponent, canActivate: [authGuard, managerGuard] },
   { path: '**', redirectTo: '/login' }
