@@ -15,6 +15,7 @@ using RatApp.Core.Entities; // Added for User, Role, UserRole
 using System.Text.Json.Serialization; // Added for ReferenceHandler
 using Npgsql.EntityFrameworkCore.PostgreSQL; // Added for UseNpgsql
 using System.Security.Claims; // Required for ClaimTypes
+using RatApp.Api.Hubs; // Added for GameHub
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,6 +32,7 @@ builder.Services.AddControllers().AddJsonOptions(x =>
     x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+builder.Services.AddSignalR(); // Add SignalR services
 
 const string MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
@@ -85,6 +87,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<GameHub>("/gamehub"); // Map SignalR GameHub
 
 // Seed data
 using (var scope = app.Services.CreateScope())

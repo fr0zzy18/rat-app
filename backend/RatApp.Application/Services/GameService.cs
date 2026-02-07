@@ -13,10 +13,9 @@ namespace RatApp.Application.Services
         private readonly IGameRepository _gameRepository;
         // private readonly ITokenService _tokenService; // Uncomment and inject if needed to get user ID from token elsewhere
 
-        public GameService(IGameRepository gameRepository) //, ITokenService tokenService)
+        public GameService(IGameRepository gameRepository)
         {
             _gameRepository = gameRepository;
-            // _tokenService = tokenService;
         }
 
         public async Task<Game> CreateGameAsync(string userId, List<int> player1SelectedCardIds)

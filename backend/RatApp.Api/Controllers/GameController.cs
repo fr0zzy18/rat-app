@@ -6,8 +6,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RatApp.Application.Dtos;
 using RatApp.Application.Services;
-using RatApp.Core.Entities; // Needed for Game entity
-using RatApp.Core.Interfaces; // Needed for ITokenService - though not directly used in controller, GameService might need it
+using RatApp.Core.Entities;
+using Microsoft.AspNetCore.SignalR; // Added for IHubContext
+using RatApp.Api.Hubs; // Added for GameHub
 
 namespace RatApp.Api.Controllers
 {
@@ -17,12 +18,12 @@ namespace RatApp.Api.Controllers
     public class GameController : ControllerBase
     {
         private readonly GameService _gameService;
-        // private readonly ITokenService _tokenService; // Inject if needed to get user ID, but ClaimsPrincipal is often enough
+        private readonly IHubContext<GameHub> _hubContext; // Injected SignalR Hub Context
 
-        public GameController(GameService gameService) //, ITokenService tokenService)
+        public GameController(GameService gameService, IHubContext<GameHub> hubContext)
         {
             _gameService = gameService;
-            // _tokenService = tokenService;
+            _hubContext = hubContext;
         }
 
         [HttpPost("create")]
@@ -35,6 +36,8 @@ namespace RatApp.Api.Controllers
             }
 
             var newGame = await _gameService.CreateGameAsync(userId, request.Player1SelectedCardIds);
+            // No SignalR message here, as the game is just created and waiting for player 2.
+            // Players will get the initial state via GetGame and then updates via SignalR once joined.
             return Ok(new GameResponseDto
             {
                 Id = newGame.Id,
@@ -44,8 +47,8 @@ namespace RatApp.Api.Controllers
                 Player2UserId = newGame.Player2UserId,
                 Player2SelectedCardIds = newGame.Player2SelectedCardIds,
                 Player2CheckedCardIds = newGame.Player2CheckedCardIds,
-                Player1BoardLayout = newGame.Player1BoardLayout, // New
-                Player2BoardLayout = newGame.Player2BoardLayout, // New
+                Player1BoardLayout = newGame.Player1BoardLayout,
+                Player2BoardLayout = newGame.Player2BoardLayout,
                 Status = newGame.Status,
                 CreatedDate = newGame.CreatedDate
             });
@@ -67,7 +70,8 @@ namespace RatApp.Api.Controllers
                 {
                     return NotFound($"Game with ID {gameId} not found.");
                 }
-                return Ok(new GameResponseDto
+
+                var gameResponse = new GameResponseDto
                 {
                     Id = updatedGame.Id,
                     CreatedByUserId = updatedGame.CreatedByUserId,
@@ -76,11 +80,14 @@ namespace RatApp.Api.Controllers
                     Player2UserId = updatedGame.Player2UserId,
                     Player2SelectedCardIds = updatedGame.Player2SelectedCardIds,
                     Player2CheckedCardIds = updatedGame.Player2CheckedCardIds,
-                    Player1BoardLayout = updatedGame.Player1BoardLayout, // New
-                    Player2BoardLayout = updatedGame.Player2BoardLayout, // New
+                    Player1BoardLayout = updatedGame.Player1BoardLayout,
+                    Player2BoardLayout = updatedGame.Player2BoardLayout,
                     Status = updatedGame.Status,
                     CreatedDate = updatedGame.CreatedDate
-                });
+                };
+
+                await _hubContext.Clients.Group(updatedGame.Id.ToString()).SendAsync("GameUpdated", gameResponse); // Send SignalR update
+                return Ok(gameResponse);
             }
             catch (InvalidOperationException ex)
             {
@@ -114,8 +121,8 @@ namespace RatApp.Api.Controllers
                 Player2UserId = game.Player2UserId,
                 Player2SelectedCardIds = game.Player2SelectedCardIds,
                 Player2CheckedCardIds = game.Player2CheckedCardIds,
-                Player1BoardLayout = game.Player1BoardLayout, // New
-                Player2BoardLayout = game.Player2BoardLayout, // New
+                Player1BoardLayout = game.Player1BoardLayout,
+                Player2BoardLayout = game.Player2BoardLayout,
                 Status = game.Status,
                 CreatedDate = game.CreatedDate
             });
@@ -137,7 +144,8 @@ namespace RatApp.Api.Controllers
                 {
                     return NotFound($"Game with ID {gameId} not found.");
                 }
-                return Ok(new GameResponseDto
+                
+                var gameResponse = new GameResponseDto
                 {
                     Id = updatedGame.Id,
                     CreatedByUserId = updatedGame.CreatedByUserId,
@@ -146,11 +154,14 @@ namespace RatApp.Api.Controllers
                     Player2UserId = updatedGame.Player2UserId,
                     Player2SelectedCardIds = updatedGame.Player2SelectedCardIds,
                     Player2CheckedCardIds = updatedGame.Player2CheckedCardIds,
-                    Player1BoardLayout = updatedGame.Player1BoardLayout, // New
-                    Player2BoardLayout = updatedGame.Player2BoardLayout, // New
+                    Player1BoardLayout = updatedGame.Player1BoardLayout,
+                    Player2BoardLayout = updatedGame.Player2BoardLayout,
                     Status = updatedGame.Status,
                     CreatedDate = updatedGame.CreatedDate
-                });
+                };
+
+                await _hubContext.Clients.Group(updatedGame.Id.ToString()).SendAsync("GameUpdated", gameResponse); // Send SignalR update
+                return Ok(gameResponse);
             }
             catch (UnauthorizedAccessException ex)
             {
