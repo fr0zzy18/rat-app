@@ -31,15 +31,8 @@ namespace RatApp.Api.Controllers
 
         private async Task<GameResponseDto> MapGameToGameResponseDto(Game game)
         {
-            Console.WriteLine($"Mapping Game: {game.Id}");
-            Console.WriteLine($"CreatedByUserId: {game.CreatedByUserId}");
-            Console.WriteLine($"Player2UserId: {game.Player2UserId}");
-
             var createdByUser = await _userRepository.GetUserByIdAsync(game.CreatedByUserId);
             var player2User = game.Player2UserId.HasValue ? await _userRepository.GetUserByIdAsync(game.Player2UserId.Value) : null;
-
-            Console.WriteLine($"CreatedByUsername from repo: {createdByUser?.Username ?? "NULL"}");
-            Console.WriteLine($"Player2Username from repo: {player2User?.Username ?? "NULL"}");
 
             return new GameResponseDto
             {

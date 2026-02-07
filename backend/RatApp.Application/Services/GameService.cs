@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using RatApp.Core.Entities;
 using RatApp.Core.Interfaces;
-using RatApp.Application.Dtos; // Assuming DTOs might be used for input/output
+using RatApp.Application.Dtos;
 
 namespace RatApp.Application.Services
 {
@@ -17,7 +17,7 @@ namespace RatApp.Application.Services
             _gameRepository = gameRepository;
         }
 
-        public async Task<Game> CreateGameAsync(int userId, List<int> player1SelectedCardIds) // userId is now int
+        public async Task<Game> CreateGameAsync(int userId, List<int> player1SelectedCardIds)
         {
             var newGame = new Game
             {
@@ -34,7 +34,7 @@ namespace RatApp.Application.Services
             return newGame;
         }
 
-        public async Task<Game?> JoinGameAsync(Guid gameId, int player2UserId, List<int> player2SelectedCardIds) // player2UserId is now int
+        public async Task<Game?> JoinGameAsync(Guid gameId, int player2UserId, List<int> player2SelectedCardIds)
         {
             var game = await _gameRepository.GetGameByIdAsync(gameId);
 
@@ -63,7 +63,7 @@ namespace RatApp.Application.Services
             return await _gameRepository.GetGameByIdAsync(gameId);
         }
 
-        public async Task<Game?> CheckCellAsync(Guid gameId, int userId, int cardId) // userId is now int
+        public async Task<Game?> CheckCellAsync(Guid gameId, int userId, int cardId)
         {
             var game = await _gameRepository.GetGameByIdAsync(gameId);
 
@@ -77,19 +77,21 @@ namespace RatApp.Application.Services
                 throw new InvalidOperationException("Game is not in progress.");
             }
 
-            // Determine which player is making the move
             List<int> playerCheckedCards;
             List<int> playerSelectedCards;
-            
-            if (game.CreatedByUserId == userId) // Comparison is now int to int
+            List<int>? playerBoardLayout; // Declare playerBoardLayout here
+
+            if (game.CreatedByUserId == userId)
             {
                 playerCheckedCards = game.Player1CheckedCardIds;
                 playerSelectedCards = game.Player1SelectedCardIds;
+                playerBoardLayout = game.Player1BoardLayout; // Get Player1's layout
             }
-            else if (game.Player2UserId == userId) // Comparison is now int? to int
+            else if (game.Player2UserId == userId)
             {
                 playerCheckedCards = game.Player2CheckedCardIds ?? new List<int>();
                 playerSelectedCards = game.Player2SelectedCardIds ?? new List<int>();
+                playerBoardLayout = game.Player2BoardLayout; // Get Player2's layout
             }
             else
             {
@@ -110,7 +112,12 @@ namespace RatApp.Application.Services
                 playerCheckedCards.Add(cardId);
             }
 
-            if (CheckForBingo(playerSelectedCards, playerCheckedCards))
+            if (playerBoardLayout == null)
+            {
+                throw new InvalidOperationException("Player board layout is missing.");
+            }
+
+            if (CheckForBingo(playerCheckedCards, playerBoardLayout)) // Pass playerCheckedCards and playerBoardLayout
             {
                 game.Status = (game.CreatedByUserId == userId) ? "Player1Won" : "Player2Won";
             }
@@ -119,9 +126,89 @@ namespace RatApp.Application.Services
             return game;
         }
 
-        private bool CheckForBingo(List<int> selectedCards, List<int> checkedCards)
+        // Updated signature: now accepts playerCheckedCards and playerBoardLayout
+        private bool CheckForBingo(List<int> playerCheckedCards, List<int> playerBoardLayout)
         {
-            return checkedCards.Count >= 5;
+            const int boardSize = 5;
+            bool[,] boardState = new bool[boardSize, boardSize];
+
+            // 1. Populate boardState based on playerBoardLayout and playerCheckedCards
+            int layoutIndex = 0;
+            for (int r = 0; r < boardSize; r++)
+            {
+                for (int c = 0; c < boardSize; c++)
+                {
+                    if (r == 2 && c == 2) // Center cell is free space, always marked
+                    {
+                        boardState[r, c] = true;
+                    }
+                    else
+                    {
+                        // Map layoutIndex to grid, skipping the center
+                        // The order in playerBoardLayout corresponds to a sequential fill, skipping the center
+                        int cardId = playerBoardLayout[layoutIndex]; // Assuming layoutIndex won't exceed bounds
+                        boardState[r, c] = playerCheckedCards.Contains(cardId);
+                        layoutIndex++;
+                    }
+                }
+            }
+
+            // 2. Check Rows
+            for (int r = 0; r < boardSize; r++)
+            {
+                bool rowBingo = true;
+                for (int c = 0; c < boardSize; c++)
+                {
+                    if (!boardState[r, c])
+                    {
+                        rowBingo = false;
+                        break;
+                    }
+                }
+                if (rowBingo) return true;
+            }
+
+            // 3. Check Columns
+            for (int c = 0; c < boardSize; c++)
+            {
+                bool colBingo = true;
+                for (int r = 0; r < boardSize; r++)
+                {
+                    if (!boardState[r, c])
+                    {
+                        colBingo = false;
+                        break;
+                    }
+                }
+                if (colBingo) return true;
+            }
+
+            // 4. Check Diagonals
+            // Main Diagonal (top-left to bottom-right)
+            bool mainDiagBingo = true;
+            for (int i = 0; i < boardSize; i++)
+            {
+                if (!boardState[i, i])
+                {
+                    mainDiagBingo = false;
+                    break;
+                }
+            }
+            if (mainDiagBingo) return true;
+
+            // Anti-Diagonal (top-right to bottom-left)
+            bool antiDiagBingo = true;
+            for (int i = 0; i < boardSize; i++)
+            {
+                if (!boardState[i, (boardSize - 1) - i])
+                {
+                    antiDiagBingo = false;
+                    break;
+                }
+            }
+            if (antiDiagBingo) return true;
+
+            return false; // No Bingo found
         }
 
         private List<int> ShuffleCards(List<int> cards)

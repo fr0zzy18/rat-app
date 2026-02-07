@@ -131,9 +131,6 @@ export class GameRoomComponent implements OnInit, OnDestroy {
       this.router.navigate(['/login']);
       return;
     }
-    console.log('updateGameRoomUI: currentUserId (numeric):', currentUserId);
-    console.log('gameDetails.createdByUsername:', gameDetails.createdByUsername); // Added debug log
-    console.log('gameDetails.player2Username:', gameDetails.player2Username);     // Added debug log
 
     // Set display names
     if (currentUserId === gameDetails.createdByUserId) {
