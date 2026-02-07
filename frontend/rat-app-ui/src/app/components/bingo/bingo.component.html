@@ -15,13 +15,14 @@
 
   <div class="selection-info">
     Selected Cards: {{ selectedCards.length }} / 24
+    <button (click)="selectRandomCards()" [disabled]="selectedCards.length === 24">Random</button> <!-- Re-added Random button -->
     <button [disabled]="!canStartGame" (click)="startGame()">Start Game</button>
   </div>
 
   <div class="join-game-section">
     <h2>Join Existing Game</h2>
     <input type="text" [(ngModel)]="gameIdToJoin" placeholder="Enter Game ID">
-    <button [disabled]="!canStartGame || !gameIdToJoin" (click)="joinGame()">Join Game</button>
+    <button [disabled]="!gameIdToJoin || selectedCards.length !== 24" (click)="joinGame()">Join Game</button> <!-- Modified disabled logic -->
   </div>
 
   <div class="card-list">
@@ -30,8 +31,20 @@
       class="card"
       [class.selected]="isCardSelected(card)"
       (click)="toggleCardSelection(card)">
-      <span>{{ card.phrase }}</span>
-      <button *ngIf="canDelete" (click)="deleteBingoCard(card.id); $event.stopPropagation()" class="delete-button">Delete</button>
+      <ng-container *ngIf="editingCardId === card.id; else viewMode">
+        <input type="text" [(ngModel)]="editedCardPhrase" (click)="$event.stopPropagation()" class="edit-input">
+        <div class="button-group">
+          <button class="crud-button update-button" (click)="updateBingoCard(card); $event.stopPropagation()">Update</button>
+          <button class="crud-button cancel-button" (click)="cancelEdit(); $event.stopPropagation()">Cancel</button>
+        </div>
+      </ng-container>
+      <ng-template #viewMode>
+        <span>{{ card.phrase }}</span>
+        <div class="button-group">
+          <button *ngIf="canEdit" class="crud-button edit-button" (click)="editBingoCard(card); $event.stopPropagation()">Edit</button>
+          <button *ngIf="canDelete" class="crud-button delete-button" (click)="deleteBingoCard(card.id); $event.stopPropagation()">Delete</button>
+        </div>
+      </ng-template>
     </div>
   </div>
 </div>

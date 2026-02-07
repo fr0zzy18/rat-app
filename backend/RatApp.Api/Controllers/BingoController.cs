@@ -44,5 +44,17 @@ namespace RatApp.Api.Controllers
             }
             return NoContent();
         }
+
+        [HttpPut("{id}")]
+        [Authorize(Roles = "Admin,Manager")]
+        public async Task<IActionResult> UpdateBingoCard(int id, [FromBody] UpdateBingoCardDto updateBingoCardDto)
+        {
+            var updatedBingoCard = await _bingoService.UpdateBingoCardAsync(id, updateBingoCardDto);
+            if (updatedBingoCard == null)
+            {
+                return NotFound($"Bingo card with ID {id} not found.");
+            }
+            return Ok(updatedBingoCard);
+        }
     }
 }

@@ -57,5 +57,23 @@ namespace RatApp.Application.Services
             await _context.SaveChangesAsync();
             return true;
         }
+
+        public async Task<BingoCardDto?> UpdateBingoCardAsync(int id, UpdateBingoCardDto updateBingoCardDto)
+        {
+            var bingoCard = await _context.BingoCards.FindAsync(id);
+            if (bingoCard == null)
+            {
+                return null; // Card not found
+            }
+
+            bingoCard.Phrase = updateBingoCardDto.Phrase;
+            await _context.SaveChangesAsync();
+
+            return new BingoCardDto
+            {
+                Id = bingoCard.Id,
+                Phrase = bingoCard.Phrase
+            };
+        }
     }
 }

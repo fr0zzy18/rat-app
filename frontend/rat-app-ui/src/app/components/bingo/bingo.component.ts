@@ -20,13 +20,17 @@ export class BingoComponent implements OnInit {
   bingoCards: BingoCard[] = [];
   newCardPhrase: string = '';
   canCreate: boolean = false;
-  canDelete: boolean = false; // New property
+  canDelete: boolean = false;
+  canEdit: boolean = false; // New property for editing permission
   successMessage: string | null = null;
   errorMessage: string | null = null;
-  selectedCards: BingoCard[] = []; // New: Array to hold selected cards
-  gameIdToJoin: string = ''; // New: Property to hold Game ID for joining
+  selectedCards: BingoCard[] = []; // Array to hold selected cards
+  gameIdToJoin: string = ''; // Property to hold Game ID for joining
 
-  private gameApiUrl = 'http://localhost:5211/api/game'; // New: Game API URL
+  editingCardId: number | null = null; // To track which card is being edited
+  editedCardPhrase: string = '';       // To hold the phrase during editing
+
+  private gameApiUrl = 'http://localhost:5211/api/game';
 
   constructor(
     private bingoService: BingoService,
@@ -103,10 +107,16 @@ export class BingoComponent implements OnInit {
   checkRoles(): void {
     this.canCreate = this.authService.hasRole('Admin') || this.authService.hasRole('Manager');
     this.canDelete = this.authService.hasRole('Admin') || this.authService.hasRole('Manager');
+    this.canEdit = this.authService.hasRole('Admin') || this.authService.hasRole('Manager'); // Set canEdit
   }
 
-  // New: Toggle card selection
+  // Toggle card selection (existing method)
   toggleCardSelection(card: BingoCard): void {
+    // Prevent selection/deselection if card is currently being edited
+    if (this.editingCardId === card.id) {
+      return;
+    }
+
     const index = this.selectedCards.findIndex(c => c.id === card.id);
     if (index > -1) {
       this.selectedCards.splice(index, 1); // Deselect
@@ -118,17 +128,86 @@ export class BingoComponent implements OnInit {
     this.cdr.detectChanges(); // Update view
   }
 
-  // New: Check if a card is selected
+  // Select 24 random cards (existing method)
+  selectRandomCards(): void {
+    this.selectedCards = []; // Clear current selection
+    this.errorMessage = null;
+    this.successMessage = null;
+
+    if (this.bingoCards.length < 24) {
+      this.errorMessage = 'Not enough bingo cards available to select 24 random cards.';
+      this.cdr.detectChanges();
+      return;
+    }
+
+    const shuffledCards = [...this.bingoCards].sort(() => 0.5 - Math.random()); // Shuffle a copy
+    this.selectedCards = shuffledCards.slice(0, 24); // Take the first 24
+
+    this.successMessage = '24 random cards selected.';
+    this.cdr.detectChanges(); // Update view
+  }
+
+  // New: Start editing a card
+  editBingoCard(card: BingoCard): void {
+    this.editingCardId = card.id;
+    this.editedCardPhrase = card.phrase;
+  }
+
+  // New: Cancel editing
+  cancelEdit(): void {
+    this.editingCardId = null;
+    this.editedCardPhrase = '';
+    this.errorMessage = null; // Clear any error messages
+  }
+
+  // New: Update a bingo card
+  updateBingoCard(card: BingoCard): void {
+    this.successMessage = null;
+    this.errorMessage = null;
+
+    if (!this.editedCardPhrase.trim()) {
+      this.errorMessage = 'Card phrase cannot be empty.';
+      return;
+    }
+
+    if (this.editingCardId === card.id) {
+      const updatedCard = { id: card.id, phrase: this.editedCardPhrase }; // Ensure updatedCard has id for service call
+      this.bingoService.updateBingoCard(updatedCard.id!, updatedCard).subscribe({
+        next: (response: BingoCard) => {
+          const index = this.bingoCards.findIndex(c => c.id === response.id);
+          if (index > -1) {
+            this.bingoCards[index] = response; // Update the card in the list
+          }
+          // Also update selectedCards if the edited card was selected
+          const selectedIndex = this.selectedCards.findIndex(c => c.id === response.id);
+          if (selectedIndex > -1) {
+            this.selectedCards[selectedIndex] = response;
+          }
+
+          this.successMessage = 'Bingo card updated successfully!';
+          this.cancelEdit(); // Exit editing mode
+          this.cdr.detectChanges();
+        },
+        error: (err: HttpErrorResponse) => {
+          this.errorMessage = err.error || 'Failed to update bingo card. You might not have the required permissions.';
+          console.error('Error updating bingo card:', err);
+          this.cdr.detectChanges();
+        }
+      });
+    }
+  }
+
+  // Check if a card is selected (existing method)
   isCardSelected(card: BingoCard): boolean {
     return this.selectedCards.some(c => c.id === card.id);
   }
 
-  // New: Check if game can be started
+  // Check if game can be started (existing getter)
   get canStartGame(): boolean {
     return this.selectedCards.length === 24;
   }
 
-  // New: Start game (as first player, creating a new game)
+  // Start game (as first player, creating a new game) (existing method)
   startGame(): void {
     this.successMessage = null;
     this.errorMessage = null;
@@ -150,7 +229,7 @@ export class BingoComponent implements OnInit {
     }
   }
 
-  // New: Join game (as second player, joining an existing game)
+  // Join game (as second player, joining an existing game) (existing method)
   joinGame(): void {
     this.successMessage = null;
     this.errorMessage = null;
@@ -158,7 +237,8 @@ export class BingoComponent implements OnInit {
       this.errorMessage = 'Please enter a Game ID to join.';
       return;
     }
-    if (this.canStartGame) { // Re-using canStartGame as it checks for 24 selected cards
+    // No longer check canStartGame for joining, only that 24 cards are selected
+    if (this.selectedCards.length === 24) {
       const payload = { player2SelectedCardIds: this.selectedCards.map(c => c.id) };
       this.http.post<any>(`${this.gameApiUrl}/join/${this.gameIdToJoin}`, payload).subscribe({
         next: (response) => {

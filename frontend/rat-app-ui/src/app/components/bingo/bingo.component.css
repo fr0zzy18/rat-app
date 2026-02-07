@@ -66,12 +66,6 @@
   background-color: #0056b3;
 }
 
-.card-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 20px;
-}
-
 .card {
   padding: 20px;
   border: 1px solid #ccc;
@@ -80,6 +74,11 @@
   position: relative;
   cursor: pointer; /* Indicate clickable */
   transition: border-color 0.2s ease, background-color 0.2s ease;
+  display: flex; /* Added to align items horizontally */
+  flex-direction: column; /* Stack phrase and buttons vertically */
+  justify-content: space-between; /* Space out content and buttons */
+  align-items: center; /* Horizontally align content */
+  gap: 10px; /* Space between phrase/input and buttons */
 }
 
 .card.selected {
@@ -95,21 +94,77 @@
 .card span {
   display: block;
   margin-bottom: 10px;
+  flex-grow: 1; /* Allow phrase to take available space */
+}
+
+.button-group {
+  display: flex;
+  gap: 5px; /* Space between CRUD buttons */
+  margin-top: 10px; /* Space between phrase/input and buttons */
+  flex-wrap: wrap; /* Allow buttons to wrap if container is too small */
+  justify-content: center; /* Center buttons within the group */
+}
+
+.crud-button {
+  padding: 5px 10px; /* Smaller padding */
+  font-size: 0.8em; /* Smaller font size */
+  border-radius: 4px; /* Slightly rounded corners */
+  cursor: pointer;
+  border: 1px solid #ccc;
+  background-color: #f0f0f0;
+  transition: background-color 0.2s;
+  white-space: nowrap; /* Prevent button text from wrapping */
+}
+
+.crud-button:hover {
+  background-color: #e0e0e0;
 }
 
 .delete-button {
-  background-color: #dc3545;
+  background-color: #f44336; /* Red */
   color: white;
-  border: none;
-  padding: 5px 10px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.8em;
-  position: absolute;
-  bottom: 10px;
-  right: 10px;
+  border-color: #d32f2f;
 }
 
 .delete-button:hover {
-  background-color: #c82333;
+  background-color: #d32f2f;
+}
+
+.edit-button {
+  background-color: #2196f3; /* Blue */
+  color: white;
+  border-color: #1976d2;
+}
+
+.edit-button:hover {
+  background-color: #1976d2;
+}
+
+.update-button {
+  background-color: #4CAF50; /* Green */
+  color: white;
+  border-color: #388E3C;
+}
+
+.update-button:hover {
+  background-color: #388E3C;
+}
+
+.cancel-button {
+  background-color: #ff9800; /* Orange */
+  color: white;
+  border-color: #f57c00;
+}
+
+.cancel-button:hover {
+  background-color: #f57c00;
+}
+
+.edit-input {
+  width: calc(100% - 10px); /* Take full width minus padding */
+  padding: 5px;
+  font-size: 1em;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  text-align: center;
 }
