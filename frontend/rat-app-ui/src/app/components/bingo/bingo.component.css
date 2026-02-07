@@ -66,19 +66,26 @@
   background-color: #0056b3;
 }
 
+.card-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* Smaller min width for cards */
+  gap: 15px; /* Slightly reduced gap */
+}
+
 .card {
-  padding: 20px;
+  padding: 10px; /* Reduced padding */
   border: 1px solid #ccc;
   border-radius: 5px;
   text-align: center;
   position: relative;
   cursor: pointer; /* Indicate clickable */
   transition: border-color 0.2s ease, background-color 0.2s ease;
-  display: flex; /* Added to align items horizontally */
-  flex-direction: column; /* Stack phrase and buttons vertically */
-  justify-content: space-between; /* Space out content and buttons */
-  align-items: center; /* Horizontally align content */
-  gap: 10px; /* Space between phrase/input and buttons */
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  gap: 5px; /* Reduced gap within card */
+  min-height: 100px; /* Ensure a minimum height for smaller cards */
 }
 
 .card.selected {
@@ -93,8 +100,9 @@
 
 .card span {
   display: block;
-  margin-bottom: 10px;
+  margin-bottom: 5px; /* Reduced margin */
   flex-grow: 1; /* Allow phrase to take available space */
+  font-size: 0.9em; /* Slightly smaller font for the phrase */
 }
 
 .button-group {
