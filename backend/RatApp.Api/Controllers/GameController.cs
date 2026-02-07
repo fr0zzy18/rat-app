@@ -48,7 +48,8 @@ namespace RatApp.Api.Controllers
                 Player1BoardLayout = game.Player1BoardLayout,
                 Player2BoardLayout = game.Player2BoardLayout,
                 Status = game.Status,
-                CreatedDate = game.CreatedDate
+                CreatedDate = game.CreatedDate,
+                GameStartedDate = game.GameStartedDate
             };
         }
 

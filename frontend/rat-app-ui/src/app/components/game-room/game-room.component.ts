@@ -151,7 +151,7 @@ export class GameRoomComponent implements OnInit, OnDestroy {
     this.isGameCreator = (currentUserId === gameDetails.createdByUserId);
     this.isPlayer2Joined = gameDetails.player2UserId !== null; // Update player2 joined status
     this.isGameInProgress = gameDetails.status === "InProgress"; // Update game in progress status
-    this.gameStartTime = new Date(gameDetails.createdDate); // Set game start time
+    this.gameStartTime = new Date(gameDetails.gameStartedDate); // Set game start time
 
     // Set display names
     if (this.isGameCreator) {
