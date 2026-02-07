@@ -28,8 +28,7 @@ namespace RatApp.Application.Services
                 Player1SelectedCardIds = player1SelectedCardIds,
                 Player1CheckedCardIds = new List<int>(),
                 Status = "WaitingForPlayer",
-                CreatedDate = DateTime.UtcNow,
-                // CurrentTurn = userId // Player 1 starts
+                CreatedDate = DateTime.UtcNow
             };
 
             await _gameRepository.CreateGameAsync(newGame);
@@ -54,7 +53,6 @@ namespace RatApp.Application.Services
             game.Player2SelectedCardIds = player2SelectedCardIds;
             game.Player2CheckedCardIds = new List<int>();
             game.Status = "InProgress"; // Game can start once second player joins
-            game.CurrentTurn = game.CreatedByUserId; // Player 1 starts
 
             await _gameRepository.UpdateGameAsync(game);
             return game;
@@ -79,27 +77,19 @@ namespace RatApp.Application.Services
                 throw new InvalidOperationException("Game is not in progress.");
             }
 
-            if (game.CurrentTurn != userId)
-            {
-                throw new InvalidOperationException("It's not your turn.");
-            }
-
             // Determine which player is making the move
             List<int> playerCheckedCards;
             List<int> playerSelectedCards;
-            string opponentUserId;
-
+            
             if (game.CreatedByUserId == userId)
             {
                 playerCheckedCards = game.Player1CheckedCardIds;
                 playerSelectedCards = game.Player1SelectedCardIds;
-                opponentUserId = game.Player2UserId ?? throw new InvalidOperationException("Opponent not found.");
             }
             else if (game.Player2UserId == userId)
             {
                 playerCheckedCards = game.Player2CheckedCardIds ?? new List<int>();
                 playerSelectedCards = game.Player2SelectedCardIds ?? new List<int>();
-                opponentUserId = game.CreatedByUserId;
             }
             else
             {
@@ -127,9 +117,6 @@ namespace RatApp.Application.Services
             if (CheckForBingo(playerSelectedCards, playerCheckedCards))
             {
                 game.Status = (game.CreatedByUserId == userId) ? "Player1Won" : "Player2Won";
-            } else {
-                // Switch turn
-                game.CurrentTurn = opponentUserId;
             }
 
             await _gameRepository.UpdateGameAsync(game);

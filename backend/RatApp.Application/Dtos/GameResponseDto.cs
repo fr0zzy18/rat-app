@@ -13,7 +13,6 @@ namespace RatApp.Application.Dtos
         public List<int>? Player2SelectedCardIds { get; set; }
         public List<int>? Player2CheckedCardIds { get; set; }
         public string Status { get; set; } = "WaitingForPlayer";
-        public string? CurrentTurn { get; set; }
         public DateTime CreatedDate { get; set; }
     }
 }

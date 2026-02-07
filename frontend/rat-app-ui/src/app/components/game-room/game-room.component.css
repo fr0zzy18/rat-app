@@ -76,12 +76,6 @@ h1 {
   color: #1b5e20;
 }
 
-.board-cell.opponent-checked { /* New style for opponent's checked cells on player's board */
-  background-color: #ffccbc; /* Light red/orange for opponent checked */
-  border-color: #ff5722;
-  color: #bf360c;
-}
-
 .board-cell.checked.empty {
   background-color: #aed581; /* Darker green for checked empty cell */
   border-color: #689f38;

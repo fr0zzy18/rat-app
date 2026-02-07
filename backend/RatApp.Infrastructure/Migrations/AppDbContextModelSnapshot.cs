@@ -53,9 +53,6 @@ namespace RatApp.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("CurrentTurn")
-                        .HasColumnType("text");
-
                     b.PrimitiveCollection<List<int>>("Player1CheckedCardIds")
                         .IsRequired()
                         .HasColumnType("integer[]");

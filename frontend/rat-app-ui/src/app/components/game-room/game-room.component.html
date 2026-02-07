@@ -15,7 +15,6 @@
             class="board-cell"
             [class.empty]="cell.isEmpty"
             [class.checked]="cell.isChecked"
-            [class.opponent-checked]="cell.isOpponentChecked"
             (click)="toggleCellChecked(cell)">
             <span *ngIf="cell.phrase">{{ cell.phrase }}</span>
             <span *ngIf="cell.isEmpty" class="empty-text">FREE</span>

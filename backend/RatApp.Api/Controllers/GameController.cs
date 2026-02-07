@@ -45,7 +45,7 @@ namespace RatApp.Api.Controllers
                 Player2SelectedCardIds = newGame.Player2SelectedCardIds,
                 Player2CheckedCardIds = newGame.Player2CheckedCardIds,
                 Status = newGame.Status,
-                CurrentTurn = newGame.CurrentTurn,
+                // CurrentTurn = newGame.CurrentTurn, // Removed
                 CreatedDate = newGame.CreatedDate
             });
         }
@@ -76,7 +76,7 @@ namespace RatApp.Api.Controllers
                     Player2SelectedCardIds = updatedGame.Player2SelectedCardIds,
                     Player2CheckedCardIds = updatedGame.Player2CheckedCardIds,
                     Status = updatedGame.Status,
-                    CurrentTurn = updatedGame.CurrentTurn,
+                    // CurrentTurn = updatedGame.CurrentTurn, // Removed
                     CreatedDate = updatedGame.CreatedDate
                 });
             }
@@ -113,7 +113,7 @@ namespace RatApp.Api.Controllers
                 Player2SelectedCardIds = game.Player2SelectedCardIds,
                 Player2CheckedCardIds = game.Player2CheckedCardIds,
                 Status = game.Status,
-                CurrentTurn = game.CurrentTurn,
+                // CurrentTurn = game.CurrentTurn, // Removed
                 CreatedDate = game.CreatedDate
             });
         }
@@ -144,7 +144,7 @@ namespace RatApp.Api.Controllers
                     Player2SelectedCardIds = updatedGame.Player2SelectedCardIds,
                     Player2CheckedCardIds = updatedGame.Player2CheckedCardIds,
                     Status = updatedGame.Status,
-                    CurrentTurn = updatedGame.CurrentTurn,
+                    // CurrentTurn = updatedGame.CurrentTurn, // Removed
                     CreatedDate = updatedGame.CreatedDate
                 });
             }

@@ -14,7 +14,7 @@ interface GameBoardCell {
   phrase: string | null;
   isEmpty: boolean;
   isChecked: boolean;
-  isOpponentChecked?: boolean;
+  // isOpponentChecked?: boolean; // Removed
 }
 
 @Component({
@@ -88,10 +88,10 @@ export class GameRoomComponent implements OnInit, OnDestroy {
           opponentCardIds = gameDetails.player2SelectedCardIds || [];
           opponentCheckedIds = gameDetails.player2CheckedCardIds || [];
         } else if (currentUserId === gameDetails.player2UserId) {
-          playerCardIds = gameDetails.player2SelectedCardIds;
-          playerCheckedIds = gameDetails.player2CheckedCardIds;
-          opponentCardIds = gameDetails.player1SelectedCardIds;
-          opponentCheckedIds = gameDetails.player1CheckedCardIds;
+          playerCardIds = gameDetails.player2SelectedCardIds || [];
+          playerCheckedIds = gameDetails.player2CheckedCardIds || [];
+          opponentCardIds = gameDetails.player1SelectedCardIds || [];
+          opponentCheckedIds = gameDetails.player1CheckedCardIds || [];
         } else {
           console.error('fetchGameDetails: User is not a participant in this game. Current User ID:', currentUserId, 'Created By:', gameDetails.createdByUserId, 'Player 2:', gameDetails.player2UserId, 'Game Details:', gameDetails);
           this.errorMessage = 'You are not a participant in this game.';
@@ -207,14 +207,21 @@ export class GameRoomComponent implements OnInit, OnDestroy {
         if (i === Math.floor(this.boardSize / 2) && j === Math.floor(this.boardSize / 2)) {
           board[i][j] = { phrase: 'FREE', isEmpty: true, isChecked: true };
         } else if (shuffledPhrases && cardIndex < shuffledPhrases.length) {
-          const cardId = shuffledPhrases[cardIndex].id;
-          board[i][j] = {
-            id: cardId,
-            phrase: shuffledPhrases[cardIndex].phrase,
-            isEmpty: false,
-            isChecked: playerCheckedIds.includes(cardId),
-            isOpponentChecked: opponentCheckedIds.includes(cardId)
-          };
+          // Check if shuffledPhrases[cardIndex] is not null or undefined
+          const currentPhrase = shuffledPhrases[cardIndex];
+          if (currentPhrase) { // Defensive check
+            const cardId = currentPhrase.id;
+            board[i][j] = {
+              id: cardId,
+              phrase: currentPhrase.phrase,
+              isEmpty: false,
+              isChecked: playerCheckedIds.includes(cardId),
+              // isOpponentChecked: opponentCheckedIds.includes(cardId) // Removed
+            };
+          } else {
+            console.error('initializeGameBoard: shuffledPhrases[cardIndex] is null or undefined for cardIndex:', cardIndex, 'shuffledPhrases:', shuffledPhrases);
+            board[i][j] = { phrase: null, isEmpty: true, isChecked: false }; // Fallback
+          }
           cardIndex++;
         } else {
           board[i][j] = { phrase: null, isEmpty: true, isChecked: false };
@@ -230,7 +237,7 @@ export class GameRoomComponent implements OnInit, OnDestroy {
         const cell = board[i][j];
         if (!cell.isEmpty && cell.id !== undefined) {
           cell.isChecked = playerCheckedIds.includes(cell.id);
-          cell.isOpponentChecked = opponentCheckedIds.includes(cell.id);
+          // cell.isOpponentChecked = opponentCheckedIds.includes(cell.id); // Removed
         }
       }
     }

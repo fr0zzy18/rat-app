@@ -13,7 +13,6 @@ namespace RatApp.Core.Entities
         public List<int>? Player2SelectedCardIds { get; set; }
         public List<int>? Player2CheckedCardIds { get; set; }
         public string Status { get; set; } = "WaitingForPlayer"; // e.g., "WaitingForPlayer", "InProgress", "Player1Won", "Player2Won", "Draw"
-        public string? CurrentTurn { get; set; }
         public DateTime CreatedDate { get; set; }
     }
 }
