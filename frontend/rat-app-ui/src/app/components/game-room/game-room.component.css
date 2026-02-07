@@ -196,8 +196,14 @@ h1 {
 
 .copy-feedback {
   font-size: 0.9em;
-  color: #28a745; /* Green */
-  font-weight: bold;
+  color: white; /* Changed for better contrast on a background */
+  background-color: #28a745; /* Green background */
+  padding: 5px 10px;
+  border-radius: 5px;
+  margin-left: 10px; /* Space from the button */
+  opacity: 1; /* Start opaque */
+  transition: opacity 0.3s ease-out; /* Smooth fade-out */
+  white-space: nowrap; /* Prevent wrapping */
 }
 
 .game-timer-section {

@@ -328,14 +328,18 @@ export class GameRoomComponent implements OnInit, OnDestroy {
       try {
         await navigator.clipboard.writeText(this.gameId);
         this.copyFeedbackMessage = 'Copied!';
+        this.cdr.detectChanges(); // Manually trigger change detection
         setTimeout(() => {
           this.copyFeedbackMessage = '';
+          this.cdr.detectChanges(); // Manually trigger change detection to clear the message
         }, 2000); // Clear message after 2 seconds
       } catch (err) {
         console.error('Failed to copy Game ID:', err);
         this.copyFeedbackMessage = 'Copy failed!';
+        this.cdr.detectChanges(); // Manually trigger change detection
         setTimeout(() => {
           this.copyFeedbackMessage = '';
+          this.cdr.detectChanges(); // Manually trigger change detection to clear the message
         }, 2000);
       }
     }
