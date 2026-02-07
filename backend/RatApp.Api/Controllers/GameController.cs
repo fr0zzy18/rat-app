@@ -7,8 +7,9 @@ using Microsoft.AspNetCore.Mvc;
 using RatApp.Application.Dtos;
 using RatApp.Application.Services;
 using RatApp.Core.Entities;
-using Microsoft.AspNetCore.SignalR; // Added for IHubContext
-using RatApp.Api.Hubs; // Added for GameHub
+using RatApp.Core.Interfaces; // Added for IUserRepository
+using Microsoft.AspNetCore.SignalR;
+using RatApp.Api.Hubs;
 
 namespace RatApp.Api.Controllers
 {
@@ -18,47 +19,65 @@ namespace RatApp.Api.Controllers
     public class GameController : ControllerBase
     {
         private readonly GameService _gameService;
-        private readonly IHubContext<GameHub> _hubContext; // Injected SignalR Hub Context
+        private readonly IHubContext<GameHub> _hubContext;
+        private readonly IUserRepository _userRepository;
 
-        public GameController(GameService gameService, IHubContext<GameHub> hubContext)
+        public GameController(GameService gameService, IHubContext<GameHub> hubContext, IUserRepository userRepository)
         {
             _gameService = gameService;
             _hubContext = hubContext;
+            _userRepository = userRepository;
+        }
+
+        private async Task<GameResponseDto> MapGameToGameResponseDto(Game game)
+        {
+            Console.WriteLine($"Mapping Game: {game.Id}");
+            Console.WriteLine($"CreatedByUserId: {game.CreatedByUserId}");
+            Console.WriteLine($"Player2UserId: {game.Player2UserId}");
+
+            var createdByUser = await _userRepository.GetUserByIdAsync(game.CreatedByUserId);
+            var player2User = game.Player2UserId.HasValue ? await _userRepository.GetUserByIdAsync(game.Player2UserId.Value) : null;
+
+            Console.WriteLine($"CreatedByUsername from repo: {createdByUser?.Username ?? "NULL"}");
+            Console.WriteLine($"Player2Username from repo: {player2User?.Username ?? "NULL"}");
+
+            return new GameResponseDto
+            {
+                Id = game.Id,
+                CreatedByUserId = game.CreatedByUserId,
+                CreatedByUsername = createdByUser?.Username ?? "Unknown Player",
+                Player1SelectedCardIds = game.Player1SelectedCardIds,
+                Player1CheckedCardIds = game.Player1CheckedCardIds,
+                Player2UserId = game.Player2UserId,
+                Player2Username = player2User?.Username,
+                Player2SelectedCardIds = game.Player2SelectedCardIds,
+                Player2CheckedCardIds = game.Player2CheckedCardIds,
+                Player1BoardLayout = game.Player1BoardLayout,
+                Player2BoardLayout = game.Player2BoardLayout,
+                Status = game.Status,
+                CreatedDate = game.CreatedDate
+            };
         }
 
         [HttpPost("create")]
         public async Task<ActionResult<GameResponseDto>> CreateGame([FromBody] CreateGameRequestDto request)
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userId))
+            var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdString) || !int.TryParse(userIdString, out int userId))
             {
                 return Unauthorized();
             }
 
             var newGame = await _gameService.CreateGameAsync(userId, request.Player1SelectedCardIds);
-            // No SignalR message here, as the game is just created and waiting for player 2.
-            // Players will get the initial state via GetGame and then updates via SignalR once joined.
-            return Ok(new GameResponseDto
-            {
-                Id = newGame.Id,
-                CreatedByUserId = newGame.CreatedByUserId,
-                Player1SelectedCardIds = newGame.Player1SelectedCardIds,
-                Player1CheckedCardIds = newGame.Player1CheckedCardIds,
-                Player2UserId = newGame.Player2UserId,
-                Player2SelectedCardIds = newGame.Player2SelectedCardIds,
-                Player2CheckedCardIds = newGame.Player2CheckedCardIds,
-                Player1BoardLayout = newGame.Player1BoardLayout,
-                Player2BoardLayout = newGame.Player2BoardLayout,
-                Status = newGame.Status,
-                CreatedDate = newGame.CreatedDate
-            });
+            var gameResponse = await MapGameToGameResponseDto(newGame);
+            return Ok(gameResponse);
         }
 
         [HttpPost("join/{gameId}")]
         public async Task<ActionResult<GameResponseDto>> JoinGame(Guid gameId, [FromBody] JoinGameRequestDto request)
         {
-            var player2UserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(player2UserId))
+            var player2UserIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(player2UserIdString) || !int.TryParse(player2UserIdString, out int player2UserId))
             {
                 return Unauthorized();
             }
@@ -71,27 +90,13 @@ namespace RatApp.Api.Controllers
                     return NotFound($"Game with ID {gameId} not found.");
                 }
 
-                var gameResponse = new GameResponseDto
-                {
-                    Id = updatedGame.Id,
-                    CreatedByUserId = updatedGame.CreatedByUserId,
-                    Player1SelectedCardIds = updatedGame.Player1SelectedCardIds,
-                    Player1CheckedCardIds = updatedGame.Player1CheckedCardIds,
-                    Player2UserId = updatedGame.Player2UserId,
-                    Player2SelectedCardIds = updatedGame.Player2SelectedCardIds,
-                    Player2CheckedCardIds = updatedGame.Player2CheckedCardIds,
-                    Player1BoardLayout = updatedGame.Player1BoardLayout,
-                    Player2BoardLayout = updatedGame.Player2BoardLayout,
-                    Status = updatedGame.Status,
-                    CreatedDate = updatedGame.CreatedDate
-                };
-
-                await _hubContext.Clients.Group(updatedGame.Id.ToString()).SendAsync("GameUpdated", gameResponse); // Send SignalR update
+                var gameResponse = await MapGameToGameResponseDto(updatedGame);
+                await _hubContext.Clients.Group(updatedGame.Id.ToString()).SendAsync("GameUpdated", gameResponse);
                 return Ok(gameResponse);
             }
             catch (InvalidOperationException ex)
             {
-                return Conflict(ex.Message); // Return 409 Conflict if game already has two players
+                return Conflict(ex.Message);
             }
         }
 
@@ -104,35 +109,26 @@ namespace RatApp.Api.Controllers
                 return NotFound($"Game with ID {gameId} not found.");
             }
 
-            var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            // Only allow players involved in the game or an admin/manager to view the game details
+            var currentUserIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(currentUserIdString) || !int.TryParse(currentUserIdString, out int currentUserId))
+            {
+                return Unauthorized(); // Should not happen if [Authorize] is effective
+            }
+
             if (currentUserId != game.CreatedByUserId && currentUserId != game.Player2UserId)
             {
-                 // You might want a more sophisticated authorization check here
                 return Forbid();
             }
 
-            return Ok(new GameResponseDto
-            {
-                Id = game.Id,
-                CreatedByUserId = game.CreatedByUserId,
-                Player1SelectedCardIds = game.Player1SelectedCardIds,
-                Player1CheckedCardIds = game.Player1CheckedCardIds,
-                Player2UserId = game.Player2UserId,
-                Player2SelectedCardIds = game.Player2SelectedCardIds,
-                Player2CheckedCardIds = game.Player2CheckedCardIds,
-                Player1BoardLayout = game.Player1BoardLayout,
-                Player2BoardLayout = game.Player2BoardLayout,
-                Status = game.Status,
-                CreatedDate = game.CreatedDate
-            });
+            var gameResponse = await MapGameToGameResponseDto(game);
+            return Ok(gameResponse);
         }
 
         [HttpPost("{gameId}/checkCell")]
         public async Task<ActionResult<GameResponseDto>> CheckCell(Guid gameId, [FromBody] CheckCellRequestDto request)
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userId))
+            var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdString) || !int.TryParse(userIdString, out int userId))
             {
                 return Unauthorized();
             }
@@ -145,22 +141,8 @@ namespace RatApp.Api.Controllers
                     return NotFound($"Game with ID {gameId} not found.");
                 }
                 
-                var gameResponse = new GameResponseDto
-                {
-                    Id = updatedGame.Id,
-                    CreatedByUserId = updatedGame.CreatedByUserId,
-                    Player1SelectedCardIds = updatedGame.Player1SelectedCardIds,
-                    Player1CheckedCardIds = updatedGame.Player1CheckedCardIds,
-                    Player2UserId = updatedGame.Player2UserId,
-                    Player2SelectedCardIds = updatedGame.Player2SelectedCardIds,
-                    Player2CheckedCardIds = updatedGame.Player2CheckedCardIds,
-                    Player1BoardLayout = updatedGame.Player1BoardLayout,
-                    Player2BoardLayout = updatedGame.Player2BoardLayout,
-                    Status = updatedGame.Status,
-                    CreatedDate = updatedGame.CreatedDate
-                };
-
-                await _hubContext.Clients.Group(updatedGame.Id.ToString()).SendAsync("GameUpdated", gameResponse); // Send SignalR update
+                var gameResponse = await MapGameToGameResponseDto(updatedGame);
+                await _hubContext.Clients.Group(updatedGame.Id.ToString()).SendAsync("GameUpdated", gameResponse);
                 return Ok(gameResponse);
             }
             catch (UnauthorizedAccessException ex)

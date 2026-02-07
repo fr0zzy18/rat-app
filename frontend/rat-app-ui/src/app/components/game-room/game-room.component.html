@@ -7,7 +7,7 @@
 
   <div class="boards-wrapper">
     <div class="player-board-section">
-      <h2>Your Board</h2>
+      <h2>{{ myBoardDisplayName }}</h2>
       <div class="game-board">
         <div *ngFor="let row of gameBoard; let i = index" class="board-row">
           <div
@@ -24,7 +24,7 @@
     </div>
 
     <div *ngIf="opponentSelectedCards.length > 0" class="opponent-board-section">
-      <h2>Opponent's Board</h2>
+      <h2>{{ opponentBoardDisplayName }}</h2>
       <div class="game-board opponent-board">
         <div *ngFor="let row of opponentGameBoard; let i = index" class="board-row">
           <div

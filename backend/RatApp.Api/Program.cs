@@ -55,6 +55,7 @@ builder.Services.AddScoped<PlayerService>(); // Re-register PlayerService
 builder.Services.AddScoped<BingoService>();
 builder.Services.AddScoped<IGameRepository, GameRepository>(); // New: Register GameRepository
 builder.Services.AddScoped<GameService>(); // New: Register GameService
+builder.Services.AddScoped<IUserRepository, UserRepository>(); // New: Register UserRepository
 builder.Services.AddHttpClient(); // Add HttpClient for PlayerService
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

@@ -35,6 +35,9 @@ export class GameRoomComponent implements OnInit, OnDestroy {
   loading: boolean = true;
   private gameUpdateSubscription: Subscription | undefined; // For SignalR updates
   
+  myBoardDisplayName: string = 'Your Board'; // New
+  opponentBoardDisplayName: string = "Opponent's Board"; // New
+  
   private gameApiUrl = 'http://localhost:5211/api/game';
 
   constructor(
@@ -121,8 +124,31 @@ export class GameRoomComponent implements OnInit, OnDestroy {
   }
 
   updateGameRoomUI(gameDetails: any): void {
-    const currentUserId = this.authService.currentUserValue?.id?.toString();
-    console.log('updateGameRoomUI: currentUserId:', currentUserId);
+    const currentUserId = Number(this.authService.currentUserValue?.id); // Convert to number
+    if (isNaN(currentUserId)) {
+      console.error('updateGameRoomUI: Invalid currentUserId:', this.authService.currentUserValue?.id);
+      this.errorMessage = 'Invalid user ID. Please log in again.';
+      this.router.navigate(['/login']);
+      return;
+    }
+    console.log('updateGameRoomUI: currentUserId (numeric):', currentUserId);
+    console.log('gameDetails.createdByUsername:', gameDetails.createdByUsername); // Added debug log
+    console.log('gameDetails.player2Username:', gameDetails.player2Username);     // Added debug log
+
+    // Set display names
+    if (currentUserId === gameDetails.createdByUserId) {
+      this.myBoardDisplayName = gameDetails.createdByUsername;
+      this.opponentBoardDisplayName = gameDetails.player2Username ?? "Waiting for Opponent...";
+    } else if (currentUserId === gameDetails.player2UserId) {
+      this.myBoardDisplayName = gameDetails.player2Username ?? "Your Board";
+      this.opponentBoardDisplayName = gameDetails.createdByUsername;
+    } else {
+      console.error('updateGameRoomUI: User is not a participant in this game. Current User ID:', currentUserId, 'Created By:', gameDetails.createdByUserId, 'Player 2:', gameDetails.player2UserId, 'Game Details:', gameDetails);
+      this.errorMessage = 'You are not a participant in this game.';
+      this.router.navigate(['/bingo']);
+      return;
+    }
+
     let playerSelectedCardIds: number[] = [];
     let playerCheckedIds: number[] = [];
     let playerBoardLayout: number[] = [];

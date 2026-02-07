@@ -46,9 +46,8 @@ namespace RatApp.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<string>("CreatedByUserId")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<int>("CreatedByUserId")
+                        .HasColumnType("integer");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("timestamp with time zone");
@@ -73,8 +72,8 @@ namespace RatApp.Infrastructure.Migrations
                     b.PrimitiveCollection<List<int>>("Player2SelectedCardIds")
                         .HasColumnType("integer[]");
 
-                    b.Property<string>("Player2UserId")
-                        .HasColumnType("text");
+                    b.Property<int?>("Player2UserId")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Status")
                         .IsRequired()

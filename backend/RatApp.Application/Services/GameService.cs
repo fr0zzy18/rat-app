@@ -11,14 +11,13 @@ namespace RatApp.Application.Services
     public class GameService
     {
         private readonly IGameRepository _gameRepository;
-        // private readonly ITokenService _tokenService; // Uncomment and inject if needed to get user ID from token elsewhere
 
         public GameService(IGameRepository gameRepository)
         {
             _gameRepository = gameRepository;
         }
 
-        public async Task<Game> CreateGameAsync(string userId, List<int> player1SelectedCardIds)
+        public async Task<Game> CreateGameAsync(int userId, List<int> player1SelectedCardIds) // userId is now int
         {
             var newGame = new Game
             {
@@ -28,20 +27,20 @@ namespace RatApp.Application.Services
                 Player1CheckedCardIds = new List<int>(),
                 Status = "WaitingForPlayer",
                 CreatedDate = DateTime.UtcNow,
-                Player1BoardLayout = ShuffleCards(player1SelectedCardIds) // New: Generate board layout
+                Player1BoardLayout = ShuffleCards(player1SelectedCardIds)
             };
 
             await _gameRepository.CreateGameAsync(newGame);
             return newGame;
         }
 
-        public async Task<Game?> JoinGameAsync(Guid gameId, string player2UserId, List<int> player2SelectedCardIds)
+        public async Task<Game?> JoinGameAsync(Guid gameId, int player2UserId, List<int> player2SelectedCardIds) // player2UserId is now int
         {
             var game = await _gameRepository.GetGameByIdAsync(gameId);
 
             if (game == null)
             {
-                return null; // Game not found
+                return null;
             }
 
             if (game.Player2UserId != null)
@@ -52,8 +51,8 @@ namespace RatApp.Application.Services
             game.Player2UserId = player2UserId;
             game.Player2SelectedCardIds = player2SelectedCardIds;
             game.Player2CheckedCardIds = new List<int>();
-            game.Player2BoardLayout = ShuffleCards(player2SelectedCardIds); // New: Generate board layout
-            game.Status = "InProgress"; // Game can start once second player joins
+            game.Player2BoardLayout = ShuffleCards(player2SelectedCardIds);
+            game.Status = "InProgress";
 
             await _gameRepository.UpdateGameAsync(game);
             return game;
@@ -64,13 +63,13 @@ namespace RatApp.Application.Services
             return await _gameRepository.GetGameByIdAsync(gameId);
         }
 
-        public async Task<Game?> CheckCellAsync(Guid gameId, string userId, int cardId)
+        public async Task<Game?> CheckCellAsync(Guid gameId, int userId, int cardId) // userId is now int
         {
             var game = await _gameRepository.GetGameByIdAsync(gameId);
 
             if (game == null)
             {
-                return null; // Game not found
+                return null;
             }
 
             if (game.Status != "InProgress")
@@ -82,12 +81,12 @@ namespace RatApp.Application.Services
             List<int> playerCheckedCards;
             List<int> playerSelectedCards;
             
-            if (game.CreatedByUserId == userId)
+            if (game.CreatedByUserId == userId) // Comparison is now int to int
             {
                 playerCheckedCards = game.Player1CheckedCardIds;
                 playerSelectedCards = game.Player1SelectedCardIds;
             }
-            else if (game.Player2UserId == userId)
+            else if (game.Player2UserId == userId) // Comparison is now int? to int
             {
                 playerCheckedCards = game.Player2CheckedCardIds ?? new List<int>();
                 playerSelectedCards = game.Player2SelectedCardIds ?? new List<int>();
@@ -97,13 +96,11 @@ namespace RatApp.Application.Services
                 throw new UnauthorizedAccessException("User is not a participant in this game.");
             }
 
-            // Ensure the card being checked is one of the player's selected cards
             if (!playerSelectedCards.Contains(cardId))
             {
                 throw new InvalidOperationException($"Card ID {cardId} is not part of this player's selected cards.");
             }
 
-            // Toggle the checked status of the card
             if (playerCheckedCards.Contains(cardId))
             {
                 playerCheckedCards.Remove(cardId);
@@ -113,8 +110,6 @@ namespace RatApp.Application.Services
                 playerCheckedCards.Add(cardId);
             }
 
-            // Check for Bingo
-            // TODO: Implement actual Bingo win condition logic here
             if (CheckForBingo(playerSelectedCards, playerCheckedCards))
             {
                 game.Status = (game.CreatedByUserId == userId) ? "Player1Won" : "Player2Won";
@@ -126,11 +121,7 @@ namespace RatApp.Application.Services
 
         private bool CheckForBingo(List<int> selectedCards, List<int> checkedCards)
         {
-            // This is a placeholder. Real Bingo logic would be complex.
-            // For now, let's say a player wins if they check 5 cards.
-            // In a real scenario, you'd need the 5x5 board structure,
-            // and logic to check rows, columns, and diagonals.
-            return checkedCards.Count >= 5; // Simplified win condition for testing
+            return checkedCards.Count >= 5;
         }
 
         private List<int> ShuffleCards(List<int> cards)
