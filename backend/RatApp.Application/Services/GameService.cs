@@ -53,6 +53,7 @@ namespace RatApp.Application.Services
             game.Player2CheckedCardIds = new List<int>();
             game.Player2BoardLayout = ShuffleCards(player2SelectedCardIds);
             game.Status = "InProgress";
+            game.GameStartedDate = DateTime.UtcNow; // Set game start time when game status changes to InProgress
 
             await _gameRepository.UpdateGameAsync(game);
             return game;

@@ -18,5 +18,6 @@ namespace RatApp.Application.Dtos
         public string? Player2Username { get; set; } // New
         public string Status { get; set; } = "WaitingForPlayer";
         public DateTime CreatedDate { get; set; }
+        public DateTime? GameStartedDate { get; set; } // New property
     }
 }

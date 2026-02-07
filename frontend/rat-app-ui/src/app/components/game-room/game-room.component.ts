@@ -35,8 +35,23 @@ export class GameRoomComponent implements OnInit, OnDestroy {
   loading: boolean = true;
   private gameUpdateSubscription: Subscription | undefined; // For SignalR updates
   
-  myBoardDisplayName: string = 'Your Board'; // New
-  opponentBoardDisplayName: string = "Opponent's Board"; // New
+  myBoardDisplayName: string = 'Your Board';
+  opponentBoardDisplayName: string = "Opponent's Board";
+
+  winnerMessage: string | null = null;
+  isGameFinished: boolean = false;
+
+  // Properties for Game ID visibility and copy functionality
+  showGameIdSection: boolean = false;
+  copyFeedbackMessage: string = '';
+  isGameCreator: boolean = false;
+
+  // New properties for timer functionality
+  isPlayer2Joined: boolean = false;
+  isGameInProgress: boolean = false;
+  gameStartTime: Date | null = null;
+  private timerInterval: any; // To store setInterval reference
+  displayTimer: string = '00:00:00';
   
   private gameApiUrl = 'http://localhost:5211/api/game';
 
@@ -48,7 +63,7 @@ export class GameRoomComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private bingoService: BingoService,
     private cdr: ChangeDetectorRef,
-    private signalrService: SignalRService // Inject SignalRService
+    private signalrService: SignalRService
   ) {}
 
   ngOnInit(): void {
@@ -61,8 +76,8 @@ export class GameRoomComponent implements OnInit, OnDestroy {
         return;
       }
 
-      this.fetchGameDetails(); // Initial fetch
-      this.setupSignalR(); // Setup SignalR instead of polling
+      this.fetchGameDetails();
+      this.setupSignalR();
     });
   }
 
@@ -74,15 +89,16 @@ export class GameRoomComponent implements OnInit, OnDestroy {
     if (this.gameUpdateSubscription) {
       this.gameUpdateSubscription.unsubscribe();
     }
+    this.stopTimer(); // Ensure timer is stopped on component destruction
   }
 
-  async setupSignalR(): Promise<void> { // Mark as async
+  async setupSignalR(): Promise<void> {
     const token = this.authService.getToken();
     if (token) {
       try {
-        await this.signalrService.startConnection(token); // Await the connection
+        await this.signalrService.startConnection(token);
         console.log('SignalR Connection established, joining game group...');
-        this.signalrService.joinGameGroup(this.gameId!); // Now safe to join group
+        this.signalrService.joinGameGroup(this.gameId!);
 
         this.gameUpdateSubscription = this.signalrService.gameUpdate$.subscribe(
           (gameDetails) => {
@@ -96,7 +112,6 @@ export class GameRoomComponent implements OnInit, OnDestroy {
       } catch (err) {
         console.error('Failed to start SignalR connection or join game group:', err);
         this.errorMessage = 'Failed to connect to real-time game updates.';
-        // Optionally navigate away or show a critical error message
         this.router.navigate(['/bingo']);
       }
     } else {
@@ -112,7 +127,7 @@ export class GameRoomComponent implements OnInit, OnDestroy {
         console.log('fetchGameDetails: Game Details:', gameDetails);
         this.updateGameRoomUI(gameDetails);
         this.loading = false;
-        this.cdr.detectChanges(); // Explicitly trigger change detection
+        this.cdr.detectChanges();
       },
       error: (err: HttpErrorResponse) => {
         this.errorMessage = err.error || 'Failed to load game details.';
@@ -124,7 +139,7 @@ export class GameRoomComponent implements OnInit, OnDestroy {
   }
 
   updateGameRoomUI(gameDetails: any): void {
-    const currentUserId = Number(this.authService.currentUserValue?.id); // Convert to number
+    const currentUserId = Number(this.authService.currentUserValue?.id);
     if (isNaN(currentUserId)) {
       console.error('updateGameRoomUI: Invalid currentUserId:', this.authService.currentUserValue?.id);
       this.errorMessage = 'Invalid user ID. Please log in again.';
@@ -132,8 +147,14 @@ export class GameRoomComponent implements OnInit, OnDestroy {
       return;
     }
 
+    // Determine if current user is the game creator
+    this.isGameCreator = (currentUserId === gameDetails.createdByUserId);
+    this.isPlayer2Joined = gameDetails.player2UserId !== null; // Update player2 joined status
+    this.isGameInProgress = gameDetails.status === "InProgress"; // Update game in progress status
+    this.gameStartTime = new Date(gameDetails.createdDate); // Set game start time
+
     // Set display names
-    if (currentUserId === gameDetails.createdByUserId) {
+    if (this.isGameCreator) {
       this.myBoardDisplayName = gameDetails.createdByUsername;
       this.opponentBoardDisplayName = gameDetails.player2Username ?? "Waiting for Opponent...";
     } else if (currentUserId === gameDetails.player2UserId) {
@@ -146,6 +167,27 @@ export class GameRoomComponent implements OnInit, OnDestroy {
       return;
     }
 
+    // --- Handle game finished state and winner message ---
+    this.isGameFinished = false; // Reset by default
+    this.winnerMessage = null;   // Reset by default
+
+    if (gameDetails.status === "Player1Won" || gameDetails.status === "Player2Won") {
+      this.isGameFinished = true;
+      this.stopTimer(); // Stop timer when game is finished
+      const winnerName = gameDetails.status === "Player1Won"
+        ? gameDetails.createdByUsername
+        : gameDetails.player2Username;
+      this.winnerMessage = `Congratulations, ${winnerName}! You won the game!`;
+    }
+
+    // --- Timer logic ---
+    if (this.isGameInProgress && !this.isGameFinished && !this.timerInterval) {
+      this.startTimer();
+    } else if (!this.isGameInProgress || this.isGameFinished) {
+      this.stopTimer();
+    }
+    // --- End Timer logic ---
+
     let playerSelectedCardIds: number[] = [];
     let playerCheckedIds: number[] = [];
     let playerBoardLayout: number[] = [];
@@ -153,7 +195,7 @@ export class GameRoomComponent implements OnInit, OnDestroy {
     let opponentCheckedIds: number[] = [];
     let opponentBoardLayout: number[] = [];
 
-    if (currentUserId === gameDetails.createdByUserId) {
+    if (this.isGameCreator) {
       playerSelectedCardIds = gameDetails.player1SelectedCardIds || [];
       playerCheckedIds = gameDetails.player1CheckedCardIds || [];
       playerBoardLayout = gameDetails.player1BoardLayout || [];
@@ -194,7 +236,7 @@ export class GameRoomComponent implements OnInit, OnDestroy {
             this.initializeGameBoard(this.opponentGameBoard, allBingoCards, opponentBoardLayout, opponentCheckedIds);
             this.opponentGameBoard = [...this.opponentGameBoard];
         }
-        this.cdr.detectChanges(); // Explicitly trigger change detection
+        this.cdr.detectChanges();
       },
       error: (err) => {
         this.errorMessage = 'Failed to load bingo cards for the game.';
@@ -237,8 +279,6 @@ export class GameRoomComponent implements OnInit, OnDestroy {
     console.log('initializeGameBoard: board (after init):', board);
   }
 
-  // shuffleArray method removed as it's now handled by backend
-
   updateGameBoardCheckedStates(board: GameBoardCell[][], playerCheckedIds: number[]): void {
     for (let i = 0; i < this.boardSize; i++) {
       for (let j = 0; j < this.boardSize; j++) {
@@ -251,6 +291,10 @@ export class GameRoomComponent implements OnInit, OnDestroy {
   }
 
   toggleCellChecked(cell: GameBoardCell): void {
+    if (this.isGameFinished) { // Prevent clicks if game is finished
+      console.log('Game is finished, cannot click cells.');
+      return;
+    }
     if (!cell.isEmpty && cell.id !== undefined && this.gameId) {
       this.http.post<any>(`${this.gameApiUrl}/${this.gameId}/checkCell`, { cardId: cell.id }).subscribe({
         next: (updatedGame) => {
@@ -263,5 +307,69 @@ export class GameRoomComponent implements OnInit, OnDestroy {
         }
       });
     }
+  }
+
+  // New: Navigate back to the bingo selection page
+  goBackToBingo(): void {
+    this.router.navigate(['/bingo']);
+  }
+
+  // New: Toggle visibility of Game ID section
+  toggleGameIdVisibility(): void {
+    this.showGameIdSection = !this.showGameIdSection;
+    if (!this.showGameIdSection) {
+      this.copyFeedbackMessage = ''; // Clear message when hiding
+    }
+  }
+
+  // New: Copy Game ID to clipboard
+  async copyGameIdToClipboard(): Promise<void> {
+    if (this.gameId) {
+      try {
+        await navigator.clipboard.writeText(this.gameId);
+        this.copyFeedbackMessage = 'Copied!';
+        setTimeout(() => {
+          this.copyFeedbackMessage = '';
+        }, 2000); // Clear message after 2 seconds
+      } catch (err) {
+        console.error('Failed to copy Game ID:', err);
+        this.copyFeedbackMessage = 'Copy failed!';
+        setTimeout(() => {
+          this.copyFeedbackMessage = '';
+        }, 2000);
+      }
+    }
+  }
+
+  // New: Start the game timer
+  private startTimer(): void {
+    if (this.gameStartTime && !this.timerInterval) {
+      this.timerInterval = setInterval(() => {
+        const now = new Date();
+        const elapsedMilliseconds = now.getTime() - this.gameStartTime!.getTime();
+        const elapsedSeconds = Math.floor(elapsedMilliseconds / 1000);
+
+        const hours = Math.floor(elapsedSeconds / 3600);
+        const minutes = Math.floor((elapsedSeconds % 3600) / 60);
+        const seconds = elapsedSeconds % 60;
+
+        this.displayTimer = 
+          `${this.pad(hours)}:${this.pad(minutes)}:${this.pad(seconds)}`;
+        this.cdr.detectChanges(); // Manually trigger change detection for timer update
+      }, 1000);
+    }
+  }
+
+  // New: Stop the game timer
+  private stopTimer(): void {
+    if (this.timerInterval) {
+      clearInterval(this.timerInterval);
+      this.timerInterval = undefined;
+    }
+  }
+
+  // Helper function to pad single digits with a leading zero
+  private pad(num: number): string {
+    return num < 10 ? '0' + num : num.toString();
   }
 }

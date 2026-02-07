@@ -5,7 +5,31 @@
     {{ errorMessage }}
   </div>
 
-  <div class="boards-wrapper">
+  <div *ngIf="winnerMessage" class="winner-message alert alert-success">
+    {{ winnerMessage }}
+  </div>
+
+  <!-- Show/Hide Game ID section (only for creator if P2 not joined and game not finished) -->
+  <div *ngIf="isGameCreator && !isPlayer2Joined && !isGameFinished" class="game-id-section">
+    <button (click)="toggleGameIdVisibility()" class="show-hide-id-button">
+      {{ showGameIdSection ? 'Hide Game ID' : 'Show Game ID' }}
+    </button>
+    <div *ngIf="showGameIdSection" class="game-id-display">
+      <span class="game-id-text">Game ID: {{ gameId }}</span>
+      <button (click)="copyGameIdToClipboard()" class="copy-button">Copy</button>
+      <span *ngIf="copyFeedbackMessage" class="copy-feedback">{{ copyFeedbackMessage }}</span>
+    </div>
+  </div>
+  <!-- End Show/Hide Game ID -->
+
+  <!-- Timer display (appears when P2 joined and game not finished) -->
+  <div *ngIf="isPlayer2Joined && !isGameFinished" class="game-timer-section">
+    <span class="game-timer-label">Game Duration:</span>
+    <span class="game-timer-value">{{ displayTimer }}</span>
+  </div>
+  <!-- End Timer -->
+
+  <div class="boards-wrapper" [class.game-finished]="isGameFinished">
     <div class="player-board-section">
       <h2>{{ myBoardDisplayName }}</h2>
       <div class="game-board">
@@ -39,4 +63,6 @@
       </div>
     </div>
   </div>
+
+  <button *ngIf="isGameFinished" (click)="goBackToBingo()" class="back-button">Back to Bingo Selection</button>
 </div>
