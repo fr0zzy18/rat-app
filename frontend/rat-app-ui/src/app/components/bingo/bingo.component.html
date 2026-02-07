@@ -15,7 +15,7 @@
 
   <div class="selection-info">
     Selected Cards: {{ selectedCards.length }} / 24
-    <button (click)="selectRandomCards()" [disabled]="selectedCards.length === 24">Random</button> <!-- Re-added Random button -->
+    <button (click)="selectRandomCards()">Random</button> <!-- Always enabled Random button -->
     <button [disabled]="!canStartGame" (click)="startGame()">Start Game</button>
   </div>
 
