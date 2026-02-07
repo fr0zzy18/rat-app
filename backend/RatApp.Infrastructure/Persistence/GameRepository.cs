@@ -38,5 +38,12 @@ namespace RatApp.Infrastructure.Persistence
                 .FirstOrDefaultAsync(g => (g.CreatedByUserId == userId || g.Player2UserId == userId) &&
                                           (g.Status == "InProgress" || g.Status == "Paused"));
         }
+
+        public async Task<List<Game>> GetWaitingGamesAsync()
+        {
+            return await _context.Games
+                .Where(g => g.Status == "WaitingForPlayer")
+                .ToListAsync();
+        }
     }
 }

@@ -72,6 +72,11 @@ namespace RatApp.Application.Services
             return await _gameRepository.GetGameByParticipantIdAsync(userId);
         }
 
+        public async Task<List<Game>> GetWaitingGamesAsync()
+        {
+            return await _gameRepository.GetWaitingGamesAsync();
+        }
+
         // New method to update a game (needed by GameHub)
         public async Task UpdateGameAsync(Game game)
         {

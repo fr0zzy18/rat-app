@@ -1,10 +1,7 @@
 <div class="container">
   <div class="header-section">
     <h1>Bingo Card Management</h1>
-    <div class="user-info">
-      <span class="welcome-message">Welcome, {{ authService.currentUserValue?.username }}!</span>
-      <button (click)="logout()" class="logout-button">Logout</button>
-    </div>
+
   </div>
 
   <!-- New: Reconnect Button -->
@@ -34,7 +31,22 @@
   <div class="join-game-section">
     <h2>Join Existing Game</h2>
     <input type="text" [(ngModel)]="gameIdToJoin" placeholder="Enter Game ID">
-    <button [disabled]="!gameIdToJoin || selectedCards.length !== 24" (click)="joinGame()">Join Game</button> <!-- Modified disabled logic -->
+    <button [disabled]="!gameIdToJoin || selectedCards.length !== 24" (click)="joinGame()">Join Game</button>
+  </div>
+
+  <!-- New: Available Games Section -->
+  <div class="available-games-section">
+    <h2>Available Games (Waiting for Player)</h2>
+    <div *ngIf="waitingGames.length === 0; else gamesList">
+      <p>No games currently waiting for a second player.</p>
+    </div>
+    <ng-template #gamesList>
+      <ul>
+        <li *ngFor="let game of waitingGames" (click)="joinAvailableGame(game.id)" class="waiting-game-item">
+          Game by {{ game.createdByUsername }} (ID: {{ game.id }}) - Click to Join
+        </li>
+      </ul>
+    </ng-template>
   </div>
 
   <div class="card-list">

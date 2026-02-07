@@ -8,6 +8,7 @@ import { Router } from '@angular/router'; // Import Router
 import { GameService } from '../../core/services/game.service'; // Import GameService
 
 import { HttpClient, HttpErrorResponse } from '@angular/common/http'; // Import HttpClient
+import { GameResponse } from '../../core/models/game-response.model'; // Import the new GameResponse model
 
 @Component({
   selector: 'app-bingo',
@@ -27,6 +28,7 @@ export class BingoComponent implements OnInit {
   selectedCards: BingoCard[] = []; // Array to hold selected cards
   gameIdToJoin: string = ''; // Property to hold Game ID for joining
   reconnectGameId: string | null = null; // New property to hold game ID for reconnecting
+  waitingGames: GameResponse[] = []; // New property to store waiting games
 
   editingCardId: number | null = null; // To track which card is being edited
   editedCardPhrase: string = '';       // To hold the phrase during editing
@@ -46,6 +48,33 @@ export class BingoComponent implements OnInit {
     this.getBingoCards();
     this.checkRoles();
     this.checkActiveGame(); // New: Check for active/paused game
+    this.getWaitingGames(); // Call new method to fetch waiting games
+  }
+
+  // New method to get games waiting for players
+  getWaitingGames(): void {
+    this.http.get<GameResponse[]>(`${this.gameApiUrl}/waiting-games`).subscribe({
+      next: (games) => {
+        this.waitingGames = games;
+        this.cdr.detectChanges();
+      },
+      error: (err: HttpErrorResponse) => {
+        console.error('Error fetching waiting games:', err);
+        // Optionally display an error message to the user
+      }
+    });
+  }
+
+  // New method to join an available game by clicking it
+  joinAvailableGame(gameId: string): void {
+    // Before joining, ensure 24 cards are selected
+    if (this.selectedCards.length !== 24) {
+      this.errorMessage = 'Please select exactly 24 cards to join an available game.';
+      this.cdr.detectChanges();
+      return;
+    }
+    this.gameIdToJoin = gameId; // Set the game ID
+    this.joinGame(); // Call the existing joinGame method
   }
 
   // New: Check for an active or paused game for the current user

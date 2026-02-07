@@ -200,5 +200,17 @@ namespace RatApp.Api.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+        [HttpGet("waiting-games")] // New endpoint to get games waiting for a second player
+        public async Task<ActionResult<IEnumerable<GameResponseDto>>> GetWaitingGames()
+        {
+            var waitingGames = await _gameService.GetWaitingGamesAsync();
+            var gameResponses = new List<GameResponseDto>();
+            foreach (var game in waitingGames)
+            {
+                gameResponses.Add(await MapGameToGameResponseDto(game));
+            }
+            return Ok(gameResponses);
+        }
     }
 }
