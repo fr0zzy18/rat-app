@@ -57,38 +57,61 @@ namespace RatApp.Api.Hubs
 
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
-            int userId;
-            ConnectedUsers.TryRemove(Context.ConnectionId, out userId); // Remove user from ConnectedUsers
+            int userIdDisconnected;
+            // Try to remove the disconnected user from the general ConnectedUsers
+            ConnectedUsers.TryRemove(Context.ConnectionId, out userIdDisconnected);
 
-            string? gameId; // Declare as nullable string
-            if (ConnectedGameConnections.TryRemove(Context.ConnectionId, out gameId))
+            string? gameIdString;
+            // Try to remove the disconnected connection from the game-specific connections
+            if (ConnectedGameConnections.TryRemove(Context.ConnectionId, out gameIdString))
             {
-                // At this point, gameId is guaranteed to be non-null by TryRemove
-                // No need for null-forgiving operator here
+                Guid gameId = Guid.Parse(gameIdString);
+                var game = await _gameService.GetGameByIdAsync(gameId);
 
-                // Check if there are any other connections left for this gameId
-                var remainingConnectionsInGame = ConnectedGameConnections.Where(x => x.Value == gameId).ToList();
+                if (game != null)
+                {
+                    // Determine if the game has a second player (i.e., it's not "WaitingForPlayer" or has been joined)
+                    bool isTwoPlayerGame = game.Player2UserId.HasValue;
 
-                if (remainingConnectionsInGame.Count == 0)
-                {
-                    // No players left in the game, abandon it
-                    await _gameService.AbandonGameAsync(Guid.Parse(gameId));
-                    await Clients.Group(gameId).SendAsync("GameAbandoned", gameId);
-                }
-                else
-                {
-                    // If there are still players, but the game was in progress, pause it
-                    var game = await _gameService.GetGameByIdAsync(Guid.Parse(gameId));
-                    if (game != null && game.Status == "InProgress")
+                    // Check if game creator is still connected (by userId)
+                    bool player1StillConnected = ConnectedUsers.Any(cu => cu.Value == game.CreatedByUserId);
+
+                    // Check if player 2 is still connected (by userId)
+                    bool player2StillConnected = isTwoPlayerGame && ConnectedUsers.Any(cu => cu.Value == game.Player2UserId!.Value);
+
+                    if (game.Status == "InProgress")
                     {
-                        game.Status = "Paused";
-                        game.LastActivityDate = DateTime.UtcNow;
-                        await _gameService.UpdateGameAsync(game);
-                        await Clients.Group(game.Id.ToString()).SendAsync("GameUpdated", game);
+                        if (!player1StillConnected && (!isTwoPlayerGame || !player2StillConnected))
+                        {
+                            // If InProgress game, and either only player1 was there and disconnected,
+                            // or both players were there and both disconnected.
+                            // This scenario means no players are left for an InProgress game.
+                            await _gameService.AbandonGameAsync(gameId);
+                            await Clients.Group(gameId.ToString()).SendAsync("GameAbandoned", gameId.ToString());
+                        }
+                        else if (!player1StillConnected || !player2StillConnected)
+                        {
+                            // If InProgress game, and one player disconnected, but the other is still connected,
+                            // This means one player is still in the game, so pause it.
+                            game.Status = "Paused";
+                            game.LastActivityDate = DateTime.UtcNow;
+                            await _gameService.UpdateGameAsync(game);
+                            await Clients.Group(game.Id.ToString()).SendAsync("GameUpdated", game);
+                        }
                     }
+                    else if (game.Status == "WaitingForPlayer")
+                    {
+                        // If the game was waiting for player and the creator disconnected, abandon it.
+                        // This assumes `game.CreatedByUserId` is the only "active" participant at this stage.
+                        if (!player1StillConnected)
+                        {
+                            await _gameService.AbandonGameAsync(gameId);
+                            await Clients.Group(gameId.ToString()).SendAsync("GameAbandoned", gameId.ToString());
+                        }
+                    }
+                    // Other statuses (Player1Won, Player2Won, Abandoned) remain unchanged.
                 }
             }
-
             await base.OnDisconnectedAsync(exception);
         }
     }

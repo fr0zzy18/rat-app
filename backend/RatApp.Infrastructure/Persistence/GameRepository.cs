@@ -35,7 +35,8 @@ namespace RatApp.Infrastructure.Persistence
         public async Task<Game?> GetGameByParticipantIdAsync(int userId)
         {
             return await _context.Games
-                .FirstOrDefaultAsync(g => g.CreatedByUserId == userId || g.Player2UserId == userId);
+                .FirstOrDefaultAsync(g => (g.CreatedByUserId == userId || g.Player2UserId == userId) &&
+                                          (g.Status == "InProgress" || g.Status == "Paused"));
         }
     }
 }

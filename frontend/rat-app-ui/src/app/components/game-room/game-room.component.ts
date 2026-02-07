@@ -34,6 +34,7 @@ export class GameRoomComponent implements OnInit, OnDestroy {
   errorMessage: string | null = null;
   loading: boolean = true;
   private gameUpdateSubscription: Subscription | undefined; // For SignalR updates
+  private signalRReconnectedSubscription: Subscription | undefined; // New subscription
   
   myBoardDisplayName: string = 'Your Board';
   opponentBoardDisplayName: string = "Opponent's Board";
@@ -91,6 +92,9 @@ export class GameRoomComponent implements OnInit, OnDestroy {
     if (this.gameUpdateSubscription) {
       this.gameUpdateSubscription.unsubscribe();
     }
+    if (this.signalRReconnectedSubscription) { // Unsubscribe from new subscription
+      this.signalRReconnectedSubscription.unsubscribe();
+    }
     this.stopTimer(); // Ensure timer is stopped on component destruction
   }
 
@@ -111,6 +115,19 @@ export class GameRoomComponent implements OnInit, OnDestroy {
             console.error('SignalR GameUpdate error:', error);
           }
         );
+
+        // New: Subscribe to reconnection events and rejoin group
+        this.signalRReconnectedSubscription = this.signalrService.reconnected$.subscribe(
+          (connectionId) => {
+            console.log(`GameRoomComponent: SignalR reconnected with ID: ${connectionId}. Rejoining game group: ${this.gameId}`);
+            if (this.gameId) {
+              this.signalrService.joinGameGroup(this.gameId);
+              // Re-fetch game details to ensure UI is up-to-date after reconnection
+              this.fetchGameDetails(); 
+            }
+          }
+        );
+
       } catch (err) {
         console.error('Failed to start SignalR connection or join game group:', err);
         this.errorMessage = 'Failed to connect to real-time game updates.';

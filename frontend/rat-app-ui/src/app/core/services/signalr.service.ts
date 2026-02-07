@@ -8,8 +8,10 @@ import { Observable, Subject } from 'rxjs';
 export class SignalRService {
   private hubConnection: signalR.HubConnection | undefined;
   private gameUpdateSubject = new Subject<any>(); // To push game updates
+  private reconnectedSubject = new Subject<string | undefined>(); // New subject for reconnection events
 
   public gameUpdate$: Observable<any> = this.gameUpdateSubject.asObservable();
+  public reconnected$: Observable<string | undefined> = this.reconnectedSubject.asObservable(); // Expose reconnection events
 
   constructor() { }
 
@@ -18,17 +20,23 @@ export class SignalRService {
       .withUrl('http://localhost:5211/gamehub', {
         accessTokenFactory: () => token // Pass JWT token for authentication
       })
+      .withAutomaticReconnect() // Add automatic reconnection
       .build();
 
     // Register handlers for messages from the hub
     this.hubConnection.on('GameUpdated', (game) => {
-      console.log('SignalR: Raw GameUpdated received from hub:', game); // ADD THIS
-      console.log('SignalR: GameUpdated received:', game); // Keep this for now
+      console.log('SignalR: Raw GameUpdated received from hub:', game);
       this.gameUpdateSubject.next(game); // Push the update to subscribers
     });
 
     this.hubConnection.on('ReceiveMessage', (message) => {
       console.log('SignalR: ReceiveMessage received:', message);
+    });
+
+    // Handle reconnection events
+    this.hubConnection.onreconnected(connectionId => {
+      console.log(`SignalR: Reconnected with connectionId: ${connectionId}`);
+      this.reconnectedSubject.next(connectionId); // Notify subscribers of reconnection
     });
 
     return this.hubConnection
@@ -50,7 +58,7 @@ export class SignalRService {
 
   // Method for clients to call the hub, e.g., to join a game group
   public joinGameGroup = (gameId: string) => {
-    console.log(`SignalRService: Attempting to join game group: ${gameId}`); // ADD THIS
+    console.log(`SignalRService: Attempting to join game group: ${gameId}`);
     if (this.hubConnection && this.hubConnection.state === signalR.HubConnectionState.Connected) {
       this.hubConnection.invoke('JoinGame', gameId)
         .catch(err => console.error('Error invoking JoinGame on hub: ' + err));
@@ -61,11 +69,13 @@ export class SignalRService {
 
   // Method for clients to call the hub, e.g., to leave a game group
   public leaveGameGroup = (gameId: string) => {
-    if (this.hubConnection && this.hubConnection.state === signalR.HubConnectionState.Connected) {
-      this.hubConnection.invoke('LeaveGame', gameId)
-        .catch(err => console.error('Error invoking LeaveGame on hub: ' + err));
-    } else {
-      console.warn('SignalR HubConnection not connected. Cannot invoke LeaveGame.');
+    if (this.hubConnection) { // Check for hubConnection before accessing its state
+      if (this.hubConnection.state === signalR.HubConnectionState.Connected) {
+        this.hubConnection.invoke('LeaveGame', gameId)
+          .catch(err => console.error('Error invoking LeaveGame on hub: ' + err));
+      } else {
+        console.warn('SignalR HubConnection not connected. Cannot invoke LeaveGame.');
+      }
     }
   }
 }

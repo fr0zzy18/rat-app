@@ -72,10 +72,23 @@ export class BingoComponent implements OnInit {
     });
   }
 
-  // New: Reconnect to an existing game
+  // New: Reconnect to an existing game and resume it
   onReconnect(): void {
     if (this.reconnectGameId) {
-      this.router.navigate(['/game-room', this.reconnectGameId]);
+      // Make API call to resume the game
+      this.http.post<any>(`${this.gameApiUrl}/${this.reconnectGameId}/resume`, {})
+        .subscribe({
+          next: (resumedGame) => {
+            this.successMessage = 'Game resumed successfully. Reconnecting...';
+            this.cdr.detectChanges();
+            this.router.navigate(['/game-room', this.reconnectGameId]);
+          },
+          error: (err: HttpErrorResponse) => {
+            this.errorMessage = err.error?.message || 'Failed to resume game. It might have been abandoned or is no longer available.';
+            console.error('Error resuming game:', err);
+            this.cdr.detectChanges();
+          }
+        });
     }
   }
 
