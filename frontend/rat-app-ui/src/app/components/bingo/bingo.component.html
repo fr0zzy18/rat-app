@@ -24,15 +24,15 @@
 
   <div class="selection-info">
     Selected Cards: {{ selectedCards.length }} / 24
-    <button (click)="selectRandomCards()">Random</button> <!-- Always enabled Random button -->
+    <button (click)="selectRandomCards()">Random</button> 
     <button [disabled]="!canStartGame" (click)="startGame()">Start Game</button>
   </div>
 
-  <div class="join-game-section">
+  <!-- <div class="join-game-section">
     <h2>Join Existing Game</h2>
     <input type="text" [(ngModel)]="gameIdToJoin" placeholder="Enter Game ID">
     <button [disabled]="!gameIdToJoin || selectedCards.length !== 24" (click)="joinGame()">Join Game</button>
-  </div>
+  </div> -->
 
   <!-- New: Available Games Section -->
   <div class="available-games-section">
@@ -43,7 +43,7 @@
     <ng-template #gamesList>
       <ul>
         <li *ngFor="let game of waitingGames" (click)="joinAvailableGame(game.id)" class="waiting-game-item">
-          Game by {{ game.createdByUsername }} (ID: {{ game.id }}) - Click to Join
+          Game by {{ game.createdByUsername }} - Click to Join
         </li>
       </ul>
     </ng-template>
