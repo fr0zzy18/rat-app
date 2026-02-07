@@ -55,6 +55,9 @@ namespace RatApp.Infrastructure.Migrations
                     b.Property<DateTime?>("GameStartedDate")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<DateTime?>("LastActivityDate")
+                        .HasColumnType("timestamp with time zone");
+
                     b.PrimitiveCollection<List<int>>("Player1BoardLayout")
                         .HasColumnType("integer[]");
 

@@ -26,6 +26,7 @@ export class BingoComponent implements OnInit {
   errorMessage: string | null = null;
   selectedCards: BingoCard[] = []; // Array to hold selected cards
   gameIdToJoin: string = ''; // Property to hold Game ID for joining
+  reconnectGameId: string | null = null; // New property to hold game ID for reconnecting
 
   editingCardId: number | null = null; // To track which card is being edited
   editedCardPhrase: string = '';       // To hold the phrase during editing
@@ -34,7 +35,7 @@ export class BingoComponent implements OnInit {
 
   constructor(
     private bingoService: BingoService,
-    private authService: AuthService,
+    public authService: AuthService,
     private cdr: ChangeDetectorRef, // Inject ChangeDetectorRef
     private router: Router, // Inject Router
     private gameService: GameService, // Inject GameService
@@ -44,6 +45,40 @@ export class BingoComponent implements OnInit {
   ngOnInit(): void {
     this.getBingoCards();
     this.checkRoles();
+    this.checkActiveGame(); // New: Check for active/paused game
+  }
+
+  // New: Check for an active or paused game for the current user
+  checkActiveGame(): void {
+    this.http.get<any>(`${this.gameApiUrl}/my-active-game`).subscribe({
+      next: (gameDetails) => {
+        if (gameDetails && gameDetails.id) {
+          this.reconnectGameId = gameDetails.id;
+          // Optionally store other game details if needed for display
+        }
+        this.cdr.detectChanges(); // Update view to show/hide reconnect button
+      },
+      error: (err: HttpErrorResponse) => {
+        // 404 Not Found is expected if no active game, others are actual errors
+        if (err.status !== 404) {
+          console.error('Error checking for active game:', err);
+        }
+        this.reconnectGameId = null; // Ensure it's null if no game or error
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
+  // New: Reconnect to an existing game
+  onReconnect(): void {
+    if (this.reconnectGameId) {
+      this.router.navigate(['/game-room', this.reconnectGameId]);
+    }
+  }
+
+  logout(): void {
+    this.authService.logout();
+    this.router.navigate(['/login']);
   }
 
   getBingoCards(): void {

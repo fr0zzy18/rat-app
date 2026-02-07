@@ -1,5 +1,17 @@
 <div class="container">
-  <h1>Bingo Cards</h1>
+  <div class="header-section">
+    <h1>Bingo Card Management</h1>
+    <div class="user-info">
+      <span class="welcome-message">Welcome, {{ authService.currentUserValue?.username }}!</span>
+      <button (click)="logout()" class="logout-button">Logout</button>
+    </div>
+  </div>
+
+  <!-- New: Reconnect Button -->
+  <div *ngIf="reconnectGameId" class="reconnect-game-section">
+    <p>You have an active game. Would you like to reconnect?</p>
+    <button (click)="onReconnect()" class="reconnect-button">Reconnect to Game</button>
+  </div>
 
   <div *ngIf="successMessage" class="alert alert-success">
     {{ successMessage }}

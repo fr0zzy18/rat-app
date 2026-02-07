@@ -22,7 +22,8 @@ export class SignalRService {
 
     // Register handlers for messages from the hub
     this.hubConnection.on('GameUpdated', (game) => {
-      console.log('SignalR: GameUpdated received:', game);
+      console.log('SignalR: Raw GameUpdated received from hub:', game); // ADD THIS
+      console.log('SignalR: GameUpdated received:', game); // Keep this for now
       this.gameUpdateSubject.next(game); // Push the update to subscribers
     });
 
@@ -49,6 +50,7 @@ export class SignalRService {
 
   // Method for clients to call the hub, e.g., to join a game group
   public joinGameGroup = (gameId: string) => {
+    console.log(`SignalRService: Attempting to join game group: ${gameId}`); // ADD THIS
     if (this.hubConnection && this.hubConnection.state === signalR.HubConnectionState.Connected) {
       this.hubConnection.invoke('JoinGame', gameId)
         .catch(err => console.error('Error invoking JoinGame on hub: ' + err));

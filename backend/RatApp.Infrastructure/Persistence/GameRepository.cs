@@ -31,5 +31,11 @@ namespace RatApp.Infrastructure.Persistence
             _context.Games.Update(game);
             await _context.SaveChangesAsync();
         }
+
+        public async Task<Game?> GetGameByParticipantIdAsync(int userId)
+        {
+            return await _context.Games
+                .FirstOrDefaultAsync(g => g.CreatedByUserId == userId || g.Player2UserId == userId);
+        }
     }
 }

@@ -9,5 +9,6 @@ namespace RatApp.Core.Interfaces
         Task CreateGameAsync(Game game);
         Task<Game?> GetGameByIdAsync(Guid id);
         Task UpdateGameAsync(Game game);
+        Task<Game?> GetGameByParticipantIdAsync(int userId); // New method
     }
 }

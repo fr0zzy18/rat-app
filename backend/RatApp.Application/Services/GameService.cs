@@ -27,6 +27,7 @@ namespace RatApp.Application.Services
                 Player1CheckedCardIds = new List<int>(),
                 Status = "WaitingForPlayer",
                 CreatedDate = DateTime.UtcNow,
+                LastActivityDate = DateTime.UtcNow, // Initialize LastActivityDate
                 Player1BoardLayout = ShuffleCards(player1SelectedCardIds)
             };
 
@@ -54,6 +55,7 @@ namespace RatApp.Application.Services
             game.Player2BoardLayout = ShuffleCards(player2SelectedCardIds);
             game.Status = "InProgress";
             game.GameStartedDate = DateTime.UtcNow; // Set game start time when game status changes to InProgress
+            game.LastActivityDate = DateTime.UtcNow; // Update LastActivityDate
 
             await _gameRepository.UpdateGameAsync(game);
             return game;
@@ -62,6 +64,18 @@ namespace RatApp.Application.Services
         public async Task<Game?> GetGameByIdAsync(Guid gameId)
         {
             return await _gameRepository.GetGameByIdAsync(gameId);
+        }
+
+        // New method to get a game by any participant ID
+        public async Task<Game?> GetGameByParticipantIdAsync(int userId)
+        {
+            return await _gameRepository.GetGameByParticipantIdAsync(userId);
+        }
+
+        // New method to update a game (needed by GameHub)
+        public async Task UpdateGameAsync(Game game)
+        {
+            await _gameRepository.UpdateGameAsync(game);
         }
 
         public async Task<Game?> CheckCellAsync(Guid gameId, int userId, int cardId)
@@ -75,24 +89,25 @@ namespace RatApp.Application.Services
 
             if (game.Status != "InProgress")
             {
-                throw new InvalidOperationException("Game is not in progress.");
+                // Prevent actions if the game is not in progress or is paused
+                throw new InvalidOperationException($"Game is not in progress. Current status: {game.Status}");
             }
 
             List<int> playerCheckedCards;
             List<int> playerSelectedCards;
-            List<int>? playerBoardLayout; // Declare playerBoardLayout here
+            List<int>? playerBoardLayout;
 
             if (game.CreatedByUserId == userId)
             {
                 playerCheckedCards = game.Player1CheckedCardIds;
                 playerSelectedCards = game.Player1SelectedCardIds;
-                playerBoardLayout = game.Player1BoardLayout; // Get Player1's layout
+                playerBoardLayout = game.Player1BoardLayout;
             }
             else if (game.Player2UserId == userId)
             {
                 playerCheckedCards = game.Player2CheckedCardIds ?? new List<int>();
                 playerSelectedCards = game.Player2SelectedCardIds ?? new List<int>();
-                playerBoardLayout = game.Player2BoardLayout; // Get Player2's layout
+                playerBoardLayout = game.Player2BoardLayout;
             }
             else
             {
@@ -118,13 +133,46 @@ namespace RatApp.Application.Services
                 throw new InvalidOperationException("Player board layout is missing.");
             }
 
-            if (CheckForBingo(playerCheckedCards, playerBoardLayout)) // Pass playerCheckedCards and playerBoardLayout
+            if (CheckForBingo(playerCheckedCards, playerBoardLayout))
             {
                 game.Status = (game.CreatedByUserId == userId) ? "Player1Won" : "Player2Won";
             }
 
+            game.LastActivityDate = DateTime.UtcNow; // Update last activity on successful move
             await _gameRepository.UpdateGameAsync(game);
             return game;
+        }
+
+        public async Task<Game?> ResumeGameAsync(Guid gameId, int userId)
+        {
+            var game = await _gameRepository.GetGameByIdAsync(gameId);
+
+            if (game == null)
+            {
+                return null;
+            }
+
+            if (game.CreatedByUserId != userId && game.Player2UserId != userId)
+            {
+                throw new UnauthorizedAccessException("User is not a participant in this game.");
+            }
+
+            if (game.Status == "Paused")
+            {
+                game.Status = "InProgress";
+                game.LastActivityDate = DateTime.UtcNow; // Reset last activity
+                // Option 1: Adjust GameStartedDate if you want timer to appear continuous
+                // game.GameStartedDate = game.GameStartedDate?.Add((DateTime.UtcNow - (game.LastActivityDate ?? DateTime.UtcNow)))
+                // This logic is tricky with pauses. Simpler to restart timer on frontend from current GameStartedDate
+                // For now, we'll just set LastActivityDate, frontend will handle timer reset
+
+                await _gameRepository.UpdateGameAsync(game);
+                return game;
+            }
+            else
+            {
+                throw new InvalidOperationException($"Game is not paused. Current status: {game.Status}");
+            }
         }
 
         // Updated signature: now accepts playerCheckedCards and playerBoardLayout

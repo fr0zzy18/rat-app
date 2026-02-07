@@ -49,7 +49,8 @@ namespace RatApp.Api.Controllers
                 Player2BoardLayout = game.Player2BoardLayout,
                 Status = game.Status,
                 CreatedDate = game.CreatedDate,
-                GameStartedDate = game.GameStartedDate
+                GameStartedDate = game.GameStartedDate,
+                LastActivityDate = game.LastActivityDate // New: Map LastActivityDate
             };
         }
 
@@ -137,6 +138,57 @@ namespace RatApp.Api.Controllers
                 
                 var gameResponse = await MapGameToGameResponseDto(updatedGame);
                 await _hubContext.Clients.Group(updatedGame.Id.ToString()).SendAsync("GameUpdated", gameResponse);
+                return Ok(gameResponse);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Forbid(ex.Message);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpGet("my-active-game")] // Moved to here
+        public async Task<ActionResult<GameResponseDto>> GetMyActiveGame()
+        {
+            var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdString) || !int.TryParse(userIdString, out int userId))
+            {
+                return Unauthorized();
+            }
+
+            var game = await _gameService.GetGameByParticipantIdAsync(userId);
+
+            if (game == null)
+            {
+                return NotFound("No active game found for this user.");
+            }
+            
+            var gameResponse = await MapGameToGameResponseDto(game);
+            return Ok(gameResponse);
+        }
+
+        [HttpPost("{gameId}/resume")] // New endpoint for resuming game
+        public async Task<ActionResult<GameResponseDto>> ResumeGame(Guid gameId)
+        {
+            var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdString) || !int.TryParse(userIdString, out int userId))
+            {
+                return Unauthorized();
+            }
+
+            try
+            {
+                var resumedGame = await _gameService.ResumeGameAsync(gameId, userId);
+                if (resumedGame == null)
+                {
+                    return NotFound($"Game with ID {gameId} not found.");
+                }
+
+                var gameResponse = await MapGameToGameResponseDto(resumedGame);
+                await _hubContext.Clients.Group(resumedGame.Id.ToString()).SendAsync("GameUpdated", gameResponse);
                 return Ok(gameResponse);
             }
             catch (UnauthorizedAccessException ex)

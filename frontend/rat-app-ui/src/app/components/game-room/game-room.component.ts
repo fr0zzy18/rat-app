@@ -49,7 +49,9 @@ export class GameRoomComponent implements OnInit, OnDestroy {
   // New properties for timer functionality
   isPlayer2Joined: boolean = false;
   isGameInProgress: boolean = false;
+  isGamePaused: boolean = false; // New property for game paused state
   gameStartTime: Date | null = null;
+  pausedTime: Date | null = null; // New property to store the time when the game was paused
   private timerInterval: any; // To store setInterval reference
   displayTimer: string = '00:00:00';
   
@@ -139,6 +141,9 @@ export class GameRoomComponent implements OnInit, OnDestroy {
   }
 
   updateGameRoomUI(gameDetails: any): void {
+    console.log('updateGameRoomUI: Received gameDetails:', gameDetails); // ADD THIS
+    console.log('updateGameRoomUI: gameDetails.status:', gameDetails.status); // ADD THIS
+
     const currentUserId = Number(this.authService.currentUserValue?.id);
     if (isNaN(currentUserId)) {
       console.error('updateGameRoomUI: Invalid currentUserId:', this.authService.currentUserValue?.id);
@@ -151,7 +156,20 @@ export class GameRoomComponent implements OnInit, OnDestroy {
     this.isGameCreator = (currentUserId === gameDetails.createdByUserId);
     this.isPlayer2Joined = gameDetails.player2UserId !== null; // Update player2 joined status
     this.isGameInProgress = gameDetails.status === "InProgress"; // Update game in progress status
+    this.isGamePaused = gameDetails.status === "Paused"; // New: Set game paused status
     this.gameStartTime = new Date(gameDetails.gameStartedDate); // Set game start time
+
+    console.log('updateGameRoomUI: isGameInProgress set to:', this.isGameInProgress); // ADD THIS
+    console.log('updateGameRoomUI: isGamePaused set to:', this.isGamePaused); // ADD THIS
+    console.log('updateGameRoomUI: gameStartTime set to:', this.gameStartTime); // ADD THIS
+
+    // New: Handle pausedTime
+    if (this.isGamePaused && gameDetails.lastActivityDate) { // Assuming backend sends lastActivityDate
+      this.pausedTime = new Date(gameDetails.lastActivityDate);
+    } else {
+      this.pausedTime = null;
+    }
+    console.log('updateGameRoomUI: pausedTime set to:', this.pausedTime); // ADD THIS
 
     // Set display names
     if (this.isGameCreator) {
@@ -181,9 +199,9 @@ export class GameRoomComponent implements OnInit, OnDestroy {
     }
 
     // --- Timer logic ---
-    if (this.isGameInProgress && !this.isGameFinished && !this.timerInterval) {
+    if (this.isGameInProgress && !this.isGameFinished && !this.isGamePaused && !this.timerInterval) {
       this.startTimer();
-    } else if (!this.isGameInProgress || this.isGameFinished) {
+    } else if (!this.isGameInProgress || this.isGameFinished || this.isGamePaused) { // Updated condition
       this.stopTimer();
     }
     // --- End Timer logic ---
@@ -291,8 +309,8 @@ export class GameRoomComponent implements OnInit, OnDestroy {
   }
 
   toggleCellChecked(cell: GameBoardCell): void {
-    if (this.isGameFinished) { // Prevent clicks if game is finished
-      console.log('Game is finished, cannot click cells.');
+    if (this.isGameFinished || this.isGamePaused) { // Prevent clicks if game is finished or paused
+      console.log('Game is finished or paused, cannot click cells.');
       return;
     }
     if (!cell.isEmpty && cell.id !== undefined && this.gameId) {

@@ -9,6 +9,11 @@
     {{ winnerMessage }}
   </div>
 
+  <!-- New: Game Paused Message -->
+  <div *ngIf="isGamePaused" class="game-paused-message alert alert-warning">
+    Game Paused. Waiting for players to reconnect.
+  </div>
+
   <!-- Show/Hide Game ID section (only for creator if P2 not joined and game not finished) -->
   <div *ngIf="isGameCreator && !isPlayer2Joined && !isGameFinished" class="game-id-section">
     <button (click)="toggleGameIdVisibility()" class="show-hide-id-button">
@@ -23,13 +28,13 @@
   <!-- End Show/Hide Game ID -->
 
   <!-- Timer display (appears when P2 joined and game not finished) -->
-  <div *ngIf="isPlayer2Joined && !isGameFinished" class="game-timer-section">
+  <div *ngIf="isPlayer2Joined && !isGameFinished && !isGamePaused" class="game-timer-section">
     <span class="game-timer-label">Game Duration:</span>
     <span class="game-timer-value">{{ displayTimer }}</span>
   </div>
   <!-- End Timer -->
 
-  <div class="boards-wrapper" [class.game-finished]="isGameFinished">
+  <div class="boards-wrapper" [class.game-finished]="isGameFinished" [class.game-paused]="isGamePaused">
     <div class="player-board-section">
       <h2>{{ myBoardDisplayName }}</h2>
       <div class="game-board">

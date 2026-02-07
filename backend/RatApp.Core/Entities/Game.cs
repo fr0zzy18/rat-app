@@ -16,6 +16,7 @@ namespace RatApp.Core.Entities
         public List<int>? Player2BoardLayout { get; set; }
         public string Status { get; set; } = "WaitingForPlayer";
         public DateTime CreatedDate { get; set; }
-        public DateTime? GameStartedDate { get; set; } // New property
+        public DateTime? GameStartedDate { get; set; }
+        public DateTime? LastActivityDate { get; set; } // New property for tracking activity
     }
 }
