@@ -53,12 +53,18 @@ namespace RatApp.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("timestamp with time zone");
 
+                    b.PrimitiveCollection<List<int>>("Player1BoardLayout")
+                        .HasColumnType("integer[]");
+
                     b.PrimitiveCollection<List<int>>("Player1CheckedCardIds")
                         .IsRequired()
                         .HasColumnType("integer[]");
 
                     b.PrimitiveCollection<List<int>>("Player1SelectedCardIds")
                         .IsRequired()
+                        .HasColumnType("integer[]");
+
+                    b.PrimitiveCollection<List<int>>("Player2BoardLayout")
                         .HasColumnType("integer[]");
 
                     b.PrimitiveCollection<List<int>>("Player2CheckedCardIds")

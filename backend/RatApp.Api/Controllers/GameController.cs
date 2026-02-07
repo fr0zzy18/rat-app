@@ -44,8 +44,9 @@ namespace RatApp.Api.Controllers
                 Player2UserId = newGame.Player2UserId,
                 Player2SelectedCardIds = newGame.Player2SelectedCardIds,
                 Player2CheckedCardIds = newGame.Player2CheckedCardIds,
+                Player1BoardLayout = newGame.Player1BoardLayout, // New
+                Player2BoardLayout = newGame.Player2BoardLayout, // New
                 Status = newGame.Status,
-                // CurrentTurn = newGame.CurrentTurn, // Removed
                 CreatedDate = newGame.CreatedDate
             });
         }
@@ -75,8 +76,9 @@ namespace RatApp.Api.Controllers
                     Player2UserId = updatedGame.Player2UserId,
                     Player2SelectedCardIds = updatedGame.Player2SelectedCardIds,
                     Player2CheckedCardIds = updatedGame.Player2CheckedCardIds,
+                    Player1BoardLayout = updatedGame.Player1BoardLayout, // New
+                    Player2BoardLayout = updatedGame.Player2BoardLayout, // New
                     Status = updatedGame.Status,
-                    // CurrentTurn = updatedGame.CurrentTurn, // Removed
                     CreatedDate = updatedGame.CreatedDate
                 });
             }
@@ -112,8 +114,9 @@ namespace RatApp.Api.Controllers
                 Player2UserId = game.Player2UserId,
                 Player2SelectedCardIds = game.Player2SelectedCardIds,
                 Player2CheckedCardIds = game.Player2CheckedCardIds,
+                Player1BoardLayout = game.Player1BoardLayout, // New
+                Player2BoardLayout = game.Player2BoardLayout, // New
                 Status = game.Status,
-                // CurrentTurn = game.CurrentTurn, // Removed
                 CreatedDate = game.CreatedDate
             });
         }
@@ -143,8 +146,9 @@ namespace RatApp.Api.Controllers
                     Player2UserId = updatedGame.Player2UserId,
                     Player2SelectedCardIds = updatedGame.Player2SelectedCardIds,
                     Player2CheckedCardIds = updatedGame.Player2CheckedCardIds,
+                    Player1BoardLayout = updatedGame.Player1BoardLayout, // New
+                    Player2BoardLayout = updatedGame.Player2BoardLayout, // New
                     Status = updatedGame.Status,
-                    // CurrentTurn = updatedGame.CurrentTurn, // Removed
                     CreatedDate = updatedGame.CreatedDate
                 });
             }

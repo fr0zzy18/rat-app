@@ -14,7 +14,6 @@ interface GameBoardCell {
   phrase: string | null;
   isEmpty: boolean;
   isChecked: boolean;
-  // isOpponentChecked?: boolean; // Removed
 }
 
 @Component({
@@ -27,8 +26,8 @@ interface GameBoardCell {
 export class GameRoomComponent implements OnInit, OnDestroy {
   gameBoard: GameBoardCell[][] = [];
   opponentGameBoard: GameBoardCell[][] = [];
-  selectedBingoCards: BingoCard[] = [];
-  opponentSelectedCards: BingoCard[] = [];
+  selectedBingoCards: BingoCard[] = []; // Still needed for selected card list
+  opponentSelectedCards: BingoCard[] = []; // Still needed for selected card list
   boardSize: number = 5;
   gameId: string | null = null;
   errorMessage: string | null = null;
@@ -77,44 +76,51 @@ export class GameRoomComponent implements OnInit, OnDestroy {
         console.log('fetchGameDetails: Game Details:', gameDetails);
         const currentUserId = this.authService.currentUserValue?.id?.toString();
         console.log('fetchGameDetails: currentUserId:', currentUserId);
-        let playerCardIds: number[] = [];
+        let playerSelectedCardIds: number[] = [];
         let playerCheckedIds: number[] = [];
-        let opponentCardIds: number[] = [];
+        let playerBoardLayout: number[] = []; // New
+        let opponentSelectedCardIds: number[] = [];
         let opponentCheckedIds: number[] = [];
+        let opponentBoardLayout: number[] = []; // New
 
         if (currentUserId === gameDetails.createdByUserId) {
-          playerCardIds = gameDetails.player1SelectedCardIds || [];
+          playerSelectedCardIds = gameDetails.player1SelectedCardIds || [];
           playerCheckedIds = gameDetails.player1CheckedCardIds || [];
-          opponentCardIds = gameDetails.player2SelectedCardIds || [];
+          playerBoardLayout = gameDetails.player1BoardLayout || []; // New
+          opponentSelectedCardIds = gameDetails.player2SelectedCardIds || [];
           opponentCheckedIds = gameDetails.player2CheckedCardIds || [];
+          opponentBoardLayout = gameDetails.player2BoardLayout || []; // New
         } else if (currentUserId === gameDetails.player2UserId) {
-          playerCardIds = gameDetails.player2SelectedCardIds || [];
+          playerSelectedCardIds = gameDetails.player2SelectedCardIds || [];
           playerCheckedIds = gameDetails.player2CheckedCardIds || [];
-          opponentCardIds = gameDetails.player1SelectedCardIds || [];
+          playerBoardLayout = gameDetails.player2BoardLayout || []; // New
+          opponentSelectedCardIds = gameDetails.player1SelectedCardIds || [];
           opponentCheckedIds = gameDetails.player1CheckedCardIds || [];
+          opponentBoardLayout = gameDetails.player1BoardLayout || []; // New
         } else {
           console.error('fetchGameDetails: User is not a participant in this game. Current User ID:', currentUserId, 'Created By:', gameDetails.createdByUserId, 'Player 2:', gameDetails.player2UserId, 'Game Details:', gameDetails);
           this.errorMessage = 'You are not a participant in this game.';
           this.router.navigate(['/bingo']);
           return;
         }
-        console.log('fetchGameDetails: playerCardIds for current user:', playerCardIds);
+        console.log('fetchGameDetails: playerSelectedCardIds for current user:', playerSelectedCardIds);
 
         this.bingoService.getBingoCards().subscribe({
           next: (allBingoCards) => {
-            this.selectedBingoCards = allBingoCards.filter(card => playerCardIds.includes(card.id));
+            this.selectedBingoCards = allBingoCards.filter(card => playerSelectedCardIds.includes(card.id));
             console.log('fetchGameDetails: selectedBingoCards (after filter):', this.selectedBingoCards);
-            this.opponentSelectedCards = allBingoCards.filter(card => opponentCardIds.includes(card.id));
-            if (this.selectedBingoCards.length !== 24 || (opponentCardIds.length > 0 && this.opponentSelectedCards.length !== 24)) {
+            this.opponentSelectedCards = allBingoCards.filter(card => opponentSelectedCardIds.includes(card.id));
+            if (this.selectedBingoCards.length !== 24 || (opponentSelectedCardIds.length > 0 && this.opponentSelectedCards.length !== 24)) {
               this.errorMessage = 'Error: Incorrect number of selected cards for this game.';
               this.router.navigate(['/bingo']);
               return;
             }
-            this.initializeGameBoard(this.gameBoard, this.selectedBingoCards, playerCheckedIds, opponentCheckedIds);
+            // Pass allBingoCards and playerBoardLayout
+            this.initializeGameBoard(this.gameBoard, allBingoCards, playerBoardLayout, playerCheckedIds);
             this.gameBoard = [...this.gameBoard]; // Trigger change detection
             console.log('fetchGameDetails: this.gameBoard (after update):', this.gameBoard); // New console.log
-            if (this.opponentSelectedCards.length > 0) {
-                this.initializeGameBoard(this.opponentGameBoard, this.opponentSelectedCards, opponentCheckedIds, playerCheckedIds);
+            if (this.opponentSelectedCards.length > 0 && opponentBoardLayout.length > 0) { // Only initialize opponent's board if they have joined and layout exists
+                this.initializeGameBoard(this.opponentGameBoard, allBingoCards, opponentBoardLayout, opponentCheckedIds);
                 this.opponentGameBoard = [...this.opponentGameBoard]; // Trigger change detection
             }
             this.loading = false;
@@ -151,15 +157,21 @@ export class GameRoomComponent implements OnInit, OnDestroy {
         let playerCheckedIds: number[] = [];
         let opponentCheckedIds: number[] = [];
         let opponentCardIds: number[] = [];
+        let playerBoardLayout: number[] = []; // New
+        let opponentBoardLayout: number[] = []; // New
 
         if (currentUserId === gameDetails.createdByUserId) {
           playerCheckedIds = gameDetails.player1CheckedCardIds || [];
           opponentCheckedIds = gameDetails.player2CheckedCardIds || [];
           opponentCardIds = gameDetails.player2SelectedCardIds || [];
+          playerBoardLayout = gameDetails.player1BoardLayout || []; // New
+          opponentBoardLayout = gameDetails.player2BoardLayout || []; // New
         } else if (currentUserId === gameDetails.player2UserId) {
           playerCheckedIds = gameDetails.player2CheckedCardIds || [];
           opponentCheckedIds = gameDetails.player1CheckedCardIds || [];
           opponentCardIds = gameDetails.player1SelectedCardIds || [];
+          playerBoardLayout = gameDetails.player2BoardLayout || []; // New
+          opponentBoardLayout = gameDetails.player1BoardLayout || []; // New
         } else {
           console.error('pollGameUpdates: User is not a participant in this game. Current User ID:', currentUserId, 'Created By:', gameDetails.createdByUserId, 'Player 2:', gameDetails.player2UserId, 'Game Details:', gameDetails);
           console.warn('Polling: User is no longer a participant in this game.');
@@ -168,25 +180,24 @@ export class GameRoomComponent implements OnInit, OnDestroy {
           return;
         }
 
-        if (opponentCardIds.length > 0 && this.opponentSelectedCards.length === 0) {
-            this.bingoService.getBingoCards().subscribe({
-                next: (allBingoCards) => {
-                    this.opponentSelectedCards = allBingoCards.filter(card => opponentCardIds.includes(card.id));
-                    if (this.opponentSelectedCards.length === 24) {
-                        this.initializeGameBoard(this.opponentGameBoard, this.opponentSelectedCards, opponentCheckedIds, playerCheckedIds);
-                    }
-                },
-                error: (err) => console.error('Error loading opponent bingo cards during poll:', err)
-            });
-        }
+        this.bingoService.getBingoCards().subscribe({ // Need allBingoCards for mapping layout
+          next: (allBingoCards) => {
+            if (opponentCardIds.length > 0 && this.opponentSelectedCards.length === 0) {
+                this.opponentSelectedCards = allBingoCards.filter(card => opponentCardIds.includes(card.id));
+            }
+            // Re-initialize player's board with potentially updated checked cards, using fixed layout
+            this.initializeGameBoard(this.gameBoard, allBingoCards, playerBoardLayout, playerCheckedIds);
+            this.gameBoard = [...this.gameBoard]; // Trigger change detection
 
-        this.updateGameBoardCheckedStates(this.gameBoard, playerCheckedIds, opponentCheckedIds);
-        this.gameBoard = [...this.gameBoard]; // Trigger change detection
-        if (this.opponentSelectedCards.length > 0) {
-            this.updateGameBoardCheckedStates(this.opponentGameBoard, opponentCheckedIds, playerCheckedIds);
-            this.opponentGameBoard = [...this.opponentGameBoard]; // Trigger change detection
-        }
-        this.cdr.detectChanges(); // Explicitly trigger change detection
+            if (this.opponentSelectedCards.length > 0 && opponentBoardLayout.length > 0) { // Only update opponent's board if they have joined and layout exists
+                // Update opponent's board with potentially updated checked cards, using fixed layout
+                this.initializeGameBoard(this.opponentGameBoard, allBingoCards, opponentBoardLayout, opponentCheckedIds);
+                this.opponentGameBoard = [...this.opponentGameBoard]; // Trigger change detection
+            }
+            this.cdr.detectChanges(); // Explicitly trigger change detection
+          },
+          error: (err) => console.error('Error loading bingo cards during poll for layout mapping:', err)
+        });
       },
       error: (err) => {
         console.error('Error polling game updates:', err);
@@ -194,11 +205,10 @@ export class GameRoomComponent implements OnInit, OnDestroy {
     });
   }
 
-  initializeGameBoard(board: GameBoardCell[][], selectedCards: BingoCard[], playerCheckedIds: number[], opponentCheckedIds: number[]): void {
-    console.log('initializeGameBoard: board (before init):', board, 'selectedCards:', selectedCards, 'playerCheckedIds:', playerCheckedIds);
+  // Modified signature
+  initializeGameBoard(board: GameBoardCell[][], allBingoCards: BingoCard[], boardLayout: number[], playerCheckedIds: number[]): void {
+    console.log('initializeGameBoard: board (before init):', board, 'allBingoCards count:', allBingoCards.length, 'boardLayout:', boardLayout, 'playerCheckedIds:', playerCheckedIds);
     board.splice(0, board.length); // Explicitly clear the board before populating
-    const cardPhrases = selectedCards.map(card => ({ id: card.id, phrase: card.phrase }));
-    const shuffledPhrases = this.shuffleArray(cardPhrases);
 
     let cardIndex = 0;
     for (let i = 0; i < this.boardSize; i++) {
@@ -206,20 +216,18 @@ export class GameRoomComponent implements OnInit, OnDestroy {
       for (let j = 0; j < this.boardSize; j++) {
         if (i === Math.floor(this.boardSize / 2) && j === Math.floor(this.boardSize / 2)) {
           board[i][j] = { phrase: 'FREE', isEmpty: true, isChecked: true };
-        } else if (shuffledPhrases && cardIndex < shuffledPhrases.length) {
-          // Check if shuffledPhrases[cardIndex] is not null or undefined
-          const currentPhrase = shuffledPhrases[cardIndex];
+        } else if (boardLayout && cardIndex < boardLayout.length) {
+          const cardId = boardLayout[cardIndex];
+          const currentPhrase = allBingoCards.find(card => card.id === cardId); // Find actual BingoCard
           if (currentPhrase) { // Defensive check
-            const cardId = currentPhrase.id;
             board[i][j] = {
               id: cardId,
               phrase: currentPhrase.phrase,
               isEmpty: false,
               isChecked: playerCheckedIds.includes(cardId),
-              // isOpponentChecked: opponentCheckedIds.includes(cardId) // Removed
             };
           } else {
-            console.error('initializeGameBoard: shuffledPhrases[cardIndex] is null or undefined for cardIndex:', cardIndex, 'shuffledPhrases:', shuffledPhrases);
+            console.error('initializeGameBoard: BingoCard not found for ID:', cardId, 'Board Layout:', boardLayout);
             board[i][j] = { phrase: null, isEmpty: true, isChecked: false }; // Fallback
           }
           cardIndex++;
@@ -231,32 +239,33 @@ export class GameRoomComponent implements OnInit, OnDestroy {
     console.log('initializeGameBoard: board (after init):', board); // New console.log
   }
 
-  updateGameBoardCheckedStates(board: GameBoardCell[][], playerCheckedIds: number[], opponentCheckedIds: number[]): void {
+  updateGameBoardCheckedStates(board: GameBoardCell[][], playerCheckedIds: number[]): void { // Modified signature
     for (let i = 0; i < this.boardSize; i++) {
       for (let j = 0; j < this.boardSize; j++) {
         const cell = board[i][j];
         if (!cell.isEmpty && cell.id !== undefined) {
           cell.isChecked = playerCheckedIds.includes(cell.id);
-          // cell.isOpponentChecked = opponentCheckedIds.includes(cell.id); // Removed
         }
       }
     }
   }
 
-  shuffleArray(array: any[]): any[] {
-    for (let i = array.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [array[i], array[j]] = [array[j], array[i]];
-    }
-    return array;
-  }
+  // Remove shuffleArray method - no longer needed
+  // shuffleArray(array: any[]): any[] {
+  //   for (let i = array.length - 1; i > 0; i--) {
+  //     const j = Math.floor(Math.random() * (i + 1));
+  //     [array[i], array[j]] = [array[j], array[i]];
+  //   }
+  //   return array;
+  // }
 
   toggleCellChecked(cell: GameBoardCell): void {
     if (!cell.isEmpty && cell.id !== undefined && this.gameId) {
       this.http.post<any>(`${this.gameApiUrl}/${this.gameId}/checkCell`, { cardId: cell.id }).subscribe({
         next: (updatedGame) => {
-          cell.isChecked = !cell.isChecked;
-          console.log(`Cell '${cell.phrase}' is now ${cell.isChecked ? 'checked' : 'unchecked'}`);
+          // No need to optimistically update cell.isChecked here, as polling will update it.
+          // This prevents potential out-of-sync issues if the backend rejects the move or updates game state differently.
+          // console.log(`Cell '${cell.phrase}' is now ${cell.isChecked ? 'checked' : 'unchecked'}`); // Remove optimistic log
         },
         error: (err) => {
           this.errorMessage = err.error || 'Failed to toggle cell.';

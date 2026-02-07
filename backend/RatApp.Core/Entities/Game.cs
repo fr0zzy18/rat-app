@@ -12,6 +12,8 @@ namespace RatApp.Core.Entities
         public string? Player2UserId { get; set; }
         public List<int>? Player2SelectedCardIds { get; set; }
         public List<int>? Player2CheckedCardIds { get; set; }
+        public List<int>? Player1BoardLayout { get; set; } // New
+        public List<int>? Player2BoardLayout { get; set; } // New
         public string Status { get; set; } = "WaitingForPlayer"; // e.g., "WaitingForPlayer", "InProgress", "Player1Won", "Player2Won", "Draw"
         public DateTime CreatedDate { get; set; }
     }

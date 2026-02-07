@@ -12,6 +12,8 @@ namespace RatApp.Application.Dtos
         public string? Player2UserId { get; set; }
         public List<int>? Player2SelectedCardIds { get; set; }
         public List<int>? Player2CheckedCardIds { get; set; }
+        public List<int>? Player1BoardLayout { get; set; } // New
+        public List<int>? Player2BoardLayout { get; set; } // New
         public string Status { get; set; } = "WaitingForPlayer";
         public DateTime CreatedDate { get; set; }
     }

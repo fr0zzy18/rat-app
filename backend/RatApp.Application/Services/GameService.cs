@@ -28,7 +28,8 @@ namespace RatApp.Application.Services
                 Player1SelectedCardIds = player1SelectedCardIds,
                 Player1CheckedCardIds = new List<int>(),
                 Status = "WaitingForPlayer",
-                CreatedDate = DateTime.UtcNow
+                CreatedDate = DateTime.UtcNow,
+                Player1BoardLayout = ShuffleCards(player1SelectedCardIds) // New: Generate board layout
             };
 
             await _gameRepository.CreateGameAsync(newGame);
@@ -52,6 +53,7 @@ namespace RatApp.Application.Services
             game.Player2UserId = player2UserId;
             game.Player2SelectedCardIds = player2SelectedCardIds;
             game.Player2CheckedCardIds = new List<int>();
+            game.Player2BoardLayout = ShuffleCards(player2SelectedCardIds); // New: Generate board layout
             game.Status = "InProgress"; // Game can start once second player joins
 
             await _gameRepository.UpdateGameAsync(game);
@@ -130,6 +132,13 @@ namespace RatApp.Application.Services
             // In a real scenario, you'd need the 5x5 board structure,
             // and logic to check rows, columns, and diagonals.
             return checkedCards.Count >= 5; // Simplified win condition for testing
+        }
+
+        private List<int> ShuffleCards(List<int> cards)
+        {
+            var rng = new Random();
+            var shuffledCards = cards.OrderBy(a => rng.Next()).ToList();
+            return shuffledCards;
         }
     }
 }
