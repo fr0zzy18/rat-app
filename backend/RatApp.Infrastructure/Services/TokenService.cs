@@ -25,7 +25,7 @@ namespace RatApp.Infrastructure.Services
         {
             var claims = new List<Claim>
             {
-                new Claim(JwtRegisteredClaimNames.NameId, user.Id.ToString()),
+                new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
                 new Claim(JwtRegisteredClaimNames.UniqueName, user.Username ?? string.Empty), // Handle possible null Username
             };
 

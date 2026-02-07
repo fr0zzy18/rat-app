@@ -19,10 +19,12 @@ export class AuthService {
     const token = localStorage.getItem('token');
     let user: UserDto | null = null;
     if (token) {
+      console.log('AuthService: Token found in localStorage:', token);
       const decodedToken: any = jwtDecode(token);
+      console.log('AuthService: Decoded token in constructor:', decodedToken);
       // Map JWT claims to UserDto
       user = {
-        id: +decodedToken.sub, // 'sub' is usually the user ID
+        id: decodedToken.sub?.toString() || '', // Ensure ID is always a string
         username: decodedToken.unique_name || decodedToken.name, // Prioritize unique_name, fallback to name
         roles: Array.isArray(decodedToken.role) ? decodedToken.role : [decodedToken.role] // 'role' can be string or array
       };
@@ -39,9 +41,11 @@ export class AuthService {
     return this.http.post(`${this.apiUrl}/login`, credentials, { responseType: 'text' }).pipe(
       tap((token: any) => {
         localStorage.setItem('token', token);
+        console.log('AuthService: Token received from login:', token);
         const decodedToken: any = jwtDecode(token);
+        console.log('AuthService: Decoded token in login:', decodedToken);
         const user: UserDto = {
-          id: +decodedToken.sub,
+          id: decodedToken.sub?.toString() || '',
           username: decodedToken.unique_name || decodedToken.name, // Prioritize unique_name, fallback to name
           roles: Array.isArray(decodedToken.role) ? decodedToken.role : [decodedToken.role]
         };

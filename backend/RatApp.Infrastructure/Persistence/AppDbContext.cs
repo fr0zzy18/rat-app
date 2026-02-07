@@ -14,6 +14,7 @@ namespace RatApp.Infrastructure.Persistence
         public DbSet<UserRole> UserRoles { get; set; }
         public DbSet<Player> Players { get; set; } // Re-added Player DbSet
         public DbSet<BingoCard> BingoCards { get; set; }
+        public DbSet<Game> Games { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

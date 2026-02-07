@@ -18,6 +18,12 @@
     <button [disabled]="!canStartGame" (click)="startGame()">Start Game</button>
   </div>
 
+  <div class="join-game-section">
+    <h2>Join Existing Game</h2>
+    <input type="text" [(ngModel)]="gameIdToJoin" placeholder="Enter Game ID">
+    <button [disabled]="!canStartGame || !gameIdToJoin" (click)="joinGame()">Join Game</button>
+  </div>
+
   <div class="card-list">
     <div
       *ngFor="let card of bingoCards"

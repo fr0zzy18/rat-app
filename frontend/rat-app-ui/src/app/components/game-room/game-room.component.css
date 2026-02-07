@@ -10,6 +10,20 @@ h1 {
   color: #333;
 }
 
+.boards-wrapper {
+  display: flex; /* Arrange boards side-by-side */
+  gap: 40px; /* Space between boards */
+  justify-content: center;
+  width: 100%;
+}
+
+.player-board-section,
+.opponent-board-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 .game-board {
   display: grid;
   grid-template-columns: repeat(5, 100px); /* 5 columns, each 100px wide */
@@ -17,6 +31,10 @@ h1 {
   border: 2px solid #333;
   gap: 5px; /* Space between cells */
   background-color: #eee;
+}
+
+.opponent-board {
+  border-color: #007bff; /* Different border for opponent's board */
 }
 
 .board-row {
@@ -56,6 +74,12 @@ h1 {
   background-color: #c8e6c9; /* Light green for checked */
   border-color: #4CAF50;
   color: #1b5e20;
+}
+
+.board-cell.opponent-checked { /* New style for opponent's checked cells on player's board */
+  background-color: #ffccbc; /* Light red/orange for opponent checked */
+  border-color: #ff5722;
+  color: #bf360c;
 }
 
 .board-cell.checked.empty {

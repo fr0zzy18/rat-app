@@ -15,7 +15,7 @@ export const routes: Routes = [
   { path: 'dashboard', component: DashboardComponent, canActivate: [authGuard] },
   { path: 'players', component: PlayersComponent, canActivate: [authGuard] }, // Protected Players route
   { path: 'bingo', component: BingoComponent, canActivate: [authGuard] },
-  { path: 'game-room', component: GameRoomComponent, canActivate: [authGuard] }, // New Game Room route
+  { path: 'game-room/:gameId', component: GameRoomComponent, canActivate: [authGuard] }, // New Game Room route
   { path: 'register', component: RegisterComponent, canActivate: [authGuard, managerGuard] },
   { path: 'manage-users', component: ManageUsersComponent, canActivate: [authGuard, managerGuard] },
   { path: '**', redirectTo: '/login' }

@@ -7,6 +7,8 @@ import { AuthService } from '../../core/services/auth.service';
 import { Router } from '@angular/router'; // Import Router
 import { GameService } from '../../core/services/game.service'; // Import GameService
 
+import { HttpClient, HttpErrorResponse } from '@angular/common/http'; // Import HttpClient
+
 @Component({
   selector: 'app-bingo',
   standalone: true,
@@ -22,13 +24,17 @@ export class BingoComponent implements OnInit {
   successMessage: string | null = null;
   errorMessage: string | null = null;
   selectedCards: BingoCard[] = []; // New: Array to hold selected cards
+  gameIdToJoin: string = ''; // New: Property to hold Game ID for joining
+
+  private gameApiUrl = 'http://localhost:5211/api/game'; // New: Game API URL
 
   constructor(
     private bingoService: BingoService,
     private authService: AuthService,
     private cdr: ChangeDetectorRef, // Inject ChangeDetectorRef
     private router: Router, // Inject Router
-    private gameService: GameService // Inject GameService
+    private gameService: GameService, // Inject GameService
+    private http: HttpClient // Inject HttpClient
   ) { }
 
   ngOnInit(): void {
@@ -122,13 +128,51 @@ export class BingoComponent implements OnInit {
     return this.selectedCards.length === 24;
   }
 
-  // New: Start game
+  // New: Start game (as first player, creating a new game)
   startGame(): void {
+    this.successMessage = null;
+    this.errorMessage = null;
     if (this.canStartGame) {
-      this.gameService.setSelectedCards(this.selectedCards); // Store selected cards in service
-      this.router.navigate(['/game-room']); // Navigate to game room
+      const payload = { player1SelectedCardIds: this.selectedCards.map(c => c.id) };
+      this.http.post<any>(`${this.gameApiUrl}/create`, payload).subscribe({
+        next: (response) => {
+          this.gameService.setSelectedCards(this.selectedCards); // Store selected cards
+          this.gameService.setGameId(response.id); // Store game ID from backend
+          this.router.navigate(['/game-room', response.id]); // Navigate with ID
+        },
+        error: (err: HttpErrorResponse) => {
+          this.errorMessage = err.error || 'Failed to create game.';
+          console.error('Error creating game:', err);
+        }
+      });
     } else {
-      this.errorMessage = 'Please select exactly 24 cards to start the game.';
+      this.errorMessage = 'Please select exactly 24 cards to start a new game.';
+    }
+  }
+
+  // New: Join game (as second player, joining an existing game)
+  joinGame(): void {
+    this.successMessage = null;
+    this.errorMessage = null;
+    if (!this.gameIdToJoin) {
+      this.errorMessage = 'Please enter a Game ID to join.';
+      return;
+    }
+    if (this.canStartGame) { // Re-using canStartGame as it checks for 24 selected cards
+      const payload = { player2SelectedCardIds: this.selectedCards.map(c => c.id) };
+      this.http.post<any>(`${this.gameApiUrl}/join/${this.gameIdToJoin}`, payload).subscribe({
+        next: (response) => {
+          this.gameService.setSelectedCards(this.selectedCards); // Store selected cards
+          this.gameService.setGameId(response.id); // Store game ID from backend
+          this.router.navigate(['/game-room', response.id]); // Navigate with ID
+        },
+        error: (err: HttpErrorResponse) => {
+          this.errorMessage = err.error || 'Failed to join game.';
+          console.error('Error joining game:', err);
+        }
+      });
+    } else {
+      this.errorMessage = 'Please select exactly 24 cards to join the game.';
     }
   }
 }
