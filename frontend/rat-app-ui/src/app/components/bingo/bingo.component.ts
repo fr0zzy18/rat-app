@@ -52,9 +52,12 @@ export class BingoComponent implements OnInit {
   checkActiveGame(): void {
     this.http.get<any>(`${this.gameApiUrl}/my-active-game`).subscribe({
       next: (gameDetails) => {
-        if (gameDetails && gameDetails.id) {
+        // Only show reconnect button if game is in a reconnectable state
+        if (gameDetails && gameDetails.id && (gameDetails.status === 'InProgress' || gameDetails.status === 'Paused')) {
           this.reconnectGameId = gameDetails.id;
           // Optionally store other game details if needed for display
+        } else {
+          this.reconnectGameId = null; // Do not show reconnect button for other statuses
         }
         this.cdr.detectChanges(); // Update view to show/hide reconnect button
       },

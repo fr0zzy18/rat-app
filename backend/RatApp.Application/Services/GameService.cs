@@ -78,6 +78,17 @@ namespace RatApp.Application.Services
             await _gameRepository.UpdateGameAsync(game);
         }
 
+        public async Task AbandonGameAsync(Guid gameId)
+        {
+            var game = await _gameRepository.GetGameByIdAsync(gameId);
+            if (game != null)
+            {
+                game.Status = "Abandoned";
+                game.LastActivityDate = DateTime.UtcNow;
+                await _gameRepository.UpdateGameAsync(game);
+            }
+        }
+
         public async Task<Game?> CheckCellAsync(Guid gameId, int userId, int cardId)
         {
             var game = await _gameRepository.GetGameByIdAsync(gameId);

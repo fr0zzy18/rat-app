@@ -60,18 +60,32 @@ namespace RatApp.Api.Hubs
             int userId;
             ConnectedUsers.TryRemove(Context.ConnectionId, out userId); // Remove user from ConnectedUsers
 
-            string gameId;
+            string? gameId; // Declare as nullable string
             if (ConnectedGameConnections.TryRemove(Context.ConnectionId, out gameId))
             {
-                var game = await _gameService.GetGameByIdAsync(Guid.Parse(gameId));
+                // At this point, gameId is guaranteed to be non-null by TryRemove
+                // No need for null-forgiving operator here
 
-                if (game != null && game.Status == "InProgress")
+                // Check if there are any other connections left for this gameId
+                var remainingConnectionsInGame = ConnectedGameConnections.Where(x => x.Value == gameId).ToList();
+
+                if (remainingConnectionsInGame.Count == 0)
                 {
-                    game.Status = "Paused";
-                    game.LastActivityDate = DateTime.UtcNow;
-                    await _gameService.UpdateGameAsync(game);
-
-                    await Clients.Group(game.Id.ToString()).SendAsync("GameUpdated", game);
+                    // No players left in the game, abandon it
+                    await _gameService.AbandonGameAsync(Guid.Parse(gameId));
+                    await Clients.Group(gameId).SendAsync("GameAbandoned", gameId);
+                }
+                else
+                {
+                    // If there are still players, but the game was in progress, pause it
+                    var game = await _gameService.GetGameByIdAsync(Guid.Parse(gameId));
+                    if (game != null && game.Status == "InProgress")
+                    {
+                        game.Status = "Paused";
+                        game.LastActivityDate = DateTime.UtcNow;
+                        await _gameService.UpdateGameAsync(game);
+                        await Clients.Group(game.Id.ToString()).SendAsync("GameUpdated", game);
+                    }
                 }
             }
 
