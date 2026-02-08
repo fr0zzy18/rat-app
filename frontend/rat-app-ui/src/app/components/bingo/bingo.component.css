@@ -1,12 +1,48 @@
 .container {
   padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #333;
+}
+
+.header-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #eee;
+}
+
+.header-section h1 {
+  color: #0056b3;
+  font-size: 2.2em;
+  margin: 0;
+}
+
+.logout-button {
+  background-color: #dc3545;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1em;
+  transition: background-color 0.3s ease;
+}
+
+.logout-button:hover {
+  background-color: #c82333;
 }
 
 .alert {
-  padding: 10px;
-  margin-bottom: 15px;
-  border-radius: 5px;
+  padding: 12px;
+  margin-bottom: 20px;
+  border-radius: 8px;
   font-weight: bold;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 .alert-success {
@@ -19,32 +55,135 @@
   background-color: #f8d7da;
   color: #721c24;
   border: 1px solid #f5c6cb;
-  max-width: fit-content; /* Adjust width to content */
-  margin-left: auto; /* Center align */
-  margin-right: auto; /* Center align */
+}
+
+.reconnect-game-section {
+  background-color: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeeba;
+  padding: 15px;
+  margin-bottom: 20px;
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1.1em;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.reconnect-button {
+  background-color: #ffc107;
+  color: #343a40;
+  padding: 8px 18px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.3s ease;
+}
+
+.reconnect-button:hover {
+  background-color: #e0a800;
 }
 
 .create-card-form {
+  display: flex;
+  gap: 10px;
   margin-bottom: 20px;
+  padding: 15px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
 .create-card-form input {
-  padding: 10px;
-  margin-right: 10px;
-  width: 300px;
+  flex-grow: 1;
+  padding: 10px 15px;
+  border: 1px solid #ced4da;
+  border-radius: 5px;
+  font-size: 1em;
 }
 
 .create-card-form button {
+  background-color: #28a745;
+  color: white;
   padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1em;
+  transition: background-color 0.3s ease;
 }
+
+.create-card-form button:hover {
+  background-color: #218838;
+}
+
+.game-controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* Two columns for game creation/joining */
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.game-section {
+  background-color: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.game-section h2 {
+  color: #0056b3;
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-size: 1.5em;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 10px;
+}
+
+.game-section input {
+  width: calc(100% - 22px);
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #ced4da;
+  border-radius: 5px;
+  font-size: 1em;
+}
+
+.game-section button {
+  width: 100%;
+  padding: 10px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1em;
+  transition: background-color 0.3s ease;
+}
+
+.game-section button:hover:not(:disabled) {
+  background-color: #0056b3;
+}
+
+.game-section button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
 
 .selection-info {
   margin-bottom: 20px;
+  padding: 15px;
+  background-color: #e9f7ef;
+  border-radius: 8px;
   font-size: 1.1em;
   font-weight: bold;
-  display: flex; /* Use flexbox for alignment */
-  align-items: center; /* Vertically align items */
-  gap: 15px; /* Space between items */
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
 .selection-info button {
@@ -55,6 +194,7 @@
   border-radius: 5px;
   cursor: pointer;
   transition: background-color 0.3s ease;
+  font-size: 0.9em;
 }
 
 .selection-info button:disabled {
@@ -66,70 +206,112 @@
   background-color: #0056b3;
 }
 
+.available-games-section {
+  background-color: #f8f9fa;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  margin-bottom: 30px;
+}
+
+.available-games-section h2 {
+  color: #0056b3;
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-size: 1.5em;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 10px;
+}
+
+.available-games-section ul {
+  list-style: none;
+  padding: 0;
+}
+
+.waiting-game-item {
+  background-color: #ffffff;
+  border: 1px solid #e0e0e0;
+  padding: 12px 15px;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.waiting-game-item:hover {
+  background-color: #e9f7fe;
+  border-color: #007bff;
+}
+
 .card-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* Smaller min width for cards */
-  gap: 15px; /* Slightly reduced gap */
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); /* Adjusted card size */
+  gap: 20px;
 }
 
 .card {
-  padding: 10px; /* Reduced padding */
+  padding: 15px;
   border: 1px solid #ccc;
-  border-radius: 5px;
+  border-radius: 8px;
   text-align: center;
   position: relative;
-  cursor: pointer; /* Indicate clickable */
-  transition: border-color 0.2s ease, background-color 0.2s ease;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
-  gap: 5px; /* Reduced gap within card */
-  min-height: 100px; /* Ensure a minimum height for smaller cards */
+  min-height: 140px; /* Increased min-height for better appearance */
+  background-color: #fff;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
 }
 
 .card.selected {
-  border-color: #007bff; /* Highlight color */
-  background-color: #e6f2ff; /* Light background for selected */
-  box-shadow: 0 0 8px rgba(0, 123, 255, 0.4);
+  border-color: #007bff;
+  background-color: #e6f2ff;
+  box-shadow: 0 0 10px rgba(0, 123, 255, 0.4);
 }
 
-.card:hover {
+.card:hover:not(.selected) {
   border-color: #0056b3;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
 .card span {
   display: block;
-  margin-bottom: 5px; /* Reduced margin */
-  flex-grow: 1; /* Allow phrase to take available space */
-  font-size: 0.9em; /* Slightly smaller font for the phrase */
+  margin-bottom: 10px;
+  flex-grow: 1;
+  font-size: 1.1em;
+  font-weight: 500;
+  color: #495057;
+  word-break: break-word; /* Ensure long phrases wrap */
 }
 
 .button-group {
   display: flex;
-  gap: 5px; /* Space between CRUD buttons */
-  margin-top: 10px; /* Space between phrase/input and buttons */
-  flex-wrap: wrap; /* Allow buttons to wrap if container is too small */
-  justify-content: center; /* Center buttons within the group */
+  gap: 8px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+  width: 100%; /* Ensure button group takes full width for centering */
 }
 
 .crud-button {
-  padding: 5px 10px; /* Smaller padding */
-  font-size: 0.8em; /* Smaller font size */
-  border-radius: 4px; /* Slightly rounded corners */
+  padding: 8px 12px;
+  font-size: 0.9em;
+  border-radius: 5px;
   cursor: pointer;
-  border: 1px solid #ccc;
-  background-color: #f0f0f0;
-  transition: background-color 0.2s;
-  white-space: nowrap; /* Prevent button text from wrapping */
-}
-
-.crud-button:hover {
-  background-color: #e0e0e0;
+  border: 1px solid;
+  transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+  white-space: nowrap;
+  flex-basis: 45%; /* Allow two buttons per line on smaller cards */
 }
 
 .delete-button {
-  background-color: #f44336; /* Red */
+  background-color: #f44336;
   color: white;
   border-color: #d32f2f;
 }
@@ -139,7 +321,7 @@
 }
 
 .edit-button {
-  background-color: #2196f3; /* Blue */
+  background-color: #2196f3;
   color: white;
   border-color: #1976d2;
 }
@@ -149,7 +331,7 @@
 }
 
 .update-button {
-  background-color: #4CAF50; /* Green */
+  background-color: #4CAF50;
   color: white;
   border-color: #388E3C;
 }
@@ -159,7 +341,7 @@
 }
 
 .cancel-button {
-  background-color: #ff9800; /* Orange */
+  background-color: #ff9800;
   color: white;
   border-color: #f57c00;
 }
@@ -169,10 +351,35 @@
 }
 
 .edit-input {
-  width: calc(100% - 10px); /* Take full width minus padding */
-  padding: 5px;
+  width: calc(100% - 10px);
+  padding: 8px;
   font-size: 1em;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+  border: 1px solid #ced4da;
+  border-radius: 5px;
   text-align: center;
+  margin-bottom: 5px; /* Space between input and buttons */
+}
+
+/* Adjustments for smaller screens */
+@media (max-width: 768px) {
+  .header-section {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .header-section h1 {
+    margin-bottom: 15px;
+  }
+
+  .create-card-form {
+    flex-direction: column;
+  }
+
+  .game-controls {
+    grid-template-columns: 1fr; /* Stack game sections vertically */
+  }
+
+  .card-list {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
 }

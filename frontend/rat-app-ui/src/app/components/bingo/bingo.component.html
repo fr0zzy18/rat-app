@@ -1,7 +1,6 @@
 <div class="container">
   <div class="header-section">
     <h1>Bingo Card Management</h1>
-
   </div>
 
   <!-- New: Reconnect Button -->
@@ -22,17 +21,14 @@
     <button (click)="createBingoCard()">Create Card</button>
   </div>
 
-  <div class="selection-info">
-    Selected Cards: {{ selectedCards.length }} / 24
-    <button (click)="selectRandomCards()">Random</button> 
-    <button [disabled]="!canStartGame" (click)="startGame()">Start Game</button>
+  <div class="game-section">
+    <h2>Game Setup</h2>
+    <div class="selection-info">
+      Selected Cards: {{ selectedCards.length }} / 24
+      <button (click)="selectRandomCards()">Random</button>
+      <button [disabled]="!canStartGame" (click)="startGame()">Start Game</button>
+    </div>
   </div>
-
-  <!-- <div class="join-game-section">
-    <h2>Join Existing Game</h2>
-    <input type="text" [(ngModel)]="gameIdToJoin" placeholder="Enter Game ID">
-    <button [disabled]="!gameIdToJoin || selectedCards.length !== 24" (click)="joinGame()">Join Game</button>
-  </div> -->
 
   <!-- New: Available Games Section -->
   <div class="available-games-section">
