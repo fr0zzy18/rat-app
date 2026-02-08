@@ -1,0 +1,94 @@
+<div class="players-container">
+  <h2>Manage Players</h2>
+
+  <div class="category-toggles">
+    <button
+      *ngFor="let cat of categories"
+      [ngClass]="{ 'active': selectedCategory === cat }"
+      (click)="onCategoryChange(cat)"
+      class="category-button"
+    >
+      {{ cat === '' ? 'All' : cat }}
+    </button>
+  </div>
+
+  <button *ngIf="canManagePlayers | async" class="add-player-button" (click)="openAddPlayerModal()">Add New Player</button>
+
+  <div *ngIf="players.length === 0 && !loading" class="no-players">
+    No players found.
+  </div>
+
+  <div *ngIf="loading" class="loading-message">Loading players...</div>
+  <div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
+
+  <div *ngIf="players.length > 0" class="player-list">
+    <h3>Current Players (Category: {{ selectedCategory === '' ? 'All' : selectedCategory }})</h3>
+    <table>
+      <thead>
+        <tr>
+          <th></th> <!-- For Thumbnail -->
+          <th>Name</th>
+          <th>Race</th>
+          <th>Class</th>
+          <th>M+ Score</th> <!-- New column for Mythic Plus Score -->
+          <th>Spec</th>
+          <th>Role</th>
+          <th>Faction</th>
+          <th>Guild</th> <!-- New column for Guild -->
+          <th>Realm</th>
+          <th>Region</th>
+          <th *ngIf="canManagePlayers | async">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let player of players">
+          <td><img [src]="player.thumbnail_url" alt="Player Thumbnail" class="player-thumbnail"></td>
+          <td><a [href]="player.profileUrl" target="_blank">{{ player.name }}</a></td>
+          <td>{{ player.race }}</td>
+          <td>{{ player.class }}</td>
+          <td>{{ player.mythicPlusScore | number:'1.0-2' }}</td> <!-- Display Mythic Plus Score -->
+          <td>{{ player.active_spec_name }}</td>
+          <td>{{ player.active_spec_role }}</td>
+          <td>{{ player.faction }}</td>
+          <td>{{ player.guildName }}</td> <!-- Display Guild Name -->
+          <td>{{ player.realm }}</td>
+          <td>{{ player.region }}</td>
+          <td *ngIf="canManagePlayers | async">
+            <button (click)="deletePlayer(player.id, player.name)" class="delete-button">Delete</button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Add Player Modal -->
+  <div *ngIf="showAddPlayerModal" class="modal-overlay">
+    <div class="modal-content">
+      <h3>Add New Player from Raider.IO</h3>
+      <form (ngSubmit)="onAddPlayer()" #addPlayerForm="ngForm">
+        <div class="form-group">
+          <label for="playerRegion">Region</label>
+          <select id="playerRegion" name="playerRegion" [(ngModel)]="newPlayerInput.region" required class="form-control">
+            <option value="us">US</option>
+            <option value="eu">EU</option>
+            <option value="kr">KR</option>
+            <option value="tw">TW</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="playerRealm">Realm</label>
+          <input type="text" id="playerRealm" name="playerRealm" [(ngModel)]="newPlayerInput.realm" required class="form-control">
+        </div>
+        <div class="form-group">
+          <label for="playerName">Character Name</label>
+          <input type="text" id="playerName" name="playerName" [(ngModel)]="newPlayerInput.name" required class="form-control">
+        </div>
+        <div class="modal-actions">
+          <button type="submit" [disabled]="!addPlayerForm.form.valid">Add Player</button>
+          <button type="button" class="cancel-button" (click)="closeAddPlayerModal()">Cancel</button>
+        </div>
+      </form>
+      <div *ngIf="addPlayerError" class="error-message">{{ addPlayerError }}</div>
+    </div>
+  </div>
+</div>
