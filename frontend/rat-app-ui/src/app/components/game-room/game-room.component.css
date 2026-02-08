@@ -22,6 +22,7 @@ h1 {
   display: flex;
   flex-direction: column;
   align-items: center;
+  position: relative; /* Added for overlay positioning */
 }
 
 .game-board {
@@ -252,4 +253,42 @@ h1 {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
   animation: fadeIn 1s ease-out; /* Re-use existing fade-in animation */
   z-index: 10; /* Ensure it's above the faded boards */
+}
+
+/* Styles for faded/inactive board when waiting for opponent */
+.player-board-section.faded-inactive {
+  opacity: 0.5; /* Fade effect */
+  pointer-events: none; /* Disable interaction */
+  position: relative; /* For overlay positioning */
+  transition: opacity 0.3s ease-in-out;
+}
+
+.waiting-for-opponent-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent white overlay */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  font-size: 1.5em;
+  font-weight: bold;
+  color: #007bff;
+  z-index: 5; /* Ensure it's above the board but below other messages */
+}
+
+.waiting-for-opponent-overlay p {
+  margin: 10px 0;
+}
+
+.waiting-for-opponent-overlay strong {
+  background-color: #e9ecef;
+  padding: 5px 10px;
+  border-radius: 5px;
+  color: #343a40;
+  word-break: break-all; /* Ensure long IDs wrap */
 }

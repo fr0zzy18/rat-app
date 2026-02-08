@@ -55,6 +55,10 @@ export class GameRoomComponent implements OnInit, OnDestroy {
   pausedTime: Date | null = null; // New property to store the time when the game was paused
   private timerInterval: any; // To store setInterval reference
   displayTimer: string = '00:00:00';
+
+  get isBoardInactiveAndFaded(): boolean {
+    return this.isGameCreator && !this.isPlayer2Joined && !this.isGameFinished;
+  }
   
   private gameApiUrl = 'http://localhost:5211/api/game';
 
@@ -326,8 +330,8 @@ export class GameRoomComponent implements OnInit, OnDestroy {
   }
 
   toggleCellChecked(cell: GameBoardCell): void {
-    if (this.isGameFinished || this.isGamePaused) { // Prevent clicks if game is finished or paused
-      console.log('Game is finished or paused, cannot click cells.');
+    if (this.isGameFinished || this.isGamePaused || this.isBoardInactiveAndFaded) { // Prevent clicks if game is finished, paused, or board is inactive
+      console.log('Game is finished, paused, or board is inactive, cannot click cells.');
       return;
     }
     if (!cell.isEmpty && cell.id !== undefined && this.gameId) {

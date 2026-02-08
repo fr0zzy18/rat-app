@@ -14,18 +14,6 @@
     Game Paused. Waiting for players to reconnect.
   </div>
 
-  <!-- Show/Hide Game ID section (only for creator if P2 not joined and game not finished) -->
-  <!-- <div *ngIf="isGameCreator && !isPlayer2Joined && !isGameFinished" class="game-id-section">
-    <button (click)="toggleGameIdVisibility()" class="show-hide-id-button">
-      {{ showGameIdSection ? 'Hide Game ID' : 'Show Game ID' }}
-    </button>
-    <div *ngIf="showGameIdSection" class="game-id-display">
-      <span class="game-id-text">Game ID: {{ gameId }}</span>
-      <button (click)="copyGameIdToClipboard()" class="copy-button">Copy</button>
-      <span *ngIf="copyFeedbackMessage" class="copy-feedback">{{ copyFeedbackMessage }}</span>
-    </div>
-  </div> -->
-  <!-- End Show/Hide Game ID -->
 
   <!-- Timer display (appears when P2 joined and game not finished) -->
   <div *ngIf="isPlayer2Joined && !isGameFinished && !isGamePaused" class="game-timer-section">
@@ -35,8 +23,11 @@
   <!-- End Timer -->
 
   <div class="boards-wrapper" [class.game-finished]="isGameFinished" [class.game-paused]="isGamePaused">
-    <div class="player-board-section">
-      <h2>{{ myBoardDisplayName }}</h2>
+    <div class="player-board-section" [class.faded-inactive]="isBoardInactiveAndFaded">
+      <h2 *ngIf="!isGamePaused">{{ myBoardDisplayName }}</h2>
+      <div *ngIf="isBoardInactiveAndFaded" class="waiting-for-opponent-overlay">
+        <p>Waiting for an opponent to join...</p>
+      </div>
       <div class="game-board">
         <div *ngFor="let row of gameBoard; let i = index" class="board-row">
           <div
@@ -53,7 +44,7 @@
     </div>
 
     <div *ngIf="opponentSelectedCards.length > 0" class="opponent-board-section">
-      <h2>{{ opponentBoardDisplayName }}</h2>
+      <h2 *ngIf="!isGamePaused">{{ opponentBoardDisplayName }}</h2>
       <div class="game-board opponent-board">
         <div *ngFor="let row of opponentGameBoard; let i = index" class="board-row">
           <div
