@@ -192,7 +192,7 @@ export class GameRoomComponent implements OnInit, OnDestroy {
     }
     console.log('updateGameRoomUI: pausedTime set to:', this.pausedTime); // ADD THIS
 
-    // Set display names
+    // Set display
     if (this.isGameCreator) {
       this.myBoardDisplayName = gameDetails.createdByUsername;
       this.opponentBoardDisplayName = gameDetails.player2Username ?? "Waiting for Opponent...";
@@ -294,7 +294,7 @@ export class GameRoomComponent implements OnInit, OnDestroy {
       board[i] = [];
       for (let j = 0; j < this.boardSize; j++) {
         if (i === Math.floor(this.boardSize / 2) && j === Math.floor(this.boardSize / 2)) {
-          board[i][j] = { phrase: 'FREE', isEmpty: true, isChecked: true };
+          board[i][j] = { phrase: 'RAT', isEmpty: true, isChecked: true };
         } else if (boardLayout && cardIndex < boardLayout.length) {
           const cardId = boardLayout[cardIndex];
           const currentPhrase = allBingoCards.find(card => card.id === cardId);

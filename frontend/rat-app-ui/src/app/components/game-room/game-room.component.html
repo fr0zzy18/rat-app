@@ -9,18 +9,14 @@
     {{ winnerMessage }}
   </div>
 
-  <!-- New: Game Paused Message -->
   <div *ngIf="isGamePaused" class="game-paused-message alert alert-warning">
     Game Paused. Waiting for players to reconnect.
   </div>
 
-
-  <!-- Timer display (appears when P2 joined and game not finished) -->
   <div *ngIf="isPlayer2Joined && !isGameFinished && !isGamePaused" class="game-timer-section">
     <span class="game-timer-label">Game Duration:</span>
     <span class="game-timer-value">{{ displayTimer }}</span>
   </div>
-  <!-- End Timer -->
 
   <div class="boards-wrapper" [class.game-finished]="isGameFinished" [class.game-paused]="isGamePaused">
     <div class="player-board-section" [class.faded-inactive]="isBoardInactiveAndFaded">
@@ -37,7 +33,7 @@
             [class.checked]="cell.isChecked"
             (click)="toggleCellChecked(cell)">
             <span *ngIf="cell.phrase">{{ cell.phrase }}</span>
-            <span *ngIf="cell.isEmpty" class="empty-text">FREE</span>
+            <span *ngIf="cell.isEmpty" class="empty-text"></span>
           </div>
         </div>
       </div>
@@ -51,9 +47,9 @@
             *ngFor="let cell of row; let j = index"
             class="board-cell"
             [class.empty]="cell.isEmpty"
-            [class.checked]="cell.isChecked"> <!-- Opponent's own checked cells -->
+            [class.checked]="cell.isChecked">
             <span *ngIf="cell.phrase">{{ cell.phrase }}</span>
-            <span *ngIf="cell.isEmpty" class="empty-text">FREE</span>
+            <span *ngIf="cell.isEmpty" class="empty-text"></span>
           </div>
         </div>
       </div>
