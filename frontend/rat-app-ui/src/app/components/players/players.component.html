@@ -1,6 +1,6 @@
 <div class="players-container">
   <h2>Players Lists</h2>
-
+<button *ngIf="canManagePlayers | async" class="add-player-button" (click)="openAddPlayerModal()">Add New Player</button>
 <div class="players-glass-card">
 
   <div class="tabs-header">

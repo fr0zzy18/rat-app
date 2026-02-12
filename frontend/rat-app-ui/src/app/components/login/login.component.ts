@@ -9,21 +9,28 @@ import { AuthService } from '../../core/services/auth.service'; // Import AuthSe
   standalone: true,
   imports: [CommonModule, FormsModule],
   template: `
-    <div class="login-container">
-      <h2>Login</h2>
-      <form (ngSubmit)="onSubmit()" #loginForm="ngForm">
-        <div class="form-group">
-          <label for="username">Username</label>
-          <input type="text" id="username" name="username" [(ngModel)]="username" required>
-        </div>
-        <div class="form-group">
-          <label for="password">Password</label>
-          <input type="password" id="password" name="password" [(ngModel)]="password" required>
-        </div>
-        <button type="submit" [disabled]="!loginForm.form.valid">Login</button>
-      </form>
-      <div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
-    </div>
+<div class="login-container">
+  <div class="login-card">
+    <h2>Login</h2>
+    <form (ngSubmit)="onSubmit()" #loginForm="ngForm">
+      
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" [(ngModel)]="username" required class="form-control">
+      </div>
+      
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" [(ngModel)]="password" required class="form-control">
+      </div>
+
+      <button type="submit" [disabled]="!loginForm.form.valid" class="login-button">Login</button>
+    </form>
+
+    <div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
+  </div>
+</div>
+
   `,
   styleUrls: ['./login.component.css']
 })

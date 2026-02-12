@@ -8,16 +8,14 @@ import { RouterLink } from '@angular/router'; // Only RouterLink needed
   standalone: true,
   imports: [CommonModule, RouterLink], // Add RouterLink here
   template: `
-    <div class="dashboard-container">
-      <h2>Welcome to the Dashboard!</h2>
-      <p *ngIf="authService.currentUserValue">You are logged in as: {{ authService.currentUserValue.username }}</p>
-
-      <nav class="dashboard-nav">
-        <a routerLink="/players" class="nav-button">View Players</a>
-        <a *ngIf="authService.hasRole('Manager')" routerLink="/register" class="nav-button">Register User</a>
-        <a *ngIf="authService.hasRole('Manager')" routerLink="/manage-users" class="nav-button">Manage Users</a>
-      </nav>
-    </div>
+   <div class="dashboard-container">
+  <div class="dashboard-card">
+    <h2>Work in progress...</h2>
+    <p *ngIf="authService.currentUserValue">
+      You are logged in as: <span class="username-highlight">{{ authService.currentUserValue.username }}</span>
+    </p>
+  </div>
+</div>
   `,
   styleUrls: ['./dashboard.component.css'] // Use styleUrls
 })

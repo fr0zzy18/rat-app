@@ -15,21 +15,29 @@ import { ChangePasswordModalComponent } from './components/change-password-modal
         <a routerLink="/dashboard" class="app-title-link">
           <span class="app-title">RatApp</span>
         </a>
-        <nav *ngIf="authService.isAuthenticated()">
+        <div class ="left-nav">
+        <nav *ngIf="authService.isAuthenticated()" class="nav-links">
           <a routerLink="/players" class="nav-link">Players</a>
           <a routerLink="/bingo" class="nav-link">Bingo</a>
         </nav>
+        </div>
+        <div class ="right-nav">
+        <nav *ngIf="authService.isAuthenticated() && authService.hasRole('Manager')" class="manager-links">
+          <a routerLink="/register" class="nav-link">Register User</a>
+          <a routerLink="/manage-users" class="nav-link">Manage Users</a>
+        </nav>
+        </div>
         <div *ngIf="authService.isAuthenticated()" class="user-section">
           <span class="username" (click)="toggleLogoutPopup()">{{ authService.currentUserValue?.username }}</span>
           <div *ngIf="showLogoutPopup" class="logout-popup">
-            <p>Are you sure you want to log out?</p>
-            <button (click)="logout()">Yes, Logout</button>
+            <p class="logout-message">Hello there {{ authService.currentUserValue?.username }}!</p>
+            <button (click)="logout()">Logout</button>
             <button (click)="openChangePasswordModal()">Change Password</button>
             <button (click)="toggleLogoutPopup()">Cancel</button>
           </div>
         </div>
       </div>
-    </header>
+    </header> 
     <router-outlet></router-outlet>
 
     <app-change-password-modal
