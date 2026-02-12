@@ -16,7 +16,7 @@ import { map } from 'rxjs/operators';
 export class PlayersComponent implements OnInit {
   players: Player[] = [];
   // Initialize newPlayerInput with default category
-  newPlayerInput: AddPlayerRequestDto = { region: 'eu', realm: 'tarren-mill', name: '', category: '' };
+  newPlayerInput: AddPlayerRequestDto = { region: 'eu', realm: '', name: '', category: '' };
   loading = false;
   errorMessage: string | null = null;
   addPlayerError: string | null = null;
@@ -64,14 +64,14 @@ export class PlayersComponent implements OnInit {
     this.showAddPlayerModal = true;
     this.addPlayerError = null;
     // Reset form for new entry, category will be assigned from selectedCategory on add
-    this.newPlayerInput = { region: 'eu', realm: 'tarren-mill', name: '', category: '' }; 
+    this.newPlayerInput = { region: 'eu', realm: '', name: '', category: '' }; 
     this.cdr.detectChanges();
   }
 
   closeAddPlayerModal(): void {
     this.showAddPlayerModal = false;
     this.addPlayerError = null;
-    this.newPlayerInput = { region: 'eu', realm: 'tarren-mill', name: '', category: '' }; // Reset form
+    this.newPlayerInput = { region: 'eu', realm: '', name: '', category: '' }; // Reset form
     this.cdr.detectChanges();
   }
 
