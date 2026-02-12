@@ -1,6 +1,6 @@
 <div class="container">
   <div class="header-section">
-    <h1>Bingo Card Management</h1>
+    <h1>Bingo Game</h1>
   </div>
 
   <!-- New: Reconnect Button -->
@@ -16,11 +16,6 @@
     {{ errorMessage }}
   </div>
 
-  <div *ngIf="canCreate" class="create-card-form">
-    <input type="text" [(ngModel)]="newCardPhrase" placeholder="Enter a phrase">
-    <button (click)="createBingoCard()">Create Card</button>
-  </div>
-
   <div class="game-section">
     <h2>Game Setup</h2>
     <div class="selection-info">
@@ -30,11 +25,11 @@
     </div>
   </div>
 
-  <!-- New: Available Games Section -->
+  <!-- Available Games Section -->
   <div class="available-games-section">
-    <h2>Available Games (Waiting for Player)</h2>
+    <h2>Games List</h2>
     <div *ngIf="waitingGames.length === 0; else gamesList">
-      <p>No games currently waiting for a second player.</p>
+      <p>No games at the moment... But you can create one!</p>
     </div>
     <ng-template #gamesList>
       <ul>
@@ -43,6 +38,11 @@
         </li>
       </ul>
     </ng-template>
+  </div>
+
+    <div *ngIf="canCreate" class="create-card-form">
+    <input type="text" [(ngModel)]="newCardPhrase" placeholder="Enter a phrase">
+    <button (click)="createBingoCard()">Create Card</button>
   </div>
 
   <div class="card-list">

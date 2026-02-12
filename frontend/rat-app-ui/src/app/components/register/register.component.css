@@ -1,54 +1,124 @@
+/* ===== Container ===== */
 .register-container {
-    max-width: 400px;
-    margin: 50px auto;
-    padding: 20px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    background-color: #f9f9f9;
+  min-height: 100vh;
+  padding: 40px 20px;
+  display: flex;
+  justify-content: center;
+  align-items: start;
+  background: linear-gradient(135deg, #0f172a, #1e293b);
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  color: #f1f5f9;
 }
 
-h2 {
-    text-align: center;
-    margin-bottom: 20px;
+/* ===== Form Card ===== */
+.register-card {
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  padding: 30px 40px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.4);
+  width: 100%;
+  max-width: 450px;
 }
 
+/* ===== Headings ===== */
+.register-card h2 {
+  text-align: center;
+  color: #ffffff;
+  font-weight: 700;
+  margin-bottom: 25px;
+}
+
+/* ===== Form Groups ===== */
 .form-group {
-    margin-bottom: 15px;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 18px;
 }
 
+.form-group label {
+  margin-bottom: 6px;
+  color: #cbd5e1;
+  font-size: 14px;
+}
+
+/* ===== Inputs & Select ===== */
 .form-control {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.08);
+  color: #f1f5f9;
+  font-size: 14px;
+  box-sizing: border-box;
+  transition: border-color 0.25s ease, box-shadow 0.25s ease;
 }
 
-.btn {
-    width: 100%;
-    padding: 10px;
-    border: none;
-    border-radius: 4px;
-    color: white;
-    cursor: pointer;
+.form-control:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 8px rgba(59, 130, 246, 0.5);
 }
 
-.btn-primary {
-    background-color: #007bff;
-}
-
-.btn-primary:disabled {
-    background-color: #aaa;
-}
-
+/* ===== Alerts ===== */
 .alert {
-    padding: 10px;
-    margin-bottom: 15px;
-    border-radius: 4px;
+  border-radius: 14px;
+  padding: 12px 16px;
+  margin-bottom: 15px;
+  font-weight: 500;
+  backdrop-filter: blur(10px);
 }
 
 .alert-danger {
-    background-color: #f8d7da;
-    color: #721c24;
-    border: 1px solid #f5c6cb;
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.alert-success {
+  background: rgba(34, 197, 94, 0.15);
+  color: #4ade80;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+/* ===== Submit Button ===== */
+.btn-primary {
+  width: 100%;
+  padding: 12px 0;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #3b82f6, #6366f1);
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+  border: none;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5);
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 500px) {
+  .register-card {
+    padding: 25px 20px;
+  }
+  .register-card h2 {
+    font-size: 24px;
+  }
+  .form-control {
+    font-size: 13px;
+  }
+  .btn-primary {
+    font-size: 15px;
+  }
 }
