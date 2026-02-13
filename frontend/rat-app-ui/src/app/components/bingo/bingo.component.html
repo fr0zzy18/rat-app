@@ -23,7 +23,8 @@
       <h2>Game Setup</h2>
       <div class="selection-info">
         Selected Cards: {{ selectedCards.length }} / 24
-        <button (click)="selectRandomCards()">Random</button>
+        <button (click)="selectRandomCards()">Select 24 random Cards</button>
+        <button (click)="clearSelection()">Clear Selected Cards</button>
         <button [disabled]="!canStartGame" (click)="startGame()">Start Game</button>
       </div>
     </div>
@@ -36,8 +37,8 @@
       </div>
       <ng-template #gamesList>
         <ul>
-          <li *ngFor="let game of waitingGames" (click)="joinAvailableGame(game.id)" class="waiting-game-item">
-            Game by {{ game.createdByUsername }} - Click to Join
+          <li *ngFor="let game of waitingGames" class="waiting-game-item">
+            <span>Join Game created by {{ game.createdByUsername }}</span>
           </li>
         </ul>
       </ng-template>
@@ -45,7 +46,7 @@
   </div>
 
     <div *ngIf="canCreate" class="create-card-form">
-    <input type="text" [(ngModel)]="newCardPhrase" placeholder="Enter a phrase">
+    <input type="text" [(ngModel)]="newCardPhrase" placeholder="Enter a funny quote.">
     <button (click)="createBingoCard()">Create Card</button>
   </div>
 

@@ -264,6 +264,10 @@ export class BingoComponent implements OnInit, OnDestroy { // Implement OnDestro
     this.showAndClearMessage('success', '24 random cards selected.');
   }
 
+  clearSelection(): void {
+    this.selectedCards = [];
+  }
+
   // New: Start editing a card
   editBingoCard(card: BingoCard): void {
     this.editingCardId = card.id;
