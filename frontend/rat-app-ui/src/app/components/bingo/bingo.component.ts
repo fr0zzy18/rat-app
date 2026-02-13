@@ -32,6 +32,7 @@ export class BingoComponent implements OnInit {
 
   editingCardId: number | null = null; // To track which card is being edited
   editedCardPhrase: string = '';       // To hold the phrase during editing
+  hoveredCardId: number | null = null; // New: To track which card is being hovered
 
   private gameApiUrl = 'http://localhost:5211/api/game';
 
@@ -49,6 +50,14 @@ export class BingoComponent implements OnInit {
     this.checkRoles();
     this.checkActiveGame(); // New: Check for active/paused game
     this.getWaitingGames(); // Call new method to fetch waiting games
+  }
+
+  onMouseEnter(cardId: number): void {
+    this.hoveredCardId = cardId;
+  }
+
+  onMouseLeave(): void {
+    this.hoveredCardId = null;
   }
 
   // New method to get games waiting for players

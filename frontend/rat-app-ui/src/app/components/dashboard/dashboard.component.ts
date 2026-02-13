@@ -1,12 +1,10 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../core/services/auth.service';
-import { RouterLink } from '@angular/router'; // Only RouterLink needed
-
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, RouterLink], // Add RouterLink here
+  imports: [CommonModule],
   template: `
    <div class="dashboard-container">
   <div class="dashboard-card">

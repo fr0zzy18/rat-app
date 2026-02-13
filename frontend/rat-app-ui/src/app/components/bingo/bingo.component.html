@@ -9,35 +9,39 @@
     <button (click)="onReconnect()" class="reconnect-button">Reconnect to Game</button>
   </div>
 
-  <div *ngIf="successMessage" class="alert alert-success">
-    {{ successMessage }}
-  </div>
-  <div *ngIf="errorMessage" class="alert alert-danger">
-    {{ errorMessage }}
-  </div>
-
-  <div class="game-section">
-    <h2>Game Setup</h2>
-    <div class="selection-info">
-      Selected Cards: {{ selectedCards.length }} / 24
-      <button (click)="selectRandomCards()">Random</button>
-      <button [disabled]="!canStartGame" (click)="startGame()">Start Game</button>
+  <div class="message-area">
+    <div *ngIf="successMessage" class="alert alert-success">
+      {{ successMessage }}
+    </div>
+    <div *ngIf="errorMessage" class="alert alert-danger">
+      {{ errorMessage }}
     </div>
   </div>
 
-  <!-- Available Games Section -->
-  <div class="available-games-section">
-    <h2>Games List</h2>
-    <div *ngIf="waitingGames.length === 0; else gamesList">
-      <p>No games at the moment... But you can create one!</p>
+  <div class="game-overview-section">
+    <div class="game-section">
+      <h2>Game Setup</h2>
+      <div class="selection-info">
+        Selected Cards: {{ selectedCards.length }} / 24
+        <button (click)="selectRandomCards()">Random</button>
+        <button [disabled]="!canStartGame" (click)="startGame()">Start Game</button>
+      </div>
     </div>
-    <ng-template #gamesList>
-      <ul>
-        <li *ngFor="let game of waitingGames" (click)="joinAvailableGame(game.id)" class="waiting-game-item">
-          Game by {{ game.createdByUsername }} - Click to Join
-        </li>
-      </ul>
-    </ng-template>
+
+    <!-- Available Games Section -->
+    <div class="available-games-section">
+      <h2>Games List</h2>
+      <div *ngIf="waitingGames.length === 0; else gamesList">
+        <p>No games at the moment... But you can create one!</p>
+      </div>
+      <ng-template #gamesList>
+        <ul>
+          <li *ngFor="let game of waitingGames" (click)="joinAvailableGame(game.id)" class="waiting-game-item">
+            Game by {{ game.createdByUsername }} - Click to Join
+          </li>
+        </ul>
+      </ng-template>
+    </div>
   </div>
 
     <div *ngIf="canCreate" class="create-card-form">
@@ -46,25 +50,24 @@
   </div>
 
   <div class="card-list">
-    <div
-      *ngFor="let card of bingoCards"
-      class="card"
-      [class.selected]="isCardSelected(card)"
-      (click)="toggleCardSelection(card)">
-      <ng-container *ngIf="editingCardId === card.id; else viewMode">
-        <input type="text" [(ngModel)]="editedCardPhrase" (click)="$event.stopPropagation()" class="edit-input">
-        <div class="button-group">
-          <button class="crud-button update-button" (click)="updateBingoCard(card); $event.stopPropagation()">Update</button>
-          <button class="crud-button cancel-button" (click)="cancelEdit(); $event.stopPropagation()">Cancel</button>
-        </div>
-      </ng-container>
-      <ng-template #viewMode>
-        <span>{{ card.phrase }}</span>
-        <div class="button-group">
-          <button *ngIf="canEdit" class="crud-button edit-button" (click)="editBingoCard(card); $event.stopPropagation()">Edit</button>
-          <button *ngIf="canDelete" class="crud-button delete-button" (click)="deleteBingoCard(card.id); $event.stopPropagation()">Delete</button>
-        </div>
-      </ng-template>
-    </div>
+          <div
+            *ngFor="let card of bingoCards"
+            class="card"
+            [class.selected]="isCardSelected(card)"
+            (click)="toggleCardSelection(card)"
+            (mouseenter)="onMouseEnter(card.id!)"
+            (mouseleave)="onMouseLeave()">              <ng-container *ngIf="editingCardId === card.id">
+                <input type="text" [(ngModel)]="editedCardPhrase" (click)="$event.stopPropagation()" class="edit-input">
+                <div class="button-group">
+                  <button class="crud-button update-button" (click)="updateBingoCard(card); $event.stopPropagation()">Update</button>
+                  <button class="crud-button cancel-button" (click)="cancelEdit(); $event.stopPropagation()">Cancel</button>
+                </div>
+              </ng-container>
+              <ng-container *ngIf="!editingCardId || editingCardId !== card.id">
+                <span>{{ card.phrase }}</span>
+                <div class="button-group">
+                            <button *ngIf="canEdit && hoveredCardId === card.id" class="crud-button edit-button" (click)="editBingoCard(card); $event.stopPropagation()">Edit</button>
+                            <button *ngIf="canDelete && hoveredCardId === card.id" class="crud-button delete-button" (click)="deleteBingoCard(card.id); $event.stopPropagation()">Delete</button>                </div>
+              </ng-container>    </div>
   </div>
 </div>
