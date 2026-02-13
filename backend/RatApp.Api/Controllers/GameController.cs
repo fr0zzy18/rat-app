@@ -65,6 +65,7 @@ namespace RatApp.Api.Controllers
 
             var newGame = await _gameService.CreateGameAsync(userId, request.Player1SelectedCardIds);
             var gameResponse = await MapGameToGameResponseDto(newGame);
+            await _hubContext.Clients.All.SendAsync("WaitingGameAdded", gameResponse); // Notify all clients about the new waiting game
             return Ok(gameResponse);
         }
 

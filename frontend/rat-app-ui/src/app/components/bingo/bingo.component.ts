@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, OnDestroy } from '@angular/core';
 import { BingoCard } from '../../core/models/bingo-card.model';
 import { BingoService } from '../../core/services/bingo.service';
 import { CommonModule } from '@angular/common';
@@ -9,6 +9,7 @@ import { GameService } from '../../core/services/game.service'; // Import GameSe
 
 import { HttpClient, HttpErrorResponse } from '@angular/common/http'; // Import HttpClient
 import { GameResponse } from '../../core/models/game-response.model'; // Import the new GameResponse model
+import { Subscription } from 'rxjs'; // Import Subscription
 
 @Component({
   selector: 'app-bingo',
@@ -17,7 +18,7 @@ import { GameResponse } from '../../core/models/game-response.model'; // Import 
   templateUrl: './bingo.component.html',
   styleUrls: ['./bingo.component.css']
 })
-export class BingoComponent implements OnInit {
+export class BingoComponent implements OnInit, OnDestroy { // Implement OnDestroy
   bingoCards: BingoCard[] = [];
   newCardPhrase: string = '';
   canCreate: boolean = false;
@@ -28,6 +29,7 @@ export class BingoComponent implements OnInit {
   private successTimer: any;
   private errorTimer: any;
   private readonly MESSAGE_DELAY = 3000; // 3 seconds delay for messages
+  private subscriptions: Subscription[] = []; // Array to hold subscriptions
 
   private showAndClearMessage(type: 'success' | 'error', message: string): void {
     if (type === 'success') {
@@ -76,6 +78,17 @@ export class BingoComponent implements OnInit {
     this.checkRoles();
     this.checkActiveGame(); // New: Check for active/paused game
     this.getWaitingGames(); // Call new method to fetch waiting games
+
+    // Subscribe to real-time updates for new waiting games
+    this.subscriptions.push(
+      this.gameService.waitingGameAdded$.subscribe(game => {
+        // Add the new game to the waitingGames array if it's not already there
+        if (!this.waitingGames.some(wg => wg.id === game.id)) {
+          this.waitingGames.push(game);
+          this.cdr.detectChanges(); // Trigger change detection
+        }
+      })
+    );
   }
 
   onMouseEnter(cardId: number): void {
@@ -356,5 +369,10 @@ export class BingoComponent implements OnInit {
     } else {
       this.showAndClearMessage('error', 'Please select exactly 24 cards to join the game.');
     }
+  }
+
+  ngOnDestroy(): void {
+    // Unsubscribe from all subscriptions to prevent memory leaks
+    this.subscriptions.forEach(sub => sub.unsubscribe());
   }
 }

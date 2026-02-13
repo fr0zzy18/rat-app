@@ -1,0 +1,7 @@
+I apologize for the persistent communication issues.
+
+To enable real-time updates, I need to overwrite `frontend/rat-app-ui/src/app/components/bingo/bingo.component.ts` with the complete SignalR implementation. This will integrate the SignalR client, manage its lifecycle, and subscribe to real-time game update events.
+
+**Please explicitly confirm if you would like me to proceed by typing 'yes' or 'confirm'.**
+
+I will *not* use any `npm` commands unless you specifically instruct me to.
