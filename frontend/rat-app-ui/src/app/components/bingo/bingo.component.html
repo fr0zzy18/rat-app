@@ -57,12 +57,13 @@
             (click)="toggleCardSelection(card)"
             (mouseenter)="onMouseEnter(card.id!)"
             (mouseleave)="onMouseLeave()">              <ng-container *ngIf="editingCardId === card.id">
-                <input type="text" [(ngModel)]="editedCardPhrase" (click)="$event.stopPropagation()" class="edit-input">
-                <div class="button-group">
-                  <button class="crud-button update-button" (click)="updateBingoCard(card); $event.stopPropagation()">Update</button>
-                  <button class="crud-button cancel-button" (click)="cancelEdit(); $event.stopPropagation()">Cancel</button>
-                </div>
-              </ng-container>
+                          <div class="card-edit-input-wrapper">
+                            <input type="text" [(ngModel)]="editedCardPhrase" (click)="$event.stopPropagation()" class="edit-input">
+                          </div>
+                          <div class="button-group">
+                            <button class="crud-button update-button" (click)="updateBingoCard(card); $event.stopPropagation()">Update</button>
+                            <button class="crud-button cancel-button" (click)="cancelEdit(); $event.stopPropagation()">Cancel</button>
+                          </div>              </ng-container>
               <ng-container *ngIf="!editingCardId || editingCardId !== card.id">
                 <span>{{ card.phrase }}</span>
                 <div class="button-group">

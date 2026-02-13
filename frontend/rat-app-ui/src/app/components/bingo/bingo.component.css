@@ -206,3 +206,9 @@ button:hover {
   background: rgba(59, 246, 146, 0.2);
   color: #93fd9a;
 }
+
+/* New rule to make the edit input field full width within its wrapper */
+.card-edit-input-wrapper input[type="text"] {
+  width: 100%;
+  box-sizing: border-box; /* Ensures padding and border are included in the element's total width and height */
+}
