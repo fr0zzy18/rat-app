@@ -7,9 +7,7 @@
             "port": 5432,
             "driver": "PostgreSQL",
             "name": "localhost",
-            "database": "RatAppDB",
-            "username": "admin",
-            "password": "123123"
+            "database": "RatAppDB"
         }
     ]
 }

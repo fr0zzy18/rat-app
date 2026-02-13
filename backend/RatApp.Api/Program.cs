@@ -140,24 +140,7 @@ using (var scope = app.Services.CreateScope())
         }
         await context.SaveChangesAsync();
 
-        // Seed Admin user if not exists
-        if (!context.Users.Any(u => u.Username == "admin"))
-        {
-            var adminUser = new User
-            {
-                Username = "admin",
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword("123123"), // Changed password to "123123"
-                IsActive = true
-            };
-            context.Users.Add(adminUser);
-            await context.SaveChangesAsync();
 
-            context.UserRoles.Add(new UserRole { UserId = adminUser.Id, RoleId = adminRole.Id });
-            context.UserRoles.Add(new UserRole { UserId = adminUser.Id, RoleId = managerRole.Id });
-            await context.SaveChangesAsync();
-
-            Console.WriteLine("Seeded Admin user with Admin and Manager roles.");
-        }
     }
     catch (Exception ex)
     {
