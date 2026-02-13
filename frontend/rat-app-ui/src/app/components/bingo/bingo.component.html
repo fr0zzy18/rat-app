@@ -61,14 +61,14 @@
                             <input type="text" [(ngModel)]="editedCardPhrase" (click)="$event.stopPropagation()" class="edit-input">
                           </div>
                           <div class="button-group">
-                            <button class="crud-button update-button" (click)="updateBingoCard(card); $event.stopPropagation()">Update</button>
-                            <button class="crud-button cancel-button" (click)="cancelEdit(); $event.stopPropagation()">Cancel</button>
+                            <button class="crud-button update-button" (click)="updateBingoCard(card); $event.stopPropagation()">&#10003;</button>
+                            <button class="crud-button cancel-button" (click)="cancelEdit(); $event.stopPropagation()">&#10006;</button>
                           </div>              </ng-container>
               <ng-container *ngIf="!editingCardId || editingCardId !== card.id">
                 <span>{{ card.phrase }}</span>
                 <div class="button-group">
-                            <button *ngIf="canEdit && hoveredCardId === card.id" class="crud-button edit-button" (click)="editBingoCard(card); $event.stopPropagation()">Edit</button>
-                            <button *ngIf="canDelete && hoveredCardId === card.id" class="crud-button delete-button" (click)="deleteBingoCard(card.id); $event.stopPropagation()">Delete</button>                </div>
+                            <button *ngIf="canEdit && hoveredCardId === card.id" class="crud-button edit-button" (click)="editBingoCard(card); $event.stopPropagation()">&#9998;</button>
+                            <button *ngIf="canDelete && hoveredCardId === card.id" class="crud-button delete-button" (click)="deleteBingoCard(card.id); $event.stopPropagation()">&#128465;</button>                </div>
               </ng-container>    </div>
   </div>
 </div>

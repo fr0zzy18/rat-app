@@ -25,6 +25,32 @@ export class BingoComponent implements OnInit {
   canEdit: boolean = false; // New property for editing permission
   successMessage: string | null = null;
   errorMessage: string | null = null;
+  private successTimer: any;
+  private errorTimer: any;
+  private readonly MESSAGE_DELAY = 3000; // 3 seconds delay for messages
+
+  private showAndClearMessage(type: 'success' | 'error', message: string): void {
+    if (type === 'success') {
+      this.successMessage = message;
+      if (this.successTimer) {
+        clearTimeout(this.successTimer);
+      }
+      this.successTimer = setTimeout(() => {
+        this.successMessage = null;
+        this.cdr.detectChanges();
+      }, this.MESSAGE_DELAY);
+    } else { // type === 'error'
+      this.errorMessage = message;
+      if (this.errorTimer) {
+        clearTimeout(this.errorTimer);
+      }
+      this.errorTimer = setTimeout(() => {
+        this.errorMessage = null;
+        this.cdr.detectChanges();
+      }, this.MESSAGE_DELAY);
+    }
+    this.cdr.detectChanges(); // Ensure message is shown immediately
+  }
   selectedCards: BingoCard[] = []; // Array to hold selected cards
   gameIdToJoin: string = ''; // Property to hold Game ID for joining
   reconnectGameId: string | null = null; // New property to hold game ID for reconnecting
@@ -117,14 +143,12 @@ export class BingoComponent implements OnInit {
       this.http.post<any>(`${this.gameApiUrl}/${this.reconnectGameId}/resume`, {})
         .subscribe({
           next: (resumedGame) => {
-            this.successMessage = 'Game resumed successfully. Reconnecting...';
-            this.cdr.detectChanges();
+            this.showAndClearMessage('success', 'Game resumed successfully. Reconnecting...');
             this.router.navigate(['/game-room', this.reconnectGameId]);
           },
           error: (err: HttpErrorResponse) => {
-            this.errorMessage = err.error?.message || 'Failed to resume game. It might have been abandoned or is no longer available.';
+            this.showAndClearMessage('error', err.error?.message || 'Failed to resume game. It might have been abandoned or is no longer available.');
             console.error('Error resuming game:', err);
-            this.cdr.detectChanges();
           }
         });
     }
@@ -142,9 +166,8 @@ export class BingoComponent implements OnInit {
         this.cdr.detectChanges(); // Trigger change detection after loading cards
       },
       error: (err) => {
-        this.errorMessage = 'Failed to load bingo cards.';
+        this.showAndClearMessage('error', 'Failed to load bingo cards.');
         console.error('Error loading bingo cards:', err);
-        this.cdr.detectChanges(); // Trigger change detection for error message
       }
     });
   }
@@ -158,18 +181,15 @@ export class BingoComponent implements OnInit {
         next: (card) => {
           this.bingoCards = [...this.bingoCards, card]; // Create new array reference
           this.newCardPhrase = '';
-          this.successMessage = 'Bingo card created successfully!';
-          this.cdr.detectChanges(); // Trigger change detection
+          this.showAndClearMessage('success', 'Bingo card created successfully!');
         },
         error: (err) => {
-          this.errorMessage = 'Failed to create bingo card. You might not have the required permissions.';
+          this.showAndClearMessage('error', 'Failed to create bingo card. You might not have the required permissions.');
           console.error('Error creating bingo card:', err);
-          this.cdr.detectChanges(); // Trigger change detection for error message
         }
       });
     } else {
-      this.errorMessage = 'Phrase cannot be empty.';
-      this.cdr.detectChanges(); // Trigger change detection for error message
+      this.showAndClearMessage('error', 'Phrase cannot be empty.');
     }
   }
 
@@ -181,13 +201,11 @@ export class BingoComponent implements OnInit {
       this.bingoService.deleteBingoCard(id).subscribe({
         next: () => {
           this.bingoCards = this.bingoCards.filter(card => card.id !== id); // Optimistic update
-          this.successMessage = 'Bingo card deleted successfully!';
-          this.cdr.detectChanges(); // Trigger change detection
+          this.showAndClearMessage('success', 'Bingo card deleted successfully!');
         },
         error: (err) => {
-          this.errorMessage = 'Failed to delete bingo card. You might not have the required permissions.';
+          this.showAndClearMessage('error', 'Failed to delete bingo card. You might not have the required permissions.');
           console.error('Error deleting bingo card:', err);
-          this.cdr.detectChanges(); // Trigger change detection for error message
         }
       });
     }
@@ -212,9 +230,8 @@ export class BingoComponent implements OnInit {
     } else if (this.selectedCards.length < 24) {
       this.selectedCards.push(card); // Select, if less than 24 selected
     } else {
-      this.errorMessage = 'You can select a maximum of 24 cards.';
+      this.showAndClearMessage('error', 'You can select a maximum of 24 cards.');
     }
-    this.cdr.detectChanges(); // Update view
   }
 
   // Select 24 random cards (existing method)
@@ -224,16 +241,14 @@ export class BingoComponent implements OnInit {
     this.successMessage = null;
 
     if (this.bingoCards.length < 24) {
-      this.errorMessage = 'Not enough bingo cards available to select 24 random cards.';
-      this.cdr.detectChanges();
+      this.showAndClearMessage('error', 'Not enough bingo cards available to select 24 random cards.');
       return;
     }
 
     const shuffledCards = [...this.bingoCards].sort(() => 0.5 - Math.random()); // Shuffle a copy
     this.selectedCards = shuffledCards.slice(0, 24); // Take the first 24
 
-    this.successMessage = '24 random cards selected.';
-    this.cdr.detectChanges(); // Update view
+    this.showAndClearMessage('success', '24 random cards selected.');
   }
 
   // New: Start editing a card
@@ -255,7 +270,7 @@ export class BingoComponent implements OnInit {
     this.errorMessage = null;
 
     if (!this.editedCardPhrase.trim()) {
-      this.errorMessage = 'Card phrase cannot be empty.';
+      this.showAndClearMessage('error', 'Card phrase cannot be empty.');
       return;
     }
 
@@ -273,14 +288,12 @@ export class BingoComponent implements OnInit {
             this.selectedCards[selectedIndex] = response;
           }
 
-          this.successMessage = 'Bingo card updated successfully!';
+          this.showAndClearMessage('success', 'Bingo card updated successfully!');
           this.cancelEdit(); // Exit editing mode
-          this.cdr.detectChanges();
         },
         error: (err: HttpErrorResponse) => {
-          this.errorMessage = err.error || 'Failed to update bingo card. You might not have the required permissions.';
+          this.showAndClearMessage('error', err.error || 'Failed to update bingo card. You might not have the required permissions.');
           console.error('Error updating bingo card:', err);
-          this.cdr.detectChanges();
         }
       });
     }
@@ -309,12 +322,12 @@ export class BingoComponent implements OnInit {
           this.router.navigate(['/game-room', response.id]); // Navigate with ID
         },
         error: (err: HttpErrorResponse) => {
-          this.errorMessage = err.error || 'Failed to create game.';
+          this.showAndClearMessage('error', err.error || 'Failed to create game.');
           console.error('Error creating game:', err);
         }
       });
     } else {
-      this.errorMessage = 'Please select exactly 24 cards to start a new game.';
+      this.showAndClearMessage('error', 'Please select exactly 24 cards to start a new game.');
     }
   }
 
@@ -323,7 +336,7 @@ export class BingoComponent implements OnInit {
     this.successMessage = null;
     this.errorMessage = null;
     if (!this.gameIdToJoin) {
-      this.errorMessage = 'Please enter a Game ID to join.';
+      this.showAndClearMessage('error', 'Please enter a Game ID to join.');
       return;
     }
     // No longer check canStartGame for joining, only that 24 cards are selected
@@ -336,12 +349,12 @@ export class BingoComponent implements OnInit {
           this.router.navigate(['/game-room', response.id]); // Navigate with ID
         },
         error: (err: HttpErrorResponse) => {
-          this.errorMessage = err.error || 'Failed to join game.';
+          this.showAndClearMessage('error', err.error || 'Failed to join game.');
           console.error('Error joining game:', err);
         }
       });
     } else {
-      this.errorMessage = 'Please select exactly 24 cards to join the game.';
+      this.showAndClearMessage('error', 'Please select exactly 24 cards to join the game.');
     }
   }
 }

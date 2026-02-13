@@ -82,7 +82,7 @@ button {
 }
 
 /* Primary */
-button:not(.delete-button):not(.cancel-button) {
+button:not(.delete-button):not(.cancel-button):not(.edit-button):not(.update-button) {
   background: linear-gradient(135deg, #3b82f6, #6366f1);
   color: white;
 }
@@ -196,13 +196,13 @@ button:hover {
 }
 
 /* Edit */
-.edit-button {
+button.edit-button {
   background: rgba(59, 246, 146, 0.2);
   color: #93fd9a;
 }
 
 /* Update */
-.update-button {
+button.update-button {
   background: rgba(59, 246, 146, 0.2);
   color: #93fd9a;
 }
