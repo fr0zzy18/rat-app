@@ -22,8 +22,8 @@
           <th>Name</th>
           <th>Race</th>
           <th>Class</th>
-          <th>M+ Score</th>
           <th>Spec</th>
+          <th>M+ Score</th>
           <th>Role</th>
           <th>Faction</th>
           <th>Guild</th>
@@ -35,11 +35,11 @@
       <tbody>
         <tr *ngFor="let player of players">
           <td><img [src]="player.thumbnail_url" alt="Player Thumbnail" class="player-thumbnail"></td>
-          <td><a [href]="player.profileUrl" target="_blank">{{ player.name }}</a></td>
+          <td><a [href]="player.profileUrl"target="_blank"[ngStyle]="{ color: classColors[player.class] || '#fff' }"class="player-name">{{ player.name }}</a></td>
           <td>{{ player.race }}</td>
           <td>{{ player.class }}</td>
-          <td>{{ player.mythicPlusScore | number:'1.0-2' }}</td>
           <td>{{ player.active_spec_name }}</td>
+          <td>{{ player.mythicPlusScore | number:'1.0-2' }}</td>
           <td>{{ player.active_spec_role }}</td>
           <td>{{ player.faction }}</td>
           <td>{{ player.guildName }}</td>
