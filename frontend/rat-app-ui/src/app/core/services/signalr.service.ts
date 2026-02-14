@@ -1,3 +1,4 @@
+import { environment } from '@env/environment';
 import { Injectable } from '@angular/core';
 import * as signalR from '@microsoft/signalr';
 import { Observable, Subject } from 'rxjs';
@@ -17,7 +18,7 @@ export class SignalRService {
 
   public startConnection = (token: string): Promise<void> => {
     this.hubConnection = new signalR.HubConnectionBuilder()
-      .withUrl('http://localhost:5211/gamehub', {
+      .withUrl(environment.signalRUrl, {
         accessTokenFactory: () => token // Pass JWT token for authentication
       })
       .withAutomaticReconnect() // Add automatic reconnection

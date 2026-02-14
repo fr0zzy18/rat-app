@@ -1,3 +1,4 @@
+import { environment } from '@env/environment';
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
@@ -10,7 +11,7 @@ import { Role } from '../entities/role';
   providedIn: 'root'
 })
 export class AuthService {
-  private apiUrl = 'http://localhost:5211/api/auth';
+  private apiUrl = `${environment.apiUrl}/api/auth`;
   private currentUserSubject: BehaviorSubject<UserDto | null>;
   public currentUser: Observable<UserDto | null>;
   public errorMessage: string | null = null;

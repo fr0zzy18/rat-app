@@ -1,3 +1,4 @@
+import { environment } from '@env/environment';
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http'; // Import HttpHeaders and HttpParams
 import { Observable } from 'rxjs';
@@ -33,7 +34,7 @@ export interface AddPlayerRequestDto {
   providedIn: 'root'
 })
 export class PlayerService {
-  private apiUrl = 'http://localhost:5211/api/players'; // Backend API URL
+  private apiUrl = `${environment.apiUrl}/api/players`; // Backend API URL
 
   constructor(private http: HttpClient, private authService: AuthService) { } // Inject AuthService
 

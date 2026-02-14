@@ -1,3 +1,4 @@
+import { environment } from '@env/environment';
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -7,7 +8,7 @@ import { BingoCard } from '../models/bingo-card.model';
   providedIn: 'root'
 })
 export class BingoService {
-  private apiUrl = 'http://localhost:5211/api/bingo';
+  private apiUrl = `${environment.apiUrl}/api/bingo`;
 
   constructor(private http: HttpClient) { }
 
