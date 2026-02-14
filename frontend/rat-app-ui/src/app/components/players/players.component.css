@@ -336,5 +336,168 @@ td a:hover {
   border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
+.player-name {
+  font-weight: 600;
+  text-decoration: none !important;
+  transition: all 0.2s ease;
+}
+
+.player-name:hover {
+  filter: brightness(1.2);
+  text-shadow: 0 0 6px currentColor;
+  text-decoration: none;
+}
+.players-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+  padding: 20px;
+}
+
+/* CARD */
+.player-card {
+  position: relative; /* ВАЖЛИВО */
+  
+  background: rgba(30, 41, 59, 0.55);
+  backdrop-filter: blur(14px);
+  border-radius: 16px;
+  padding: 18px;
+  border: 1px solid rgba(255,255,255,0.08);
+
+  transition: all 0.25s ease;
+}
+
+
+/* HEADER */
+.player-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 15px;
+}
+
+.player-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+}
+
+.player-name {
+  font-size: 18px;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.player-name:hover {
+  text-shadow: 0 0 8px currentColor;
+}
+
+.player-guild {
+  font-size: 13px;
+  opacity: 0.7;
+}
+
+/* INFO GRID */
+.player-info {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.label {
+  font-size: 11px;
+  opacity: 0.6;
+}
+
+.score {
+  font-weight: 600;
+  color: #60a5fa;
+}
+
+/* BUTTON */
+.player-actions {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+
+  opacity: 0;
+  transform: translateY(6px);
+
+  transition: all 0.2s ease;
+}
+
+.player-card:hover .player-actions {
+  opacity: 1;
+  transform: translateY(0);
+}
+.delete-button {
+  padding: 4px 10px;
+  font-size: 12px;
+
+  border-radius: 8px;
+  border: 1px solid rgba(239,68,68,0.4);
+
+  background: rgba(239,68,68,0.1);
+  color: #ef4444;
+
+  cursor: pointer;
+
+  backdrop-filter: blur(6px);
+
+  transition: all 0.15s ease;
+}
+
+
+.delete-button:hover {
+  background: rgba(239,68,68,0.2);
+  box-shadow: 0 0 8px rgba(239,68,68,0.4);
+}
+
+.rio-score {
+  position: absolute;
+  top: 16px;
+  right: 20px;
+  text-align: right;
+}
+
+.rio-label {
+  font-size: 10px;
+  opacity: 0.6;
+  letter-spacing: 0.5px;
+}
+
+.rio-value {
+  font-size: 24px;
+  font-weight: 700;
+
+  background: linear-gradient(135deg, #60a5fa, #a78bfa);
+  background-clip: text;
+  -webkit-background-clip: text;
+
+  -webkit-text-fill-color: transparent;
+
+  text-shadow: 0 0 10px rgba(96,165,250,0.4);
+}
+
+.icon {
+  width: 25px;
+  height: 25px;
+  object-fit: contain;
+  margin-left: 6px;
+}
+
+.faction-icon {
+  filter: drop-shadow(0 0 2px rgba(255,255,255,0.2));
+}
+
+.role-icon {
+  filter: drop-shadow(0 0 2px rgba(0,0,0,0.4));
+}
+
 
 

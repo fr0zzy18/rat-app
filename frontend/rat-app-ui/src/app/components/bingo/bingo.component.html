@@ -37,7 +37,7 @@
       </div>
       <ng-template #gamesList>
         <ul>
-          <li *ngFor="let game of waitingGames" class="waiting-game-item">
+          <li *ngFor="let game of waitingGames" class="waiting-game-item" (click)="joinAvailableGame(game.id!)">
             <span>Join Game created by {{ game.createdByUsername }}</span>
           </li>
         </ul>
