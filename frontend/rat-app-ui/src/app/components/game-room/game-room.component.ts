@@ -1,3 +1,4 @@
+import { environment } from '@env/environment';
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -60,7 +61,7 @@ export class GameRoomComponent implements OnInit, OnDestroy {
     return this.isGameCreator && !this.isPlayer2Joined && !this.isGameFinished;
   }
   
-  private gameApiUrl = 'http://localhost:5211/api/game';
+  private gameApiUrl = `${environment.apiUrl}/api/game`;
 
   constructor(
     private router: Router,

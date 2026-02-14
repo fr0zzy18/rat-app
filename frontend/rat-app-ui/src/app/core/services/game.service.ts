@@ -1,3 +1,4 @@
+import { environment } from '@env/environment';
 import { Injectable, OnDestroy } from '@angular/core';
 import { BingoCard } from '../models/bingo-card.model';
 import * as signalR from '@microsoft/signalr'; // Import SignalR
@@ -17,7 +18,7 @@ export class GameService implements OnDestroy {
 
   constructor() {
     this.hubConnection = new signalR.HubConnectionBuilder()
-      .withUrl('http://localhost:5211/gamehub', {
+      .withUrl(environment.signalRUrl, {
         skipNegotiation: true,
         transport: signalR.HttpTransportType.WebSockets
       })

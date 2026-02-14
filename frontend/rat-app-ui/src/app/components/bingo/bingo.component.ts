@@ -1,3 +1,4 @@
+import { environment } from '@env/environment';
 import { Component, OnInit, ChangeDetectorRef, OnDestroy } from '@angular/core';
 import { BingoCard } from '../../core/models/bingo-card.model';
 import { BingoService } from '../../core/services/bingo.service';
@@ -62,7 +63,7 @@ export class BingoComponent implements OnInit, OnDestroy { // Implement OnDestro
   editedCardPhrase: string = '';       // To hold the phrase during editing
   hoveredCardId: number | null = null; // New: To track which card is being hovered
 
-  private gameApiUrl = 'http://localhost:5211/api/game';
+  private gameApiUrl = `${environment.apiUrl}/api/game`;
 
   constructor(
     private bingoService: BingoService,
