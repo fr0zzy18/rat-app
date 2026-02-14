@@ -421,22 +421,41 @@ td a:hover {
 
 /* BUTTON */
 .player-actions {
-  margin-top: 15px;
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+
+  opacity: 0;
+  transform: translateY(6px);
+
+  transition: all 0.2s ease;
 }
 
-.delete-button {
-  width: 100%;
-  padding: 8px;
-  border-radius: 10px;
-  border: none;
-  background: linear-gradient(135deg, #ef4444, #dc2626);
-  color: white;
-  cursor: pointer;
-  transition: 0.2s;
+.player-card:hover .player-actions {
+  opacity: 1;
+  transform: translateY(0);
 }
+.delete-button {
+  padding: 4px 10px;
+  font-size: 12px;
+
+  border-radius: 8px;
+  border: 1px solid rgba(239,68,68,0.4);
+
+  background: rgba(239,68,68,0.1);
+  color: #ef4444;
+
+  cursor: pointer;
+
+  backdrop-filter: blur(6px);
+
+  transition: all 0.15s ease;
+}
+
 
 .delete-button:hover {
-  transform: scale(1.03);
+  background: rgba(239,68,68,0.2);
+  box-shadow: 0 0 8px rgba(239,68,68,0.4);
 }
 
 .rio-score {
@@ -464,5 +483,21 @@ td a:hover {
 
   text-shadow: 0 0 10px rgba(96,165,250,0.4);
 }
+
+.icon {
+  width: 25px;
+  height: 25px;
+  object-fit: contain;
+  margin-left: 6px;
+}
+
+.faction-icon {
+  filter: drop-shadow(0 0 2px rgba(255,255,255,0.2));
+}
+
+.role-icon {
+  filter: drop-shadow(0 0 2px rgba(0,0,0,0.4));
+}
+
 
 

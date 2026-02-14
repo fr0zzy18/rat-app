@@ -72,9 +72,15 @@
       </div>
 
       <div class="info-item">
-        <span class="label">Faction</span>
-        <span>{{ player.faction }}</span>
-      </div>
+  <div class="info-item">
+  <span class="label">Faction</span>
+  <img
+    [src]="'assets/icon/' + (player.faction | lowercase) + '.png'"
+    alt="{{ player.faction }}"
+    class="icon faction-icon"
+  />
+</div>
+</div>
 
       <div class="info-item">
         <span class="label">Realm</span>
@@ -84,13 +90,13 @@
     </div>
 
     <div class="player-actions" *ngIf="canManagePlayers | async">
-      <button 
-        class="delete-button"
-        (click)="deletePlayer(player.id, player.name)"
-      >
-        Delete
-      </button>
-    </div>
+  <button 
+    class="delete-button"
+    (click)="deletePlayer(player.id, player.name)"
+  >
+    Delete
+  </button>
+</div>
 
   </div>
 
