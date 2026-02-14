@@ -41,7 +41,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy(name: MyAllowSpecificOrigins,
                       policy =>
                       {
-                          policy.WithOrigins("http://localhost:4200", "http://localhost:5211", "http://3.72.34.58:4200", "http://3.72.34.58:5211") // Angular app URL and API URL
+                          policy.WithOrigins("http://localhost:4200", "http://localhost:5211", "http://130.61.245.147:4200", "http://130.61.245.147:5211") // Angular app URL and API URL
                                 .AllowAnyHeader()
                                 .AllowAnyMethod()
                                 .AllowCredentials(); // Allow credentials for JWT

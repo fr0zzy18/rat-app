@@ -1,5 +1,5 @@
 export const environment = {
   production: true,
-  apiUrl: 'http://3.72.34.58:5211',
-  signalRUrl: 'http://3.72.34.58:5211/gamehub'
+  apiUrl: 'http://130.61.245.147:5211',
+  signalRUrl: 'http://130.61.245.147:5211/gamehub'
 };
