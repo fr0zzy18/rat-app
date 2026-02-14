@@ -13,46 +13,89 @@
       {{ cat === '' ? 'All' : cat }}
     </button>
   </div>
+<div class="players-container">
+  <div class="players-grid">
+<div class="player-card" *ngFor="let player of players">
 
-  <div class="players-table-wrapper">
-     <table>
-      <thead>
-        <tr>
-          <th></th> 
-          <th>Name</th>
-          <th>Race</th>
-          <th>Class</th>
-          <th>Spec</th>
-          <th>M+ Score</th>
-          <th>Role</th>
-          <th>Faction</th>
-          <th>Guild</th>
-          <th>Realm</th>
-          <th>Region</th>
-          <th *ngIf="canManagePlayers | async">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let player of players">
-          <td><img [src]="player.thumbnail_url" alt="Player Thumbnail" class="player-thumbnail"></td>
-          <td><a [href]="player.profileUrl"target="_blank"[ngStyle]="{ color: classColors[player.class] || '#fff' }"class="player-name">{{ player.name }}</a></td>
-          <td>{{ player.race }}</td>
-          <td>{{ player.class }}</td>
-          <td>{{ player.active_spec_name }}</td>
-          <td>{{ player.mythicPlusScore | number:'1.0-2' }}</td>
-          <td>{{ player.active_spec_role }}</td>
-          <td>{{ player.faction }}</td>
-          <td>{{ player.guildName }}</td>
-          <td>{{ player.realm }}</td>
-          <td>{{ player.region }}</td>
-          <td *ngIf="canManagePlayers | async">
-            <button (click)="deletePlayer(player.id, player.name)" class="delete-button">Delete</button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+  <div class="rio-score">
+  <div class="rio-label">M+ Score</div>
+  <div class="rio-value">
+    {{ player.mythicPlusScore | number:'1.0-0' }}
   </div>
 </div>
+
+  <div class="player-header">
+
+    <img 
+      [src]="player.thumbnail_url" 
+      class="player-avatar"
+      alt="Player avatar"
+    >
+
+    <div class="player-header-info">
+      <a 
+        [href]="player.profileUrl"
+        target="_blank"
+        class="player-name"
+        [ngStyle]="{ color: classColors[player.class] || '#fff' }"
+      >
+        {{ player.name }}
+      </a>
+
+      <div class="player-guild">
+        {{ player.guildName || 'No Guild' }}
+      </div>
+    </div>
+
+  </div>
+
+    <div class="player-info">
+
+      <div class="info-item">
+        <span class="label">Class</span>
+        <span>{{ player.class }}</span>
+      </div>
+
+      <div class="info-item">
+        <span class="label">Spec</span>
+        <span>{{ player.active_spec_name }}</span>
+      </div>
+
+      <div class="info-item">
+        <span class="label">Role</span>
+        <span>{{ player.active_spec_role }}</span>
+      </div>
+
+      <div class="info-item">
+        <span class="label">Race</span>
+        <span>{{ player.race }}</span>
+      </div>
+
+      <div class="info-item">
+        <span class="label">Faction</span>
+        <span>{{ player.faction }}</span>
+      </div>
+
+      <div class="info-item">
+        <span class="label">Realm</span>
+        <span>{{ player.realm }}</span>
+      </div>
+
+    </div>
+
+    <div class="player-actions" *ngIf="canManagePlayers | async">
+      <button 
+        class="delete-button"
+        (click)="deletePlayer(player.id, player.name)"
+      >
+        Delete
+      </button>
+    </div>
+
+  </div>
+
+</div>
+
 
   <div *ngIf="players.length === 0 && !loading" class="no-players">
     No players found.
