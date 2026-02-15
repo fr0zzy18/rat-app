@@ -78,7 +78,7 @@ export class AuthService {
   }
 
   changePassword(userId: number, newPassword: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/change-password`, { userId, newPassword });
+    return this.http.put(`${this.apiUrl}/change-password`, { userId, newPassword });
   }
 
   getAllUsers(): Observable<UserDto[]> {
