@@ -130,8 +130,9 @@ export class BingoComponent implements OnInit, OnDestroy { // Implement OnDestro
   checkActiveGame(): void {
     this.http.get<any>(`${this.gameApiUrl}/my-active-game`).subscribe({
       next: (gameDetails) => {
-        // Only show reconnect button if game is in a reconnectable state
-        if (gameDetails && gameDetails.id && (gameDetails.status === 'InProgress' || gameDetails.status === 'Paused')) {
+        if (!gameDetails) { // Handle null response for no active game
+          this.reconnectGameId = null;
+        } else if (gameDetails.id && (gameDetails.status === 'InProgress' || gameDetails.status === 'Paused')) {
           this.reconnectGameId = gameDetails.id;
           // Optionally store other game details if needed for display
         } else {

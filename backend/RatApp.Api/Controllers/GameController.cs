@@ -164,7 +164,7 @@ namespace RatApp.Api.Controllers
 
             if (game == null)
             {
-                return NotFound("No active game found for this user.");
+                return Ok(null); // Return 200 OK with a null body to indicate no active game
             }
             
             var gameResponse = await MapGameToGameResponseDto(game);

@@ -41,10 +41,10 @@ builder.Services.AddCors(options =>
     options.AddPolicy(name: MyAllowSpecificOrigins,
                       policy =>
                       {
-                          policy.WithOrigins("http://localhost:5211", 
+                          policy.WithOrigins("http://localhost:4200", 
                                              "http://130.61.245.147",
                                              "https://130.61.245.147",
-                                             "http://130.61.245.147:5211")
+                                             "http://130.61.245.147:4200")
                                 .AllowAnyHeader()
                                 .AllowAnyMethod()
                                 .AllowCredentials(); // Allow credentials for JWT
