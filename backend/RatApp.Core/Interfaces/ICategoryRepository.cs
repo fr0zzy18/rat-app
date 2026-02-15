@@ -7,9 +7,9 @@ namespace RatApp.Core.Interfaces
     public interface ICategoryRepository
     {
         Task<IEnumerable<Category>> GetAllCategoriesAsync();
-        Task<Category?> GetCategoryByIdAsync(int id); // Included for potential future use, though not strictly needed for this task
+        Task<Category?> GetCategoryByIdAsync(int id);
         Task<Category?> GetCategoryByNameAsync(string name);
         Task AddCategoryAsync(Category category);
-        // DeleteCategoryAsync is omitted as per the current specific request
+        Task DeleteCategoryAsync(int id); // Added DeleteCategoryAsync
     }
 }

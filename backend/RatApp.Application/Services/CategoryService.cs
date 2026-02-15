@@ -9,10 +9,12 @@ namespace RatApp.Application.Services
     public class CategoryService
     {
         private readonly ICategoryRepository _categoryRepository;
+        private readonly PlayerService _playerService; // New: PlayerService dependency
 
-        public CategoryService(ICategoryRepository categoryRepository)
+        public CategoryService(ICategoryRepository categoryRepository, PlayerService playerService)
         {
             _categoryRepository = categoryRepository;
+            _playerService = playerService; // Inject PlayerService
         }
 
         public async Task<IEnumerable<Category>> GetAllCategoriesAsync()
@@ -41,6 +43,24 @@ namespace RatApp.Application.Services
             var category = new Category { Name = categoryName };
             await _categoryRepository.AddCategoryAsync(category);
             return category;
+        }
+
+        // New method to delete a category, with check for associated players
+        public async Task<bool> DeleteCategoryAsync(int categoryId)
+        {
+            var category = await _categoryRepository.GetCategoryByIdAsync(categoryId);
+            if (category == null)
+            {
+                return false; // Category not found
+            }
+
+            if (await _playerService.DoesCategoryHavePlayersAsync(category.Name))
+            {
+                throw new InvalidOperationException("Category must be empty before it can be deleted.");
+            }
+
+            await _categoryRepository.DeleteCategoryAsync(categoryId);
+            return true;
         }
     }
 }

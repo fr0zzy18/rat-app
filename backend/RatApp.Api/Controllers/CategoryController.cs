@@ -50,5 +50,24 @@ namespace RatApp.Api.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+        [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin,Manager")]
+        public async Task<ActionResult> DeleteCategory(int id)
+        {
+            try
+            {
+                var result = await _categoryService.DeleteCategoryAsync(id);
+                if (!result)
+                {
+                    return NotFound(); // Category not found by ID
+                }
+                return NoContent(); // Successfully deleted
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(ex.Message); // "Category must be empty"
+            }
+        }
     }
 }

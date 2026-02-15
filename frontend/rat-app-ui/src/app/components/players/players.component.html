@@ -16,6 +16,7 @@
     <div class="actions">
       <button *ngIf="canManagePlayers | async" class="add-player-button" (click)="openAddPlayerModal()">Add New Player</button>
       <button *ngIf="canManageCategories | async" class="new-category-button" (click)="openNewCategoryPopup()">New Category</button>
+      <button *ngIf="canManageCategories | async" class="delete-category-button" (click)="openDeleteCategoryPopup()">Delete Category</button>
     </div>
   </div>
 
@@ -58,6 +59,25 @@
       <div class="modal-actions">
         <button (click)="createNewCategory()">New Category</button>
         <button (click)="closeNewCategoryPopup()" class="cancel-button">Cancel</button>
+      </div>
+      <div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
+    </div>
+  </div>
+
+  <!-- Delete Category Popup -->
+  <div *ngIf="showDeleteCategoryPopup" class="modal-overlay">
+    <div class="modal-content">
+      <h3>Delete Category</h3>
+      <div class="form-group">
+        <label for="categoryToDelete">Select Category to Delete</label>
+        <select id="categoryToDelete" name="categoryToDelete" [(ngModel)]="selectedCategoryToDelete" class="form-control">
+          <option [ngValue]="null" disabled>-- Select a category --</option>
+          <option *ngFor="let cat of categoriesForDeleteDropdown" [ngValue]="cat">{{ cat.name }}</option>
+        </select>
+      </div>
+      <div class="modal-actions">
+        <button class="delete-button" (click)="deleteSelectedCategory()">Delete</button>
+        <button type="button" class="cancel-button" (click)="closeDeleteCategoryPopup()">Cancel</button>
       </div>
       <div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
     </div>

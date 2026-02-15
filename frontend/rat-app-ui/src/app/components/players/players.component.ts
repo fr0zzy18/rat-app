@@ -23,11 +23,15 @@ export class PlayersComponent implements OnInit {
   addPlayerError: string | null = null;
   canManagePlayers: Observable<boolean>; // Change to Observable
 
-  // New properties for Category Management
+  // New properties for Category Management (Add Category)
   availableCategories: Category[] = []; // Dynamic list of categories
   newCategoryName: string = ''; // For adding new category via popup
   showNewCategoryPopup: boolean = false; // Controls visibility of new category popup
   canManageCategories: Observable<boolean>; // RBAC for category management
+
+  // New properties for Category Management (Delete Category)
+  showDeleteCategoryPopup: boolean = false; // Controls visibility of delete category popup
+  selectedCategoryToDelete: Category | null = null; // Holds the category selected for deletion
 
   showAddPlayerModal: boolean = false;
   
@@ -99,6 +103,47 @@ export class PlayersComponent implements OnInit {
     }
   }
 
+  // Delete Category Popup
+  openDeleteCategoryPopup(): void {
+    this.showDeleteCategoryPopup = true;
+    this.selectedCategoryToDelete = null; // Clear previous selection
+    this.errorMessage = null; // Clear any previous error messages
+    this.cdr.detectChanges();
+  }
+
+  closeDeleteCategoryPopup(): void {
+    this.showDeleteCategoryPopup = false;
+    this.selectedCategoryToDelete = null;
+    this.errorMessage = null;
+    this.cdr.detectChanges();
+  }
+
+  deleteSelectedCategory(): void {
+    if (this.selectedCategoryToDelete && this.selectedCategoryToDelete.id) {
+      if (this.selectedCategoryToDelete.name === 'All') {
+        this.errorMessage = "The 'All' category cannot be deleted.";
+        this.cdr.detectChanges();
+        return;
+      }
+      if (confirm(`Are you sure you want to delete the category "${this.selectedCategoryToDelete.name}"?`)) {
+        this.categoryService.deleteCategory(this.selectedCategoryToDelete.id).subscribe({
+          next: () => {
+            this.closeDeleteCategoryPopup();
+            this.loadCategories(); // Reload categories to update the list
+            this.cdr.detectChanges();
+          },
+          error: (err) => {
+            console.error('Error deleting category:', err);
+            this.errorMessage = err.message || 'Failed to delete category.';
+            this.cdr.detectChanges();
+          }
+        });
+      }
+    } else {
+      this.errorMessage = 'Please select a category to delete.';
+    }
+  }
+
   loadPlayers(): void { 
     this.loading = true;
     this.errorMessage = null;
@@ -140,6 +185,11 @@ getClassColor(className: string): string {
   onCategoryChange(categoryName: string): void {
     this.selectedCategory = categoryName;
     this.loadPlayers(); // Reload players for the selected category
+  }
+
+  get categoriesForDeleteDropdown(): Category[] {
+    // Filter out the "All" virtual category
+    return this.availableCategories.filter(c => c.name !== 'All');
   }
 
   openAddPlayerModal(): void {

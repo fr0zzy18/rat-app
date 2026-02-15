@@ -44,6 +44,7 @@ namespace RatApp.Application.Services
 
                 return new PlayerDto
                 {
+                    Id = 0, // Placeholder, will be set after DB operation if adding new player
                     Name = raiderIoPlayer.name,
                     Race = raiderIoPlayer.race,
                     Class = raiderIoPlayer.Class, 
@@ -194,6 +195,16 @@ namespace RatApp.Application.Services
             _context.Players.Remove(player);
             await _context.SaveChangesAsync();
             return true;
+        }
+
+        // New method to check if a category has any associated players
+        public async Task<bool> DoesCategoryHavePlayersAsync(string categoryName)
+        {
+            if (string.IsNullOrWhiteSpace(categoryName))
+            {
+                return false; // An empty or whitespace category name doesn't "have players" in a meaningful way for deletion check
+            }
+            return await _context.Players.AnyAsync(p => p.Category == categoryName);
         }
     }
 }
