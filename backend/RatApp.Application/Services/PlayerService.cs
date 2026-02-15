@@ -148,15 +148,15 @@ namespace RatApp.Application.Services
                     if (raiderIoDetails != null)
                     {
                         // Update stored player entity with new data
-                        storedPlayer.Race = raiderIoDetails.Race;
-                        storedPlayer.Class = raiderIoDetails.Class;
-                        storedPlayer.ActiveSpecName = raiderIoDetails.ActiveSpecName;
-                        storedPlayer.ActiveSpecRole = raiderIoDetails.ActiveSpecRole;
-                        storedPlayer.Faction = raiderIoDetails.Faction;
-                        storedPlayer.ThumbnailUrl = raiderIoDetails.ThumbnailUrl;
+                        storedPlayer.Race = raiderIoDetails.Race ?? storedPlayer.Race; // Coalesce to existing if null
+                        storedPlayer.Class = raiderIoDetails.Class ?? storedPlayer.Class; // Coalesce to existing if null
+                        storedPlayer.ActiveSpecName = raiderIoDetails.ActiveSpecName ?? string.Empty; // Ensure not null
+                        storedPlayer.ActiveSpecRole = raiderIoDetails.ActiveSpecRole ?? string.Empty; // Ensure not null
+                        storedPlayer.Faction = raiderIoDetails.Faction ?? storedPlayer.Faction; // Coalesce to existing if null
+                        storedPlayer.ThumbnailUrl = raiderIoDetails.ThumbnailUrl ?? string.Empty; // Ensure not null
                         storedPlayer.LastUpdated = DateTime.UtcNow; // Update timestamp
-                        storedPlayer.ProfileUrl = raiderIoDetails.ProfileUrl; // Update ProfileUrl
-                        storedPlayer.GuildName = raiderIoDetails.GuildName; // Update GuildName
+                        storedPlayer.ProfileUrl = raiderIoDetails.ProfileUrl ?? string.Empty; // Ensure not null
+                        storedPlayer.GuildName = raiderIoDetails.GuildName ?? string.Empty; // Ensure not null
                         storedPlayer.MythicPlusScore = raiderIoDetails.MythicPlusScore; // Update MythicPlusScore
                         // Category is not refreshed from Raider.IO, it's set during import
                         await _context.SaveChangesAsync();
