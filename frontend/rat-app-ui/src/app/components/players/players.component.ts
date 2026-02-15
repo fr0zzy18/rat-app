@@ -5,6 +5,7 @@ import { PlayerService, Player, AddPlayerRequestDto } from '../../core/services/
 import { AuthService } from '../../core/services/auth.service';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { CategoryService, Category } from '../../core/services/category.service'; // Import CategoryService and Category
 
 @Component({
   selector: 'app-players',
@@ -21,20 +22,81 @@ export class PlayersComponent implements OnInit {
   errorMessage: string | null = null;
   addPlayerError: string | null = null;
   canManagePlayers: Observable<boolean>; // Change to Observable
+
+  // New properties for Category Management
+  availableCategories: Category[] = []; // Dynamic list of categories
+  newCategoryName: string = ''; // For adding new category via popup
+  showNewCategoryPopup: boolean = false; // Controls visibility of new category popup
+  canManageCategories: Observable<boolean>; // RBAC for category management
+
   showAddPlayerModal: boolean = false;
   
-  categories: string[] = ['All', 'Nova', 'Bambattles']; // Available categories
   selectedCategory: string = 'All'; // Default selected category
 
-  constructor(private playerService: PlayerService, public authService: AuthService, private cdr: ChangeDetectorRef) {
+  constructor(
+    private playerService: PlayerService, 
+    public authService: AuthService, 
+    private cdr: ChangeDetectorRef,
+    private categoryService: CategoryService // Inject CategoryService
+  ) {
     // Initialize canManagePlayers as an Observable
     this.canManagePlayers = this.authService.currentUser.pipe(
+      map(user => user?.roles?.includes('Admin') || user?.roles?.includes('Manager') || false)
+    );
+    // Initialize canManageCategories for Admin/Manager roles
+    this.canManageCategories = this.authService.currentUser.pipe(
       map(user => user?.roles?.includes('Admin') || user?.roles?.includes('Manager') || false)
     );
   }
 
   ngOnInit(): void {
     this.loadPlayers(); 
+    this.loadCategories(); // Load categories on init
+  }
+
+  loadCategories(): void {
+    this.categoryService.getAllCategories().subscribe({
+      next: (categories) => {
+        this.availableCategories = [{ id: 0, name: 'All' }, ...categories]; // Add 'All' as a virtual category
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        console.error('Error loading categories:', err);
+        this.errorMessage = 'Failed to load categories.';
+      }
+    });
+  }
+
+  openNewCategoryPopup(): void {
+    this.showNewCategoryPopup = true;
+    this.newCategoryName = ''; // Clear previous input
+    this.errorMessage = null;
+    this.cdr.detectChanges();
+  }
+
+  closeNewCategoryPopup(): void {
+    this.showNewCategoryPopup = false;
+    this.newCategoryName = '';
+    this.errorMessage = null;
+    this.cdr.detectChanges();
+  }
+
+  createNewCategory(): void {
+    if (this.newCategoryName.trim()) {
+      this.categoryService.addCategory(this.newCategoryName.trim()).subscribe({
+        next: (category) => {
+          this.closeNewCategoryPopup();
+          this.loadCategories(); // Reload categories to include the new one
+          this.cdr.detectChanges();
+        },
+        error: (err) => {
+          console.error('Error adding category:', err);
+          this.errorMessage = err.message || 'Failed to add category.';
+        }
+      });
+    } else {
+      this.errorMessage = 'Category name cannot be empty.';
+    }
   }
 
   loadPlayers(): void { 
@@ -75,8 +137,8 @@ getClassColor(className: string): string {
   return this.classColors[className] || '#ffffff';
 }
 
-  onCategoryChange(category: string): void {
-    this.selectedCategory = category;
+  onCategoryChange(categoryName: string): void {
+    this.selectedCategory = categoryName;
     this.loadPlayers(); // Reload players for the selected category
   }
 

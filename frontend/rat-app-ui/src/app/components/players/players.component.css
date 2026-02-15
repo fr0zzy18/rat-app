@@ -18,9 +18,27 @@
   color: #ffffff;
 }
 
+/* Tabs and Actions Container */
+.tabs-and-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px; /* Space between this section and the glass card */
+  flex-wrap: wrap; /* Allow items to wrap on smaller screens */
+  gap: 15px; /* Gap between tabs-header and actions, and between elements if wrapped */
+}
+
+.actions {
+  display: flex;
+  gap: 15px; /* Space between buttons */
+  flex-wrap: wrap; /* Allow buttons to wrap */
+}
+
+
 /* ===== Buttons ===== */
 .add-player-button,
-.category-button,
+.new-category-button, /* Added for new category button */
+.tab-button, /* Consolidated with category-button below */
 .delete-button,
 .modal-actions button {
   padding: 10px 18px;
@@ -32,44 +50,55 @@
 }
 
 /* Primary Button */
-.add-player-button {
-  align-self: flex-end;
-  margin-bottom: 20px;
-  margin-bottom: 20px;
+.add-player-button,
+.new-category-button { /* Apply similar styling to new category button */
   background: linear-gradient(135deg, #3b82f6, #6366f1);
   color: white;
-  margin-bottom: 20px;
 }
 
-.add-player-button:hover {
+.add-player-button:hover,
+.new-category-button:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(59,130,246,0.5);
 }
 
-/* Category Buttons */
-.category-toggles {
+/* Category Buttons (existing styles, make sure they still work) */
+.tabs-header {
   display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  margin-bottom: 25px;
+  gap: 6px;
+  padding: 10px 15px 0 15px;
+  position: relative;
+  flex-wrap: wrap; /* Allow tabs to wrap */
 }
 
-.category-button {
-  background: rgba(255,255,255,0.06);
+.tab-button { /* Styling for individual category filter tabs */
+  position: relative;
+  padding: 10px 18px;
+  border-radius: 12px 12px 0 0;
+  border: none;
+
+  background: rgba(255, 255, 255, 0.05);
   color: #cbd5e1;
-  border: 1px solid rgba(255,255,255,0.12);
-  backdrop-filter: blur(10px);
+
+  cursor: pointer;
+  transition: all 0.25s ease;
 }
 
-.category-button:hover {
-  background: rgba(59,130,246,0.25);
-  color: #fff;
+.tab-button:hover {
+  color: #ffffff;
+  background: rgba(59, 130, 246, 0.15);
 }
 
-.category-button.active {
+.tab-button.active {
   background: linear-gradient(135deg, #3b82f6, #6366f1);
-  color: white;
-  box-shadow: 0 4px 15px rgba(59,130,246,0.5);
+  color: #ffffff;
+  font-weight: 600;
+
+  box-shadow:
+    0 4px 15px rgba(59, 130, 246, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.08);
+
+  z-index: 2;
 }
 
 /* ===== Table Wrapper ===== */
@@ -137,16 +166,7 @@ td a:hover {
 }
 
 /* Delete button */
-.delete-button {
-  background: rgba(239,68,68,0.15);
-  color: #f87171;
-  border: 1px solid rgba(239,68,68,0.4);
-}
-
-.delete-button:hover {
-  background: rgba(239,68,68,0.3);
-  box-shadow: 0 4px 15px rgba(239,68,68,0.4);
-}
+/* Moved delete button styles to player-actions in HTML */
 
 /* ===== Messages ===== */
 .loading-message,
@@ -498,6 +518,3 @@ td a:hover {
 .role-icon {
   filter: drop-shadow(0 0 2px rgba(0,0,0,0.4));
 }
-
-
-

@@ -40,6 +40,23 @@ namespace RatApp.Infrastructure.Migrations
                     b.ToTable("BingoCards");
                 });
 
+            modelBuilder.Entity("RatApp.Core.Entities.Category", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Categories");
+                });
+
             modelBuilder.Entity("RatApp.Core.Entities.Game", b =>
                 {
                     b.Property<Guid>("Id")

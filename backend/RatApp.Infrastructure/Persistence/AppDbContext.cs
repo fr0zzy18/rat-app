@@ -15,6 +15,7 @@ namespace RatApp.Infrastructure.Persistence
         public DbSet<Player> Players { get; set; } // Re-added Player DbSet
         public DbSet<BingoCard> BingoCards { get; set; }
         public DbSet<Game> Games { get; set; }
+        public DbSet<Category> Categories { get; set; } // New: Add Category DbSet
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

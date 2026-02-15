@@ -1,19 +1,39 @@
 <div class="players-container">
   <h2>Players Lists</h2>
-<button *ngIf="canManagePlayers | async" class="add-player-button" (click)="openAddPlayerModal()">Add New Player</button>
+
+  <div class="tabs-and-actions">
+    <div class="tabs-header">
+      <button
+        *ngFor="let cat of availableCategories"
+        [ngClass]="{ 'active': selectedCategory === cat.name }"
+        (click)="onCategoryChange(cat.name)"
+        class="tab-button"
+      >
+        {{ cat.name === '' ? 'All' : cat.name }}
+      </button>
+    </div>
+
+    <div class="actions">
+      <button *ngIf="canManagePlayers | async" class="add-player-button" (click)="openAddPlayerModal()">Add New Player</button>
+      <button *ngIf="canManageCategories | async" class="new-category-button" (click)="openNewCategoryPopup()">New Category</button>
+    </div>
+  </div>
+
+  <!-- New Category Popup -->
+  <div *ngIf="showNewCategoryPopup" class="modal-overlay">
+    <div class="modal-content">
+      <h3>Create New Category</h3>
+      <input type="text" [(ngModel)]="newCategoryName" placeholder="Category Name" class="form-control">
+      <div class="modal-actions">
+        <button (click)="createNewCategory()">New Category</button>
+        <button (click)="closeNewCategoryPopup()" class="cancel-button">Cancel</button>
+      </div>
+      <div *ngIf="errorMessage" class="error-message">{{ errorMessage }}</div>
+    </div>
+  </div>
+
 <div class="players-glass-card">
 
-  <div class="tabs-header">
-    <button
-      *ngFor="let cat of categories"
-      [ngClass]="{ 'active': selectedCategory === cat }"
-      (click)="onCategoryChange(cat)"
-      class="tab-button"
-    >
-      {{ cat === '' ? 'All' : cat }}
-    </button>
-  </div>
-<div class="players-container">
   <div class="players-grid">
 <div class="player-card" *ngFor="let player of players">
 
