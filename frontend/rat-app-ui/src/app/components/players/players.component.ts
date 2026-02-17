@@ -17,7 +17,7 @@ import { CategoryService, Category } from '../../core/services/category.service'
 export class PlayersComponent implements OnInit {
   players: Player[] = [];
   // Initialize newPlayerInput with default category
-  newPlayerInput: AddPlayerRequestDto = { region: 'eu', realm: '', name: '', category: '' };
+  newPlayerInput: AddPlayerRequestDto = { region: 'eu', realm: '', name: '', category: '', streamLink: '' };
   loading = false;
   errorMessage: string | null = null;
   addPlayerError: string | null = null;
@@ -196,26 +196,26 @@ getClassColor(className: string): string {
     this.showAddPlayerModal = true;
     this.addPlayerError = null;
     // Reset form for new entry, category will be assigned from selectedCategory on add
-    this.newPlayerInput = { region: 'eu', realm: '', name: '', category: '' }; 
+    this.newPlayerInput = { region: 'eu', realm: '', name: '', category: '', streamLink: '' }; 
     this.cdr.detectChanges();
   }
 
   closeAddPlayerModal(): void {
     this.showAddPlayerModal = false;
     this.addPlayerError = null;
-    this.newPlayerInput = { region: 'eu', realm: '', name: '', category: '' }; // Reset form
+    this.newPlayerInput = { region: 'eu', realm: '', name: '', category: '', streamLink: '' }; // Reset form
     this.cdr.detectChanges();
   }
 
   onAddPlayer(): void { 
     this.addPlayerError = null;
-    const { region, realm, name } = this.newPlayerInput; // No category destructuring
+    const { region, realm, name, streamLink } = this.newPlayerInput; 
 
     // Assign category based on selectedCategory
     const categoryToAssign = this.selectedCategory === 'All' ? '' : this.selectedCategory;
     this.newPlayerInput.category = categoryToAssign;
 
-    if (!region || !realm || !name) { // Category is no longer explicitly required from form
+    if (!region || !realm || !name) { 
       this.addPlayerError = 'Region, Realm, and Character Name cannot be empty.';
       this.cdr.detectChanges();
       return;

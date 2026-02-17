@@ -597,3 +597,8 @@ td a:hover {
 .icon-link.logs:hover {
   box-shadow: 0 0 8px rgb(255, 255, 255);
 }
+
+.icon-link.twitch:hover {
+  box-shadow: 0 0 8px rgba(100, 65, 165, 0.7); /* Twitch purple */
+}
+

@@ -42,6 +42,10 @@
           <label for="playerName">Character Name</label>
           <input type="text" id="playerName" name="playerName" [(ngModel)]="newPlayerInput.name" required class="form-control">
         </div>
+        <div class="form-group">
+          <label for="streamLink">Stream Link (Optional)</label>
+          <input type="url" id="streamLink" name="streamLink" [(ngModel)]="newPlayerInput.streamLink" class="form-control" placeholder="e.g., https://twitch.tv/playername">
+        </div>
         <div class="modal-actions">
           <button type="submit" [disabled]="!addPlayerForm.form.valid">Add Player</button>
           <button type="button" class="cancel-button" (click)="closeAddPlayerModal()">Cancel</button>
@@ -124,6 +128,16 @@
        (click)="$event.stopPropagation()">
 
       <img src="assets/icon/wowlogs.png" alt="WarcraftLogs">
+
+    </a>
+
+        <a *ngIf="player.streamLink"
+       [href]="player.streamLink"
+       target="_blank"
+       class="icon-link twitch"
+       (click)="$event.stopPropagation()">
+
+      <img src="assets/icon/twitch.png" alt="Twitch Stream">
 
     </a>
 

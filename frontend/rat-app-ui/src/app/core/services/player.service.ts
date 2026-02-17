@@ -20,6 +20,7 @@ export interface Player {
   guildName: string; // From Raider.IO
   mythicPlusScore: number; // From Raider.IO
   category: string; // From our DB
+  streamLink: string | null; // New: Optional link to player's stream
 }
 
 // DTO for adding a player, matching backend AddPlayerRequestDto
@@ -28,6 +29,7 @@ export interface AddPlayerRequestDto {
   realm: string;
   name: string;
   category: string;
+  streamLink: string | null; // New: Optional link to player's stream
 }
 
 @Injectable({
