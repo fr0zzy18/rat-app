@@ -528,6 +528,24 @@ td a:hover {
   text-shadow: 0 0 10px rgba(96,165,250,0.4);
 }
 
+.item-level {
+  text-align: right;
+  margin-top: 5px;
+}
+
+.item-level-label {
+  font-size: 10px;
+  opacity: 0.6;
+  letter-spacing: 0.5px;
+}
+
+.item-level-value {
+  font-size: 18px;
+  font-weight: 600;
+  color: #60a5fa; /* Similar to M+ score color */
+}
+
+
 .icon {
   width: 25px;
   height: 25px;

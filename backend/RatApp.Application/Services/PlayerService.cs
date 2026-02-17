@@ -30,7 +30,7 @@ namespace RatApp.Application.Services
         {
             try
             {
-                var response = await _httpClient.GetAsync($"{RaiderIoApiBaseUrl}?region={region}&realm={realm}&name={name}&fields=guild,mythic_plus_scores_by_season:current");
+                var response = await _httpClient.GetAsync($"{RaiderIoApiBaseUrl}?region={region}&realm={realm}&name={name}&fields=guild,mythic_plus_scores_by_season:current,gear");
                 response.EnsureSuccessStatusCode(); // Throws an exception if the HTTP response status is an error code
 
                 var raiderIoPlayer = await response.Content.ReadFromJsonAsync<RaiderIoPlayerResponse>();
@@ -41,6 +41,9 @@ namespace RatApp.Application.Services
                 var mythicPlusScoreAll = raiderIoPlayer.MythicPlusScoresBySeason?
                                                         .FirstOrDefault(s => s.season == "season-tww-3") // Assuming "current" resolves to a specific season
                                                         ?.scores?.all ?? 0;
+
+                // Extract ItemLevelEquipped from gear
+                var itemLevelEquipped = raiderIoPlayer.gear?.ItemLevelEquipped ?? 0.0;
 
                 return new PlayerDto
                 {
@@ -56,7 +59,8 @@ namespace RatApp.Application.Services
                     ThumbnailUrl = raiderIoPlayer.thumbnail_url,
                     ProfileUrl = raiderIoPlayer.profile_url,
                     GuildName = raiderIoPlayer.guild?.name ?? string.Empty,
-                    MythicPlusScore = mythicPlusScoreAll
+                    MythicPlusScore = mythicPlusScoreAll,
+                    ItemLevelEquipped = itemLevelEquipped // Include ItemLevelEquipped
                 };
             }
             catch (HttpRequestException ex)
@@ -95,6 +99,7 @@ namespace RatApp.Application.Services
                 existingPlayer.MythicPlusScore = raiderIoDetails.MythicPlusScore; // Update MythicPlusScore
                 existingPlayer.Category = dto.Category; // Update Category
                 existingPlayer.StreamLink = dto.StreamLink; // Update StreamLink
+                existingPlayer.ItemLevelEquipped = raiderIoDetails.ItemLevelEquipped; // Update ItemLevelEquipped
                 
                 await _context.SaveChangesAsync();
                 raiderIoDetails.Id = existingPlayer.Id;
@@ -117,7 +122,8 @@ namespace RatApp.Application.Services
                 GuildName = raiderIoDetails.GuildName,
                 MythicPlusScore = raiderIoDetails.MythicPlusScore, // Set MythicPlusScore
                 Category = dto.Category, // Set Category
-                StreamLink = dto.StreamLink // Set StreamLink
+                StreamLink = dto.StreamLink, // Set StreamLink
+                ItemLevelEquipped = raiderIoDetails.ItemLevelEquipped // Set ItemLevelEquipped
             };
 
             _context.Players.Add(playerEntity);
@@ -160,6 +166,7 @@ namespace RatApp.Application.Services
                         storedPlayer.ProfileUrl = raiderIoDetails.ProfileUrl ?? string.Empty; // Ensure not null
                         storedPlayer.GuildName = raiderIoDetails.GuildName ?? string.Empty; // Ensure not null
                         storedPlayer.MythicPlusScore = raiderIoDetails.MythicPlusScore; // Update MythicPlusScore
+                        storedPlayer.ItemLevelEquipped = raiderIoDetails.ItemLevelEquipped; // Update ItemLevelEquipped
                         // Category is not refreshed from Raider.IO, it's set during import
                         await _context.SaveChangesAsync();
                     }
@@ -181,7 +188,8 @@ namespace RatApp.Application.Services
                     GuildName = storedPlayer.GuildName,
                     MythicPlusScore = storedPlayer.MythicPlusScore,
                     Category = storedPlayer.Category, // Include Category
-                    StreamLink = storedPlayer.StreamLink // Include StreamLink
+                    StreamLink = storedPlayer.StreamLink, // Include StreamLink
+                    ItemLevelEquipped = storedPlayer.ItemLevelEquipped // Include ItemLevelEquipped
                 });
             }
             return playerDtos;

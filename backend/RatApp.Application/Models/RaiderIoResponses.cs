@@ -25,6 +25,14 @@ namespace RatApp.Application.Models
         
         [JsonPropertyName("mythic_plus_scores_by_season")]
         public List<MythicPlusScoresBySeasonEntry>? MythicPlusScoresBySeason { get; set; }
+
+        public GearInfo? gear { get; set; } // New property for gear information
+    }
+
+    public class GearInfo
+    {
+        [JsonPropertyName("item_level_equipped")]
+        public int ItemLevelEquipped { get; set; }
     }
 
     public class GuildInfo

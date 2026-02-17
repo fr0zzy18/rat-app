@@ -18,5 +18,6 @@ namespace RatApp.Core.Entities
         public double MythicPlusScore { get; set; } = 0.0;
         public string Category { get; set; } = string.Empty;
         public string? StreamLink { get; set; }
+        public double ItemLevelEquipped { get; set; } = 0.0;
     }
 }

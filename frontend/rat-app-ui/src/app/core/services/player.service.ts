@@ -21,6 +21,7 @@ export interface Player {
   mythicPlusScore: number; // From Raider.IO
   category: string; // From our DB
   streamLink: string | null; // New: Optional link to player's stream
+  itemLevelEquipped: number; // New: Player's equipped item level
 }
 
 // DTO for adding a player, matching backend AddPlayerRequestDto

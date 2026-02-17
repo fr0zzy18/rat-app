@@ -139,6 +139,9 @@ namespace RatApp.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<double>("ItemLevelEquipped")
+                        .HasColumnType("double precision");
+
                     b.Property<DateTime>("LastUpdated")
                         .HasColumnType("timestamp with time zone");
 

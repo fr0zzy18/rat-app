@@ -23,6 +23,7 @@ namespace RatApp.Application.Dtos
         public double MythicPlusScore { get; set; } = 0.0; // From Raider.IO
         public string Category { get; set; } = string.Empty; // From our DB
         public string? StreamLink { get; set; } // New: Optional link to player's stream
+        public double ItemLevelEquipped { get; set; } = 0.0; // New: Player's equipped item level
 
     }
 }
