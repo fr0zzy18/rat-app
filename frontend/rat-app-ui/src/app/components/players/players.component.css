@@ -542,3 +542,58 @@ td a:hover {
 .role-icon {
   filter: drop-shadow(0 0 2px rgba(0,0,0,0.4));
 }
+
+.player-name-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.player-name {
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 18px;
+  transition: all 0.15s ease;
+}
+
+.player-name:hover {
+  text-shadow: 0 0 8px currentColor;
+}
+
+.player-icons {
+  display: flex;
+  gap: 6px;
+}
+
+.icon-link {
+  width: 26px;
+  height: 26px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 6px;
+
+  background: rgba(255,255,255,0.05);
+
+  transition: all 0.15s ease;
+}
+
+.icon-link img {
+  width: 16px;
+  height: 16px;
+}
+
+.icon-link:hover {
+  transform: scale(1.1);
+  background: rgba(255,255,255,0.15);
+}
+
+.icon-link.wow:hover {
+  box-shadow: 0 0 8px rgba(255, 209, 0, 0.7);
+}
+
+.icon-link.logs:hover {
+  box-shadow: 0 0 8px rgb(255, 255, 255);
+}

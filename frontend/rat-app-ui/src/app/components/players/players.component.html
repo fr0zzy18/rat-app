@@ -104,14 +104,44 @@
     >
 
     <div class="player-header-info">
-      <a 
-        [href]="player.profileUrl"
-        target="_blank"
-        class="player-name"
-        [ngStyle]="{ color: classColors[player.class] || '#fff' }"
-      >
-        {{ player.name }}
-      </a>
+<div class="player-name-block">
+
+  <!-- іконки зверху -->
+  <div class="player-icons">
+
+    <a [href]="getWoWProfileUrl(player)"
+       target="_blank"
+       class="icon-link wow"
+       (click)="$event.stopPropagation()">
+
+      <img src="assets/icon/wow.png" alt="WoW Profile">
+
+    </a>
+
+    <a [href]="getWarcraftLogsUrl(player)"
+       target="_blank"
+       class="icon-link logs"
+       (click)="$event.stopPropagation()">
+
+      <img src="assets/icon/wowlogs.png" alt="WarcraftLogs">
+
+    </a>
+
+  </div>
+
+  <!-- ім'я знизу -->
+  <a [href]="player.profileUrl"
+     target="_blank"
+     class="player-name"
+     [ngStyle]="{ color: classColors[player.class] }"
+     (click)="$event.stopPropagation()">
+
+    {{ player.name }}
+
+  </a>
+
+</div>
+
 
       <div class="player-guild">
         {{ player.guildName || 'No Guild' }}

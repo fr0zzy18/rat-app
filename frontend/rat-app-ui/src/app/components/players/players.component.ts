@@ -252,4 +252,22 @@ getClassColor(className: string): string {
       }
     });
   }
+
+  // Generate WarcraftLogs URL
+  getWarcraftLogsUrl(player: Player): string {
+    if (!player || !player.region || !player.realm || !player.name) {
+      return '#'; // Return a placeholder or empty string if data is incomplete
+    }
+    const slugifiedRealm = player.realm.toLowerCase().replace(/\s/g, '-');
+    return `https://www.warcraftlogs.com/character/${player.region}/${slugifiedRealm}/${player.name}`;
+  }
+
+  // Generate WoW Official Profile URL
+  getWoWProfileUrl(player: Player): string {
+    if (!player || !player.region || !player.realm || !player.name) {
+      return '#'; // Return a placeholder or empty string if data is incomplete
+    }
+    const slugifiedRealm = player.realm.toLowerCase().replace(/\s/g, '-');
+    return `https://worldofwarcraft.blizzard.com/en-gb/character/${player.region}/${slugifiedRealm}/${player.name}`;
+  }
 }
