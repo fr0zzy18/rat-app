@@ -22,5 +22,7 @@ namespace RatApp.Application.Dtos
         public string GuildName { get; set; } = string.Empty; // From Raider.IO
         public double MythicPlusScore { get; set; } = 0.0; // From Raider.IO
         public string Category { get; set; } = string.Empty; // From our DB
+        public string? StreamLink { get; set; } // New: Optional link to player's stream
+
     }
 }

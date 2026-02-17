@@ -165,6 +165,9 @@ namespace RatApp.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("StreamLink")
+                        .HasColumnType("text");
+
                     b.Property<string>("ThumbnailUrl")
                         .IsRequired()
                         .HasColumnType("text");

@@ -94,6 +94,7 @@ namespace RatApp.Application.Services
                 existingPlayer.GuildName = raiderIoDetails.GuildName; // Update GuildName
                 existingPlayer.MythicPlusScore = raiderIoDetails.MythicPlusScore; // Update MythicPlusScore
                 existingPlayer.Category = dto.Category; // Update Category
+                existingPlayer.StreamLink = dto.StreamLink; // Update StreamLink
                 
                 await _context.SaveChangesAsync();
                 raiderIoDetails.Id = existingPlayer.Id;
@@ -115,7 +116,8 @@ namespace RatApp.Application.Services
                 ProfileUrl = raiderIoDetails.ProfileUrl,
                 GuildName = raiderIoDetails.GuildName,
                 MythicPlusScore = raiderIoDetails.MythicPlusScore, // Set MythicPlusScore
-                Category = dto.Category // Set Category
+                Category = dto.Category, // Set Category
+                StreamLink = dto.StreamLink // Set StreamLink
             };
 
             _context.Players.Add(playerEntity);
@@ -178,7 +180,8 @@ namespace RatApp.Application.Services
                     ProfileUrl = storedPlayer.ProfileUrl,
                     GuildName = storedPlayer.GuildName,
                     MythicPlusScore = storedPlayer.MythicPlusScore,
-                    Category = storedPlayer.Category // Include Category
+                    Category = storedPlayer.Category, // Include Category
+                    StreamLink = storedPlayer.StreamLink // Include StreamLink
                 });
             }
             return playerDtos;

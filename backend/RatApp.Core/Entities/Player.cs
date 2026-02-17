@@ -17,5 +17,6 @@ namespace RatApp.Core.Entities
         public string GuildName { get; set; } = string.Empty;
         public double MythicPlusScore { get; set; } = 0.0;
         public string Category { get; set; } = string.Empty;
+        public string? StreamLink { get; set; }
     }
 }
