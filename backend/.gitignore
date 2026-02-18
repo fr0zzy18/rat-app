@@ -71,7 +71,3 @@ appsettings.Development.json
 appsettings.json
 UserSecrets/
 
-# EF Migrations history
-*.Designer.cs
-*.cs.bak
-[0-9]*_*.cs
