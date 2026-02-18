@@ -32,7 +32,7 @@ namespace RatApp.Application.Models
     public class GearInfo
     {
         [JsonPropertyName("item_level_equipped")]
-        public int ItemLevelEquipped { get; set; }
+        public double ItemLevelEquipped { get; set; }
     }
 
     public class GuildInfo
