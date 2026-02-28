@@ -49,5 +49,17 @@ namespace RatApp.Api.Controllers
             }
             return NoContent();
         }
+
+        [HttpPatch("{id}/category")]
+        [Authorize(Roles = "Admin,Manager")]
+        public async Task<ActionResult<PlayerDto>> UpdatePlayerCategory(int id, [FromBody] UpdatePlayerCategoryDto dto)
+        {
+            var updated = await _playerService.UpdatePlayerCategoryAsync(id, dto.Category);
+            if (updated == null)
+            {
+                return NotFound($"Player with ID {id} not found.");
+            }
+            return Ok(updated);
+        }
     }
 }

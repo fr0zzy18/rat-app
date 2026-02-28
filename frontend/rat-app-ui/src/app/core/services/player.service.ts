@@ -59,4 +59,8 @@ export class PlayerService {
   deletePlayer(id: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/${id}`, { headers: this.getAuthHeaders() });
   }
+
+  updatePlayerCategory(id: number, category: string): Observable<Player> {
+    return this.http.patch<Player>(`${this.apiUrl}/${id}/category`, { category }, { headers: this.getAuthHeaders() });
+  }
 }

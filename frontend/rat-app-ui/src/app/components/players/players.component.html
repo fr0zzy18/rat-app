@@ -203,7 +203,16 @@
     </div>
 
     <div class="player-actions" *ngIf="canManagePlayers | async">
-  <button 
+  <select
+    class="category-select"
+    [ngModel]="player.category"
+    [disabled]="updatingCategoryPlayerId === player.id"
+    (ngModelChange)="onPlayerCategoryChange(player, $event)"
+  >
+    <option value="">No category</option>
+    <option *ngFor="let cat of categoriesForMoveDropdown" [value]="cat.name">{{ cat.name }}</option>
+  </select>
+  <button
     class="delete-button"
     (click)="deletePlayer(player.id, player.name)"
   >

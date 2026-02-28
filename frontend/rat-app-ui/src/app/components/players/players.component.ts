@@ -29,7 +29,7 @@ export class PlayersComponent implements OnInit {
   selectedCategoryToDelete: Category | null = null;
 
   showAddPlayerModal: boolean = false;
-  
+  updatingCategoryPlayerId: number | null = null;
   selectedCategory: string = 'All';
 
   constructor(
@@ -180,6 +180,35 @@ getClassColor(className: string): string {
 
   get categoriesForDeleteDropdown(): Category[] {
     return this.availableCategories.filter(c => c.name !== 'All');
+  }
+
+  get categoriesForMoveDropdown(): Category[] {
+    return this.availableCategories.filter(c => c.name !== 'All');
+  }
+
+  onPlayerCategoryChange(player: Player, newCategory: string): void {
+    if (newCategory === player.category) return;
+
+    const oldCategory = player.category;
+    player.category = newCategory;
+    this.updatingCategoryPlayerId = player.id;
+
+    this.playerService.updatePlayerCategory(player.id, newCategory).subscribe({
+      next: (updated) => {
+        player.category = updated.category;
+        if (this.selectedCategory !== 'All' && newCategory !== this.selectedCategory) {
+          this.loadPlayers();
+        }
+        this.updatingCategoryPlayerId = null;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        player.category = oldCategory;
+        this.updatingCategoryPlayerId = null;
+        this.errorMessage = err.error?.message || 'Failed to update category.';
+        this.cdr.detectChanges();
+      }
+    });
   }
 
   openAddPlayerModal(): void {

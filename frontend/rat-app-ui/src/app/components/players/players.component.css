@@ -468,11 +468,36 @@ td a:hover {
   position: absolute;
   bottom: 12px;
   right: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
 
   opacity: 0;
   transform: translateY(6px);
 
   transition: all 0.2s ease;
+}
+
+.category-select {
+  padding: 4px 8px;
+  font-size: 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(34, 197, 94, 0.4);
+  background: rgba(34, 197, 94, 0.15);
+  color: #4ade80;
+  cursor: pointer;
+  min-width: 100px;
+}
+
+.category-select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.category-select:focus {
+  outline: none;
+  border-color: #22c55e;
 }
 
 .player-card:hover .player-actions {

@@ -193,6 +193,38 @@ namespace RatApp.Application.Services
             await _context.SaveChangesAsync();
             return true;
         }
+
+        public async Task<PlayerDto?> UpdatePlayerCategoryAsync(int id, string category)
+        {
+            var player = await _context.Players.FindAsync(id);
+            if (player == null)
+            {
+                return null;
+            }
+
+            player.Category = category ?? string.Empty;
+            await _context.SaveChangesAsync();
+
+            return new PlayerDto
+            {
+                Id = player.Id,
+                Name = player.Name,
+                Race = player.Race,
+                Class = player.Class,
+                ActiveSpecName = player.ActiveSpecName,
+                ActiveSpecRole = player.ActiveSpecRole,
+                Faction = player.Faction,
+                Region = player.Region,
+                Realm = player.Realm,
+                ThumbnailUrl = player.ThumbnailUrl,
+                ProfileUrl = player.ProfileUrl,
+                GuildName = player.GuildName,
+                MythicPlusScore = player.MythicPlusScore,
+                Category = player.Category,
+                StreamLink = player.StreamLink,
+                ItemLevelEquipped = player.ItemLevelEquipped
+            };
+        }
         public async Task<bool> DoesCategoryHavePlayersAsync(string categoryName)
         {
             if (string.IsNullOrWhiteSpace(categoryName))
