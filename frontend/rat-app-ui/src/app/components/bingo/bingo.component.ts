@@ -7,6 +7,7 @@ import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../core/services/auth.service';
 import { Router } from '@angular/router';
 import { GameService } from '../../core/services/game.service';
+import { Suggestion, SuggestionStatus } from '../../core/models/suggestion.model';
 
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { GameResponse } from '../../core/models/game-response.model';
@@ -31,6 +32,13 @@ export class BingoComponent implements OnInit, OnDestroy {
   private errorTimer: any;
   private readonly MESSAGE_DELAY = 3000;
   private subscriptions: Subscription[] = [];
+  newSuggestionPhrase: string = '';
+  canSuggest: boolean = false;
+  suggestions: Suggestion[] = []; // New property for suggestions
+  canManageSuggestions: boolean = false; // New property for managing suggestions
+  editingSuggestionId: number | null = null;
+  editedSuggestionPhrase: string = '';
+
 
   private showAndClearMessage(type: 'success' | 'error', message: string): void {
     if (type === 'success') {
@@ -87,6 +95,9 @@ export class BingoComponent implements OnInit, OnDestroy {
         }
       })
     );
+    if (this.canManageSuggestions) {
+      this.getSuggestions(); // Load suggestions if user can manage them
+    }
   }
 
   onMouseEnter(cardId: number): void {
@@ -214,7 +225,99 @@ export class BingoComponent implements OnInit, OnDestroy {
     this.canCreate = this.authService.hasRole('Admin') || this.authService.hasRole('Manager');
     this.canDelete = this.authService.hasRole('Admin') || this.authService.hasRole('Manager');
     this.canEdit = this.authService.hasRole('Admin') || this.authService.hasRole('Manager');
+    this.canSuggest = this.authService.hasRole('Player') && !(this.authService.hasRole('Admin') || this.authService.hasRole('Manager'));
+    this.canManageSuggestions = this.authService.hasRole('Admin') || this.authService.hasRole('Manager'); // Set based on roles
   }
+  submitSuggestion(): void {
+    this.successMessage = null;
+    this.errorMessage = null;
+
+    if (this.newSuggestionPhrase.trim()) {
+      this.bingoService.addSuggestion(this.newSuggestionPhrase).subscribe({
+        next: (suggestion) => {
+          this.newSuggestionPhrase = '';
+          this.showAndClearMessage('success', 'Suggestion submitted successfully!');
+        },
+        error: (err) => {
+          this.showAndClearMessage('error', err.error?.message || 'Failed to submit suggestion.');
+          console.error('Error submitting suggestion:', err);
+        }
+      });
+    } else {
+      this.showAndClearMessage('error', 'Suggestion phrase cannot be empty.');
+    }
+  }
+
+  // New methods for managing suggestions
+  getSuggestions(): void {
+    this.bingoService.getAllSuggestions().subscribe({
+      next: (suggestions) => {
+        this.suggestions = suggestions;
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.showAndClearMessage('error', 'Failed to load suggestions.');
+        console.error('Error loading suggestions:', err);
+      }
+    });
+  }
+
+  approveSuggestion(id: number): void {
+    this.bingoService.approveSuggestion(id).subscribe({
+      next: (approvedSuggestion) => {
+        this.showAndClearMessage('success', 'Suggestion approved and added as a new bingo card!');
+        this.getSuggestions(); // Refresh the list
+        this.getBingoCards(); // Refresh bingo cards as well
+      },
+      error: (err) => {
+        this.showAndClearMessage('error', err.error?.message || 'Failed to approve suggestion.');
+        console.error('Error approving suggestion:', err);
+      }
+    });
+  }
+
+  rejectSuggestion(id: number): void {
+    this.bingoService.rejectSuggestion(id).subscribe({
+      next: (rejectedSuggestion) => {
+        this.showAndClearMessage('success', 'Suggestion rejected.');
+        this.getSuggestions(); // Refresh the list
+      },
+      error: (err) => {
+        this.showAndClearMessage('error', err.error?.message || 'Failed to reject suggestion.');
+        console.error('Error rejecting suggestion:', err);
+      }
+    });
+  }
+
+  editSuggestion(suggestion: Suggestion): void {
+    this.editingSuggestionId = suggestion.id!;
+    this.editedSuggestionPhrase = suggestion.phrase;
+  }
+
+  cancelSuggestionEdit(): void {
+    this.editingSuggestionId = null;
+    this.editedSuggestionPhrase = '';
+  }
+
+  updateSuggestion(suggestion: Suggestion): void {
+    if (!this.editedSuggestionPhrase.trim()) {
+      this.showAndClearMessage('error', 'Suggestion phrase cannot be empty.');
+      return;
+    }
+
+    this.bingoService.updateSuggestionPhrase(suggestion.id!, this.editedSuggestionPhrase).subscribe({
+      next: (updatedSuggestion) => {
+        this.showAndClearMessage('success', 'Suggestion updated successfully!');
+        this.cancelSuggestionEdit();
+        this.getSuggestions(); // Refresh the list
+      },
+      error: (err) => {
+        this.showAndClearMessage('error', err.error?.message || 'Failed to update suggestion.');
+        console.error('Error updating suggestion:', err);
+      }
+    });
+  }
+
   toggleCardSelection(card: BingoCard): void {
     if (this.editingCardId === card.id) {
       return;

@@ -16,6 +16,7 @@ namespace RatApp.Infrastructure.Persistence
         public DbSet<BingoCard> BingoCards { get; set; }
         public DbSet<Game> Games { get; set; }
         public DbSet<Category> Categories { get; set; }
+        public DbSet<Suggestion> Suggestions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -32,6 +33,13 @@ namespace RatApp.Infrastructure.Persistence
                 .HasOne(ur => ur.Role)
                 .WithMany(r => r.UserRoles)
                 .HasForeignKey(ur => ur.RoleId);
+
+            modelBuilder.Entity<Suggestion>()
+                .HasOne(s => s.SuggestedByUser)
+                .WithMany()
+                .HasForeignKey(s => s.SuggestedByUserId)
+                .OnDelete(DeleteBehavior.Restrict); // Prevent cascade delete for suggestions
+
 
 
         }
