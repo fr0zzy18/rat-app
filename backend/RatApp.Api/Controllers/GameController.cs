@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using RatApp.Application.Dtos;
 using RatApp.Application.Services;
 using RatApp.Core.Entities;
-using RatApp.Core.Interfaces; // Added for IUserRepository
+using RatApp.Core.Interfaces;
 using Microsoft.AspNetCore.SignalR;
 using RatApp.Api.Hubs;
 
@@ -50,7 +50,7 @@ namespace RatApp.Api.Controllers
                 Status = game.Status,
                 CreatedDate = game.CreatedDate,
                 GameStartedDate = game.GameStartedDate,
-                LastActivityDate = game.LastActivityDate // New: Map LastActivityDate
+                LastActivityDate = game.LastActivityDate
             };
         }
 
@@ -65,7 +65,7 @@ namespace RatApp.Api.Controllers
 
             var newGame = await _gameService.CreateGameAsync(userId, request.Player1SelectedCardIds);
             var gameResponse = await MapGameToGameResponseDto(newGame);
-            await _hubContext.Clients.All.SendAsync("WaitingGameAdded", gameResponse); // Notify all clients about the new waiting game
+            await _hubContext.Clients.All.SendAsync("WaitingGameAdded", gameResponse);
             return Ok(gameResponse);
         }
 
@@ -108,7 +108,7 @@ namespace RatApp.Api.Controllers
             var currentUserIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(currentUserIdString) || !int.TryParse(currentUserIdString, out int currentUserId))
             {
-                return Unauthorized(); // Should not happen if [Authorize] is effective
+                return Unauthorized();
             }
 
             if (currentUserId != game.CreatedByUserId && currentUserId != game.Player2UserId)
@@ -151,7 +151,7 @@ namespace RatApp.Api.Controllers
             }
         }
 
-        [HttpGet("my-active-game")] // Moved to here
+        [HttpGet("my-active-game")]
         public async Task<ActionResult<GameResponseDto>> GetMyActiveGame()
         {
             var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -164,14 +164,14 @@ namespace RatApp.Api.Controllers
 
             if (game == null)
             {
-                return Ok(null); // Return 200 OK with a null body to indicate no active game
+                return Ok(null);
             }
             
             var gameResponse = await MapGameToGameResponseDto(game);
             return Ok(gameResponse);
         }
 
-        [HttpPost("{gameId}/resume")] // New endpoint for resuming game
+        [HttpPost("{gameId}/resume")]
         public async Task<ActionResult<GameResponseDto>> ResumeGame(Guid gameId)
         {
             var userIdString = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -202,7 +202,7 @@ namespace RatApp.Api.Controllers
             }
         }
 
-        [HttpGet("waiting-games")] // New endpoint to get games waiting for a second player
+        [HttpGet("waiting-games")]
         public async Task<ActionResult<IEnumerable<GameResponseDto>>> GetWaitingGames()
         {
             var waitingGames = await _gameService.GetWaitingGamesAsync();

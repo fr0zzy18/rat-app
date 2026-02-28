@@ -1,4 +1,4 @@
-/* ===== Page Background ===== */
+
 .container {
   min-height: 100vh;
   padding: 40px 30px;
@@ -7,7 +7,7 @@
   color: #f1f5f9;
 }
 
-/* ===== Header ===== */
+
 .header-section {
   text-align: center;
   margin-bottom: 30px;
@@ -19,7 +19,7 @@
   color: #ffffff;
 }
 
-/* ===== Glass Sections ===== */
+
 .reconnect-game-section,
 .create-card-form,
 .game-section,
@@ -35,7 +35,7 @@
   box-shadow: 0 8px 32px rgba(0,0,0,0.4);
 }
 
-/* ===== Alerts ===== */
+
 .alert {
   border-radius: 14px;
   padding: 14px 18px;
@@ -55,7 +55,7 @@
   border: 1px solid rgba(239,68,68,0.3);
 }
 
-/* ===== Inputs ===== */
+
 input[type="text"] {
   padding: 10px 14px;
   border-radius: 12px;
@@ -71,7 +71,7 @@ input[type="text"]:focus {
   box-shadow: 0 0 12px rgba(59,130,246,0.5);
 }
 
-/* ===== Buttons ===== */
+
 button {
   padding: 10px 18px;
   border-radius: 12px;
@@ -81,7 +81,7 @@ button {
   transition: all 0.25s ease;
 }
 
-/* Primary */
+
 button:not(.delete-button):not(.cancel-button):not(.edit-button):not(.update-button) {
   background: linear-gradient(135deg, #3b82f6, #6366f1);
   color: white;
@@ -92,7 +92,7 @@ button:hover {
   box-shadow: 0 6px 20px rgba(59,130,246,0.5);
 }
 
-/* Danger */
+
 .delete-button {
   background: rgba(239,68,68,0.15);
   color: #f87171;
@@ -103,13 +103,13 @@ button:hover {
   background: rgba(239,68,68,0.3);
 }
 
-/* Cancel */
+
 .cancel-button {
   background: rgba(148,163,184,0.2);
   color: #cbd5e1;
 }
 
-/* ===== Game Setup ===== */
+
 .selection-info {
   display: flex;
   align-items: center;
@@ -118,7 +118,7 @@ button:hover {
   font-size: 16px;
 }
 
-/* ===== Available Games List ===== */
+
 .available-games-section ul {
   list-style: none;
   padding: 0;
@@ -142,7 +142,7 @@ button:hover {
   transform: translateX(5px);
 }
 
-/* ===== Card Grid ===== */
+
 .card-list {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
@@ -150,7 +150,7 @@ button:hover {
   margin-top: 30px;
 }
 
-/* ===== Individual Card ===== */
+
 .card {
   padding: 18px;
   border-radius: 18px;
@@ -174,7 +174,7 @@ button:hover {
   box-shadow: 0 10px 30px rgba(59,130,246,0.3);
 }
 
-/* Selected card */
+
 .card.selected {
   background: linear-gradient(135deg, #3b82f6, #6366f1);
   border: none;
@@ -182,7 +182,7 @@ button:hover {
   box-shadow: 0 8px 25px rgba(59,130,246,0.6);
 }
 
-/* ===== CRUD Button Group ===== */
+
 .button-group {
   display: flex;
   gap: 8px;
@@ -195,20 +195,20 @@ button:hover {
   border-radius: 8px;
 }
 
-/* Edit */
+
 button.edit-button {
   background: rgba(59, 246, 146, 0.2);
   color: #93fd9a;
 }
 
-/* Update */
+
 button.update-button {
   background: rgba(59, 246, 146, 0.2);
   color: #93fd9a;
 }
 
-/* New rule to make the edit input field full width within its wrapper */
+
 .card-edit-input-wrapper input[type="text"] {
   width: 100%;
-  box-sizing: border-box; /* Ensures padding and border are included in the element's total width and height */
+  box-sizing: border-box; 
 }

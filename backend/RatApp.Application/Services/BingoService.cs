@@ -50,7 +50,7 @@ namespace RatApp.Application.Services
             var bingoCard = await _context.BingoCards.FindAsync(id);
             if (bingoCard == null)
             {
-                return false; // Card not found
+                return false;
             }
 
             _context.BingoCards.Remove(bingoCard);
@@ -63,7 +63,7 @@ namespace RatApp.Application.Services
             var bingoCard = await _context.BingoCards.FindAsync(id);
             if (bingoCard == null)
             {
-                return null; // Card not found
+                return null;
             }
 
             bingoCard.Phrase = updateBingoCardDto.Phrase;

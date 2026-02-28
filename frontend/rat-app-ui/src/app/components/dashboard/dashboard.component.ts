@@ -15,8 +15,8 @@ import { AuthService } from '../../core/services/auth.service';
   </div>
 </div>
   `,
-  styleUrls: ['./dashboard.component.css'] // Use styleUrls
+  styleUrls: ['./dashboard.component.css']
 })
 export class DashboardComponent {
-  constructor(public authService: AuthService) { } // Removed Router from constructor
+  constructor(public authService: AuthService) { }
 }

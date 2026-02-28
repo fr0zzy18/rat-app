@@ -19,7 +19,7 @@ namespace RatApp.Api.Controllers
         }
 
         [HttpGet]
-        [Authorize(Roles = "Admin,Manager,Player")] // Allow Player role to read
+        [Authorize(Roles = "Admin,Manager,Player")]
         public async Task<ActionResult<IEnumerable<PlayerDto>>> GetAllPlayers([FromQuery] string? category)
         {
             var players = await _playerService.GetAllPlayersAsync(category);
@@ -27,7 +27,7 @@ namespace RatApp.Api.Controllers
         }
 
         [HttpPost("import")]
-        [Authorize(Roles = "Admin,Manager")] // Only Admin or Manager can import
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<ActionResult<PlayerDto>> ImportPlayer(AddPlayerRequestDto dto)
         {
             var newPlayer = await _playerService.AddPlayerAsync(dto);
@@ -39,7 +39,7 @@ namespace RatApp.Api.Controllers
         }
 
         [HttpDelete("{id}")]
-        [Authorize(Roles = "Admin,Manager")] // Only Admin or Manager can delete
+        [Authorize(Roles = "Admin,Manager")]
         public async Task<IActionResult> DeletePlayer(int id)
         {
             var deleted = await _playerService.DeletePlayerAsync(id);

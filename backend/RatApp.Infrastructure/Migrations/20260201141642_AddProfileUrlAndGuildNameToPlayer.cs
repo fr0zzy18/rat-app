@@ -4,10 +4,8 @@
 
 namespace RatApp.Infrastructure.Migrations
 {
-    /// <inheritdoc />
     public partial class AddProfileUrlAndGuildNameToPlayer : Migration
     {
-        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<string>(
@@ -24,8 +22,6 @@ namespace RatApp.Infrastructure.Migrations
                 nullable: false,
                 defaultValue: "");
         }
-
-        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(

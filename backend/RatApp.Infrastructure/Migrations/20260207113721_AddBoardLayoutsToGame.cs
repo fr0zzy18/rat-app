@@ -5,10 +5,8 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace RatApp.Infrastructure.Migrations
 {
-    /// <inheritdoc />
     public partial class AddBoardLayoutsToGame : Migration
     {
-        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<List<int>>(
@@ -23,8 +21,6 @@ namespace RatApp.Infrastructure.Migrations
                 type: "integer[]",
                 nullable: true);
         }
-
-        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(

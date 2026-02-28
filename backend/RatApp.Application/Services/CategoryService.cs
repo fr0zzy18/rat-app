@@ -2,19 +2,19 @@ using RatApp.Core.Entities;
 using RatApp.Core.Interfaces;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using System; // For InvalidOperationException
+using System;
 
 namespace RatApp.Application.Services
 {
     public class CategoryService
     {
         private readonly ICategoryRepository _categoryRepository;
-        private readonly PlayerService _playerService; // New: PlayerService dependency
+        private readonly PlayerService _playerService;
 
         public CategoryService(ICategoryRepository categoryRepository, PlayerService playerService)
         {
             _categoryRepository = categoryRepository;
-            _playerService = playerService; // Inject PlayerService
+            _playerService = playerService;
         }
 
         public async Task<IEnumerable<Category>> GetAllCategoriesAsync()
@@ -44,14 +44,12 @@ namespace RatApp.Application.Services
             await _categoryRepository.AddCategoryAsync(category);
             return category;
         }
-
-        // New method to delete a category, with check for associated players
         public async Task<bool> DeleteCategoryAsync(int categoryId)
         {
             var category = await _categoryRepository.GetCategoryByIdAsync(categoryId);
             if (category == null)
             {
-                return false; // Category not found
+                return false;
             }
 
             if (await _playerService.DoesCategoryHavePlayersAsync(category.Name))

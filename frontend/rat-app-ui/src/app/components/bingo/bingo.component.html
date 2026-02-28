@@ -3,7 +3,6 @@
     <h1>Bingo Game</h1>
   </div>
 
-  <!-- New: Reconnect Button -->
   <div *ngIf="reconnectGameId" class="reconnect-game-section">
     <p>You have an active game. Would you like to reconnect?</p>
     <button (click)="onReconnect()" class="reconnect-button">Reconnect to Game</button>
@@ -29,7 +28,6 @@
       </div>
     </div>
 
-    <!-- Available Games Section -->
     <div class="available-games-section">
       <h2>Games List</h2>
       <div *ngIf="waitingGames.length === 0; else gamesList">

@@ -6,10 +6,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace RatApp.Infrastructure.Migrations
 {
-    /// <inheritdoc />
     public partial class AddBingoGame : Migration
     {
-        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
@@ -60,8 +58,6 @@ namespace RatApp.Infrastructure.Migrations
                 nullable: false,
                 defaultValue: "");
         }
-
-        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(

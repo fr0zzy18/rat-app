@@ -13,7 +13,7 @@ export interface Category {
   providedIn: 'root'
 })
 export class CategoryService {
-  private apiUrl = `${environment.apiUrl}/api/Category`; // Ensure this matches your backend controller route
+  private apiUrl = `${environment.apiUrl}/api/Category`;
 
   constructor(private http: HttpClient) { }
 
@@ -36,34 +36,30 @@ export class CategoryService {
     );
   }
 
-  private handleError(error: HttpErrorResponse): Observable<never> { // Explicitly define return type
+  private handleError(error: HttpErrorResponse): Observable<never> {
     let errorMessage = 'An unknown error occurred!';
     if (error.error instanceof ErrorEvent) {
-      // Client-side errors
       errorMessage = `Error: ${error.error.message}`;
     } else {
-      // Backend errors
-      if (error.status === 409) { // Conflict
-        // Backend now sends a specific message for "Category must be empty"
-        // error.error might be a string or an object with a message property
+      if (error.status === 409) {
         if (typeof error.error === 'string') {
           errorMessage = `Error: ${error.error}`;
         } else if (error.error && (error.error as any).message) {
           errorMessage = `Error: ${(error.error as any).message}`;
         } else {
-          errorMessage = `Error: Category operation conflict.`; // Fallback message
+          errorMessage = `Error: Category operation conflict.`;
         }
-      } else if (error.status === 400) { // Bad Request
+      } else if (error.status === 400) {
         errorMessage = `Error: ${typeof error.error === 'string' ? error.error : (error.error as any)?.message || 'Invalid request.'}`;
-      } else if (error.status === 403) { // Forbidden
+      } else if (error.status === 403) {
         errorMessage = `Error: You do not have permission to perform this action.`;
-      } else if (error.error && typeof error.error === 'object' && (error.error as any).message) { // Generic error from backend with message
+      } else if (error.error && typeof error.error === 'object' && (error.error as any).message) {
         errorMessage = `Error: ${(error.error as any).message}`;
       } else {
         errorMessage = `Server returned code: ${error.status}, error message: ${error.message}`;
       }
     }
-    console.error(errorMessage, error); // Log both the constructed message and the raw error object
+    console.error(errorMessage, error);
     return throwError(() => new Error(errorMessage));
   }
 }

@@ -1,4 +1,4 @@
-/* ===== Login background ===== */
+
 .login-container {
   min-height: 100vh;
   display: flex;
@@ -9,7 +9,7 @@
   font-family: 'Inter', 'Segoe UI', sans-serif;
 }
 
-/* ===== Glass card ===== */
+
 .login-card {
   background: rgba(255, 255, 255, 0.06);
   backdrop-filter: blur(18px);
@@ -26,13 +26,13 @@
   transition: all 0.3s ease;
 }
 
-/* Hover subtle glow */
+
 .login-card:hover {
   box-shadow: 0 14px 40px rgba(59, 130, 246, 0.4);
   transform: translateY(-2px);
 }
 
-/* ===== Headings ===== */
+
 .login-card h2 {
   font-size: 28px;
   font-weight: 700;
@@ -40,7 +40,7 @@
   color: #ffffff;
 }
 
-/* ===== Form Groups ===== */
+
 .form-group {
   margin-bottom: 18px;
   text-align: left;
@@ -53,7 +53,7 @@
   color: #cbd5e1;
 }
 
-/* Inputs */
+
 .form-control {
   width: 100%;
   box-sizing: border-box;
@@ -72,7 +72,7 @@
   box-shadow: 0 0 8px rgba(59, 130, 246, 0.5);
 }
 
-/* Button */
+
 .login-button {
   width: 100%;
   padding: 12px 0;
@@ -99,7 +99,7 @@
   box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5);
 }
 
-/* Error message */
+
 .error-message {
   margin-top: 12px;
   color: #f87171;
@@ -108,7 +108,7 @@
   text-align: center;
 }
 
-/* ===== Responsive ===== */
+
 @media (max-width: 500px) {
   .login-card {
     padding: 30px 20px;

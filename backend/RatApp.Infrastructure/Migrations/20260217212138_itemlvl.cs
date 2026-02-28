@@ -4,10 +4,8 @@
 
 namespace RatApp.Infrastructure.Migrations
 {
-    /// <inheritdoc />
     public partial class itemlvl : Migration
     {
-        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<double>(
@@ -17,8 +15,6 @@ namespace RatApp.Infrastructure.Migrations
                 nullable: false,
                 defaultValue: 0.0);
         }
-
-        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(

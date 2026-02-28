@@ -1,45 +1,41 @@
 import { environment } from '@env/environment';
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http'; // Import HttpHeaders and HttpParams
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { AuthService } from './auth.service'; // Import AuthService
-
-// Updated Player interface to match backend PlayerDto
+import { AuthService } from './auth.service';
 export interface Player {
-  id: number; // From our DB
-  name: string; // From Raider.IO
-  race: string; // From Raider.IO
-  class: string; // From Raider.IO (matching backend JSON)
-  active_spec_name: string; // From Raider.IO (matching backend JSON)
-  active_spec_role: string; // From Raider.IO (matching backend JSON)
-  faction: string; // From Raider.IO
-  region: string; // From Raider.IO (and our DB)
-  realm: string; // From Raider.IO (and our DB)
-  thumbnail_url: string; // From Raider.IO (matching backend JSON)
-  profileUrl: string; // From Raider.IO
-  guildName: string; // From Raider.IO
-  mythicPlusScore: number; // From Raider.IO
-  category: string; // From our DB
-  streamLink: string | null; // New: Optional link to player's stream
-  itemLevelEquipped: number; // New: Player's equipped item level
+  id: number;
+  name: string;
+  race: string;
+  class: string;
+  active_spec_name: string;
+  active_spec_role: string;
+  faction: string;
+  region: string;
+  realm: string;
+  thumbnail_url: string;
+  profileUrl: string;
+  guildName: string;
+  mythicPlusScore: number;
+  category: string;
+  streamLink: string | null;
+  itemLevelEquipped: number;
 }
-
-// DTO for adding a player, matching backend AddPlayerRequestDto
 export interface AddPlayerRequestDto {
   region: string;
   realm: string;
   name: string;
   category: string;
-  streamLink: string | null; // New: Optional link to player's stream
+  streamLink: string | null;
 }
 
 @Injectable({
   providedIn: 'root'
 })
 export class PlayerService {
-  private apiUrl = `${environment.apiUrl}/api/players`; // Backend API URL
+  private apiUrl = `${environment.apiUrl}/api/players`;
 
-  constructor(private http: HttpClient, private authService: AuthService) { } // Inject AuthService
+  constructor(private http: HttpClient, private authService: AuthService) { }
 
   private getAuthHeaders(): HttpHeaders {
     const token = this.authService.getToken();

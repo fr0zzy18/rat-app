@@ -1,4 +1,4 @@
-/* ===== Dashboard background ===== */
+
 .dashboard-container {
   min-height: 100vh;
   display: flex;
@@ -11,7 +11,7 @@
   color: #f1f5f9;
 }
 
-/* ===== Glass card ===== */
+
 .dashboard-card {
   background: rgba(255, 255, 255, 0.06);
   backdrop-filter: blur(18px);
@@ -28,13 +28,13 @@
   transition: all 0.3s ease;
 }
 
-/* Hover subtle glow */
+
 .dashboard-card:hover {
   box-shadow: 0 12px 40px rgba(59, 130, 246, 0.4);
   transform: translateY(-2px);
 }
 
-/* ===== Headings ===== */
+
 .dashboard-card h2 {
   font-size: 28px;
   font-weight: 700;
@@ -42,13 +42,13 @@
   color: #ffffff;
 }
 
-/* ===== Paragraph ===== */
+
 .dashboard-card p {
   font-size: 16px;
   color: #cbd5e1;
 }
 
-/* ===== Username highlight ===== */
+
 .username-highlight {
   font-weight: 600;
   color: #3b82f6;
@@ -57,7 +57,7 @@
   border-radius: 8px;
 }
 
-/* ===== Responsive ===== */
+
 @media (max-width: 500px) {
   .dashboard-card {
     padding: 30px 20px;

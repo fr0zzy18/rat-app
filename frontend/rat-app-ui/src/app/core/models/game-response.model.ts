@@ -1,17 +1,17 @@
 export interface GameResponse {
-  id: string; // Assuming GUID is string in frontend
+  id: string;
   createdByUserId: number;
   createdByUsername: string;
   player1SelectedCardIds: number[];
   player1CheckedCardIds: number[];
-  player2UserId?: number; // Optional
-  player2Username?: string; // Optional
-  player2SelectedCardIds?: number[]; // Optional
-  player2CheckedCardIds?: number[]; // Optional
+  player2UserId?: number;
+  player2Username?: string;
+  player2SelectedCardIds?: number[];
+  player2CheckedCardIds?: number[];
   player1BoardLayout: number[];
-  player2BoardLayout?: number[]; // Optional
+  player2BoardLayout?: number[];
   status: string;
   createdDate: Date;
-  gameStartedDate?: Date; // Optional
-  lastActivityDate?: Date; // Optional
+  gameStartedDate?: Date;
+  lastActivityDate?: Date;
 }

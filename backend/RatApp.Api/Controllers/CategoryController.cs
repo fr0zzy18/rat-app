@@ -39,7 +39,7 @@ namespace RatApp.Api.Controllers
             try
             {
                 var newCategory = await _categoryService.AddCategoryAsync(category.Name);
-                return CreatedAtAction(nameof(GetAllCategories), newCategory); // Changed to GetAllCategories for simplicity
+                return CreatedAtAction(nameof(GetAllCategories), newCategory);
             }
             catch (InvalidOperationException ex)
             {
@@ -60,13 +60,13 @@ namespace RatApp.Api.Controllers
                 var result = await _categoryService.DeleteCategoryAsync(id);
                 if (!result)
                 {
-                    return NotFound(); // Category not found by ID
+                    return NotFound();
                 }
-                return NoContent(); // Successfully deleted
+                return NoContent();
             }
             catch (InvalidOperationException ex)
             {
-                return Conflict(ex.Message); // "Category must be empty"
+                return Conflict(ex.Message);
             }
         }
     }

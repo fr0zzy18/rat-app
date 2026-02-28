@@ -3,13 +3,12 @@ using System.Text.Json.Serialization;
 
 namespace RatApp.Application.Models
 {
-    // Helper class to map Raider.IO API response
     public class RaiderIoPlayerResponse
     {
         public string name { get; set; } = string.Empty;
         public string race { get; set; } = string.Empty;
-        [JsonPropertyName("class")] // Corrected JsonProperty Name
-        public string Class { get; set; } = string.Empty; // Corrected property name
+        [JsonPropertyName("class")]
+        public string Class { get; set; } = string.Empty;
         public string active_spec_name { get; set; } = string.Empty;
         public string active_spec_role { get; set; } = string.Empty;
         public string gender { get; set; } = string.Empty;
@@ -21,12 +20,12 @@ namespace RatApp.Application.Models
         public string last_crawled_at { get; set; } = string.Empty;
         public string profile_url { get; set; } = string.Empty;
         public string profile_banner { get; set; } = string.Empty;
-        public GuildInfo? guild { get; set; } // New property for guild information
+        public GuildInfo? guild { get; set; }
         
         [JsonPropertyName("mythic_plus_scores_by_season")]
         public List<MythicPlusScoresBySeasonEntry>? MythicPlusScoresBySeason { get; set; }
 
-        public GearInfo? gear { get; set; } // New property for gear information
+        public GearInfo? gear { get; set; }
     }
 
     public class GearInfo
@@ -47,13 +46,11 @@ namespace RatApp.Application.Models
         public string season { get; set; } = string.Empty;
         [JsonPropertyName("scores")]
         public MythicPlusScores? scores { get; set; }
-        // Segments are not needed as per requirement, so not adding
     }
 
     public class MythicPlusScores
     {
         [JsonPropertyName("all")]
         public double all { get; set; }
-        // Other scores (dps, healer, tank, spec_0 etc.) are not needed, so not adding
     }
 }

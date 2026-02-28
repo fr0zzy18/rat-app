@@ -1,8 +1,8 @@
 import { Component, ChangeDetectorRef, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router'; // Import Router
-import { AuthService } from '../../core/services/auth.service'; // Import AuthService
+import { Router } from '@angular/router';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -34,15 +34,14 @@ import { AuthService } from '../../core/services/auth.service'; // Import AuthSe
   `,
   styleUrls: ['./login.component.css']
 })
-export class LoginComponent implements OnInit { // Implement OnInit
+export class LoginComponent implements OnInit {
   username = '';
   password = '';
   errorMessage: string | null = null;
 
-  constructor(private authService: AuthService, private router: Router, private cdr: ChangeDetectorRef) { } // Inject AuthService, Router, and ChangeDetectorRef
+  constructor(private authService: AuthService, private router: Router, private cdr: ChangeDetectorRef) { }
 
   ngOnInit(): void {
-    // Redirect to dashboard if already logged in
     if (this.authService.isAuthenticated()) {
       this.router.navigate(['/dashboard']);
     }
@@ -54,16 +53,16 @@ export class LoginComponent implements OnInit { // Implement OnInit
       user => {
         if (user) {
           console.log('Login successful');
-          this.router.navigate(['/dashboard']); // Navigate to dashboard on success
+          this.router.navigate(['/dashboard']);
         } else {
           this.errorMessage = this.authService.errorMessage || 'Login failed. Please try again.';
-          this.cdr.detectChanges(); // Force change detection for error message
+          this.cdr.detectChanges();
         }
       },
       error => {
         this.errorMessage = 'An unexpected error occurred during login.';
         console.error('Login error:', error);
-        this.cdr.detectChanges(); // Force change detection for error message
+        this.cdr.detectChanges();
       }
     );
   }

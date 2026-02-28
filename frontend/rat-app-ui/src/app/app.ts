@@ -1,14 +1,14 @@
 import { Component, signal, OnInit } from '@angular/core';
-import { RouterOutlet, Router, NavigationEnd, RouterLink } from '@angular/router'; // Import RouterLink
-import { CommonModule, NgIf } from '@angular/common'; // Import CommonModule and NgIf
-import { AuthService } from './core/services/auth.service'; // Import AuthService
-import { filter } from 'rxjs/operators'; // Import filter for router events
-import { ChangePasswordModalComponent } from './components/change-password-modal/change-password-modal.component'; // Import the new component
+import { RouterOutlet, Router, NavigationEnd, RouterLink } from '@angular/router';
+import { CommonModule, NgIf } from '@angular/common';
+import { AuthService } from './core/services/auth.service';
+import { filter } from 'rxjs/operators';
+import { ChangePasswordModalComponent } from './components/change-password-modal/change-password-modal.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, CommonModule, NgIf, RouterLink, ChangePasswordModalComponent], // Include RouterLink and new modal component
+  imports: [RouterOutlet, CommonModule, NgIf, RouterLink, ChangePasswordModalComponent],
   template: `
     <header *ngIf="showNavbar" class="app-header">
       <div class="header-content">
@@ -49,15 +49,14 @@ import { ChangePasswordModalComponent } from './components/change-password-modal
   `,
   styleUrls: ['./app.component.css']
 })
-export class App implements OnInit { // Implement OnInit
+export class App implements OnInit {
   showLogoutPopup: boolean = false;
-  showChangePasswordModal: boolean = false; // New property
-  showNavbar: boolean = true; // Control visibility of the navbar
+  showChangePasswordModal: boolean = false;
+  showNavbar: boolean = true;
 
   constructor(public authService: AuthService, private router: Router) {}
 
   ngOnInit(): void {
-    // Subscribe to router events to control navbar visibility
     this.router.events.pipe(
       filter(event => event instanceof NavigationEnd)
     ).subscribe((event: NavigationEnd) => {
@@ -67,15 +66,14 @@ export class App implements OnInit { // Implement OnInit
 
   toggleLogoutPopup(): void {
     this.showLogoutPopup = !this.showLogoutPopup;
-    // Ensure change password modal is closed when toggling logout popup
     if (!this.showLogoutPopup) {
       this.showChangePasswordModal = false;
     }
   }
 
   openChangePasswordModal(): void {
-    this.showLogoutPopup = false; // Close logout popup
-    this.showChangePasswordModal = true; // Open change password modal
+    this.showLogoutPopup = false;
+    this.showChangePasswordModal = true;
   }
 
   closeChangePasswordModal(): void {
@@ -83,7 +81,6 @@ export class App implements OnInit { // Implement OnInit
   }
 
   onPasswordChanged(): void {
-    // Handle any post-password change actions, e.g., show a success message
     console.log('Password changed successfully!');
     this.closeChangePasswordModal();
   }
@@ -91,6 +88,6 @@ export class App implements OnInit { // Implement OnInit
   logout(): void {
     this.authService.logout();
     this.router.navigate(['/login']);
-    this.showLogoutPopup = false; // Hide popup after logout
+    this.showLogoutPopup = false;
   }
 }

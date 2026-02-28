@@ -27,7 +27,7 @@ namespace RatApp.Application.Services
                 Player1CheckedCardIds = new List<int>(),
                 Status = "WaitingForPlayer",
                 CreatedDate = DateTime.UtcNow,
-                LastActivityDate = DateTime.UtcNow, // Initialize LastActivityDate
+                LastActivityDate = DateTime.UtcNow,
                 Player1BoardLayout = ShuffleCards(player1SelectedCardIds)
             };
 
@@ -54,8 +54,8 @@ namespace RatApp.Application.Services
             game.Player2CheckedCardIds = new List<int>();
             game.Player2BoardLayout = ShuffleCards(player2SelectedCardIds);
             game.Status = "InProgress";
-            game.GameStartedDate = DateTime.UtcNow; // Set game start time when game status changes to InProgress
-            game.LastActivityDate = DateTime.UtcNow; // Update LastActivityDate
+            game.GameStartedDate = DateTime.UtcNow;
+            game.LastActivityDate = DateTime.UtcNow;
 
             await _gameRepository.UpdateGameAsync(game);
             return game;
@@ -65,8 +65,6 @@ namespace RatApp.Application.Services
         {
             return await _gameRepository.GetGameByIdAsync(gameId);
         }
-
-        // New method to get a game by any participant ID
         public async Task<Game?> GetGameByParticipantIdAsync(int userId)
         {
             return await _gameRepository.GetGameByParticipantIdAsync(userId);
@@ -76,8 +74,6 @@ namespace RatApp.Application.Services
         {
             return await _gameRepository.GetWaitingGamesAsync();
         }
-
-        // New method to update a game (needed by GameHub)
         public async Task UpdateGameAsync(Game game)
         {
             await _gameRepository.UpdateGameAsync(game);
@@ -105,7 +101,6 @@ namespace RatApp.Application.Services
 
             if (game.Status != "InProgress")
             {
-                // Prevent actions if the game is not in progress or is paused
                 throw new InvalidOperationException($"Game is not in progress. Current status: {game.Status}");
             }
 
@@ -154,7 +149,7 @@ namespace RatApp.Application.Services
                 game.Status = (game.CreatedByUserId == userId) ? "Player1Won" : "Player2Won";
             }
 
-            game.LastActivityDate = DateTime.UtcNow; // Update last activity on successful move
+            game.LastActivityDate = DateTime.UtcNow;
             await _gameRepository.UpdateGameAsync(game);
             return game;
         }
@@ -176,11 +171,7 @@ namespace RatApp.Application.Services
             if (game.Status == "Paused")
             {
                 game.Status = "InProgress";
-                game.LastActivityDate = DateTime.UtcNow; // Reset last activity
-                // Option 1: Adjust GameStartedDate if you want timer to appear continuous
-                // game.GameStartedDate = game.GameStartedDate?.Add((DateTime.UtcNow - (game.LastActivityDate ?? DateTime.UtcNow)))
-                // This logic is tricky with pauses. Simpler to restart timer on frontend from current GameStartedDate
-                // For now, we'll just set LastActivityDate, frontend will handle timer reset
+                game.LastActivityDate = DateTime.UtcNow;
 
                 await _gameRepository.UpdateGameAsync(game);
                 return game;
@@ -190,35 +181,27 @@ namespace RatApp.Application.Services
                 throw new InvalidOperationException($"Game is not paused. Current status: {game.Status}");
             }
         }
-
-        // Updated signature: now accepts playerCheckedCards and playerBoardLayout
         private bool CheckForBingo(List<int> playerCheckedCards, List<int> playerBoardLayout)
         {
             const int boardSize = 5;
             bool[,] boardState = new bool[boardSize, boardSize];
-
-            // 1. Populate boardState based on playerBoardLayout and playerCheckedCards
             int layoutIndex = 0;
             for (int r = 0; r < boardSize; r++)
             {
                 for (int c = 0; c < boardSize; c++)
                 {
-                    if (r == 2 && c == 2) // Center cell is free space, always marked
+                    if (r == 2 && c == 2)
                     {
                         boardState[r, c] = true;
                     }
                     else
                     {
-                        // Map layoutIndex to grid, skipping the center
-                        // The order in playerBoardLayout corresponds to a sequential fill, skipping the center
-                        int cardId = playerBoardLayout[layoutIndex]; // Assuming layoutIndex won't exceed bounds
+                        int cardId = playerBoardLayout[layoutIndex];
                         boardState[r, c] = playerCheckedCards.Contains(cardId);
                         layoutIndex++;
                     }
                 }
             }
-
-            // 2. Check Rows
             for (int r = 0; r < boardSize; r++)
             {
                 bool rowBingo = true;
@@ -232,8 +215,6 @@ namespace RatApp.Application.Services
                 }
                 if (rowBingo) return true;
             }
-
-            // 3. Check Columns
             for (int c = 0; c < boardSize; c++)
             {
                 bool colBingo = true;
@@ -247,9 +228,6 @@ namespace RatApp.Application.Services
                 }
                 if (colBingo) return true;
             }
-
-            // 4. Check Diagonals
-            // Main Diagonal (top-left to bottom-right)
             bool mainDiagBingo = true;
             for (int i = 0; i < boardSize; i++)
             {
@@ -260,8 +238,6 @@ namespace RatApp.Application.Services
                 }
             }
             if (mainDiagBingo) return true;
-
-            // Anti-Diagonal (top-right to bottom-left)
             bool antiDiagBingo = true;
             for (int i = 0; i < boardSize; i++)
             {
@@ -273,7 +249,7 @@ namespace RatApp.Application.Services
             }
             if (antiDiagBingo) return true;
 
-            return false; // No Bingo found
+            return false;
         }
 
         private List<int> ShuffleCards(List<int> cards)

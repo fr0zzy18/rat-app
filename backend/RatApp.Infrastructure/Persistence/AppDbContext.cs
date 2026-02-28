@@ -12,16 +12,14 @@ namespace RatApp.Infrastructure.Persistence
         public DbSet<User> Users { get; set; }
         public DbSet<Role> Roles { get; set; }
         public DbSet<UserRole> UserRoles { get; set; }
-        public DbSet<Player> Players { get; set; } // Re-added Player DbSet
+        public DbSet<Player> Players { get; set; }
         public DbSet<BingoCard> BingoCards { get; set; }
         public DbSet<Game> Games { get; set; }
-        public DbSet<Category> Categories { get; set; } // New: Add Category DbSet
+        public DbSet<Category> Categories { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-
-            // Configure UserRole many-to-many relationship
             modelBuilder.Entity<UserRole>()
                 .HasKey(ur => new { ur.UserId, ur.RoleId });
 

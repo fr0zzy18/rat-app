@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using RatApp.Application.Dtos;
 using RatApp.Application.Services;
 using System.Collections.Generic;
-using System.Security.Claims; // Required for User.FindFirstValue
+using System.Security.Claims;
 
 namespace RatApp.Api.Controllers
 {
@@ -20,16 +20,16 @@ namespace RatApp.Api.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login(LoginDto loginDto) // Changed return type
+        public async Task<IActionResult> Login(LoginDto loginDto)
         {
-            var token = await _authService.Login(loginDto); // Changed variable name and expected return
+            var token = await _authService.Login(loginDto);
 
             if (token == null)
             {
                 return Unauthorized("Invalid credentials or inactive user.");
             }
 
-            return Ok(token); // Return the raw token
+            return Ok(token);
         }
 
         [HttpPost("register")]
@@ -98,21 +98,17 @@ namespace RatApp.Api.Controllers
         }
 
         [HttpPut("change-password")]
-        [Authorize(Roles = "Admin,Manager,Player")] // Allow users to change their own password
+        [Authorize(Roles = "Admin,Manager,Player")]
         public async Task<ActionResult> ChangePassword(ChangePasswordDto dto)
         {
             var authenticatedUserId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var authenticatedUserRoles = User.FindAll(ClaimTypes.Role).Select(c => c.Value);
 
             bool isAdminOrManager = authenticatedUserRoles.Contains("Admin") || authenticatedUserRoles.Contains("Manager");
-
-            // If not Admin/Manager, ensure the user can only change their own password
             if (!isAdminOrManager && (authenticatedUserId == null || dto.UserId.ToString() != authenticatedUserId))
             {
                 return Forbid("You are not authorized to change this user's password.");
             }
-            // If Admin/Manager, they can change any user's password, so no further ID check needed here for them.
-            // If a player, the check above covers it.
 
             var result = await _authService.ChangePasswordAsync(dto.UserId, dto.NewPassword);
             if (!result)

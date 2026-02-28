@@ -64,7 +64,6 @@ export class ChangePasswordModalComponent {
     this.authService.changePassword(this.userId, this.newPassword).subscribe({
       next: () => {
         this.successMessage = 'Password changed successfully!';
-        // Optionally, close the modal after a short delay
         setTimeout(() => this.passwordChanged.emit(), 1500);
       },
       error: (err) => {

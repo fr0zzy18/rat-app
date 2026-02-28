@@ -4,26 +4,26 @@ namespace RatApp.Application.Dtos
 {
     public class PlayerDto
     {
-        public int Id { get; set; } // From our DB
-        public required string Name { get; set; } // From Raider.IO
-        public required string Race { get; set; } // From Raider.IO
-        [JsonPropertyName("class")] // Map to class from Raider.IO
-        public required string Class { get; set; } // From Raider.IO
-        [JsonPropertyName("active_spec_name")] // Map to active_spec_name from Raider.IO
-        public required string ActiveSpecName { get; set; } // From Raider.IO
-        [JsonPropertyName("active_spec_role")] // Map to active_spec_role
-        public required string ActiveSpecRole { get; set; } // From Raider.IO
-        public required string Faction { get; set; } // From Raider.IO
-        public required string Region { get; set; } // From Raider.IO (and our DB)
-        public required string Realm { get; set; } // From Raider.IO (and our DB)
-        [JsonPropertyName("thumbnail_url")] // Map to thumbnail_url from Raider.IO
-        public required string ThumbnailUrl { get; set; } // From Raider.IO
-        public string ProfileUrl { get; set; } = string.Empty; // From Raider.IO
-        public string GuildName { get; set; } = string.Empty; // From Raider.IO
-        public double MythicPlusScore { get; set; } = 0.0; // From Raider.IO
-        public string Category { get; set; } = string.Empty; // From our DB
-        public string? StreamLink { get; set; } // New: Optional link to player's stream
-        public double ItemLevelEquipped { get; set; } = 0.0; // New: Player's equipped item level
+        public int Id { get; set; }
+        public required string Name { get; set; }
+        public required string Race { get; set; }
+        [JsonPropertyName("class")]
+        public required string Class { get; set; }
+        [JsonPropertyName("active_spec_name")]
+        public required string ActiveSpecName { get; set; }
+        [JsonPropertyName("active_spec_role")]
+        public required string ActiveSpecRole { get; set; }
+        public required string Faction { get; set; }
+        public required string Region { get; set; }
+        public required string Realm { get; set; }
+        [JsonPropertyName("thumbnail_url")]
+        public required string ThumbnailUrl { get; set; }
+        public string ProfileUrl { get; set; } = string.Empty;
+        public string GuildName { get; set; } = string.Empty;
+        public double MythicPlusScore { get; set; } = 0.0;
+        public string Category { get; set; } = string.Empty;
+        public string? StreamLink { get; set; }
+        public double ItemLevelEquipped { get; set; } = 0.0;
 
     }
 }

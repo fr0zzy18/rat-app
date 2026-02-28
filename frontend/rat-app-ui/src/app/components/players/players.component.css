@@ -1,4 +1,4 @@
-/* ===== Background ===== */
+
 .players-container {
   display: flex;
   flex-direction: column;
@@ -9,7 +9,7 @@
   color: #f1f5f9;
 }
 
-/* ===== Title ===== */
+
 .players-container h2 {
   text-align: center;
   font-size: 32px;
@@ -18,28 +18,28 @@
   color: #ffffff;
 }
 
-/* Tabs and Actions Container */
+
 .tabs-and-actions {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px; /* Space between this section and the glass card */
-  flex-wrap: wrap; /* Allow items to wrap on smaller screens */
-  gap: 15px; /* Gap between tabs-header and actions, and between elements if wrapped */
+  margin-bottom: 20px; 
+  flex-wrap: wrap; 
+  gap: 15px; 
 }
 
 .actions {
   display: flex;
-  gap: 15px; /* Space between buttons */
-  flex-wrap: wrap; /* Allow buttons to wrap */
+  gap: 15px; 
+  flex-wrap: wrap; 
 }
 
 
-/* ===== Buttons ===== */
+
 .add-player-button,
-.new-category-button, /* Added for new category button */
-.delete-category-button, /* Added for delete category button */
-.tab-button, /* Consolidated with category-button below */
+.new-category-button, 
+.delete-category-button, 
+.tab-button, 
 .delete-button,
 .modal-actions button {
   padding: 10px 18px;
@@ -50,9 +50,9 @@
   transition: all 0.25s ease;
 }
 
-/* Primary Button */
+
 .add-player-button,
-.new-category-button { /* Apply similar styling to new category button */
+.new-category-button { 
   background: linear-gradient(135deg, #3b82f6, #6366f1);
   color: white;
 }
@@ -63,9 +63,9 @@
   box-shadow: 0 6px 20px rgba(59,130,246,0.5);
 }
 
-/* Delete Category Button - Distinct Red Styling */
+
 .delete-category-button {
-  background: linear-gradient(135deg, #ef4444, #dc2626); /* Red gradient */
+  background: linear-gradient(135deg, #ef4444, #dc2626); 
   color: white;
 }
 
@@ -74,7 +74,7 @@
   box-shadow: 0 6px 20px rgba(239,68,68,0.5);
 }
 
-/* Ensure the modal delete button is red too */
+
 .modal-actions .delete-button {
   background: linear-gradient(135deg, #ef4444, #dc2626);
   color: white;
@@ -86,16 +86,16 @@
 }
 
 
-/* Category Buttons (existing styles, make sure they still work) */
+
 .tabs-header {
   display: flex;
   gap: 6px;
   padding: 10px 15px 0 15px;
   position: relative;
-  flex-wrap: wrap; /* Allow tabs to wrap */
+  flex-wrap: wrap; 
 }
 
-.tab-button { /* Styling for individual category filter tabs */
+.tab-button { 
   position: relative;
   padding: 10px 18px;
   border-radius: 12px 12px 0 0;
@@ -125,7 +125,7 @@
   z-index: 2;
 }
 
-/* ===== Table Wrapper ===== */
+
 .player-list {
   background: rgba(255,255,255,0.05);
   backdrop-filter: blur(16px);
@@ -136,7 +136,7 @@
   overflow-x: auto;
 }
 
-/* ===== Table ===== */
+
 table {
   width: 100%;
   border-collapse: collapse;
@@ -161,7 +161,7 @@ td {
   color: #f1f5f9;
 }
 
-/* Row hover */
+
 tbody tr {
   transition: background 0.2s ease;
 }
@@ -170,7 +170,7 @@ tbody tr:hover {
   background: rgba(59,130,246,0.15);
 }
 
-/* Player image */
+
 .player-thumbnail {
   width: 42px;
   height: 42px;
@@ -178,7 +178,7 @@ tbody tr:hover {
   border: 1px solid rgba(255,255,255,0.2);
 }
 
-/* Links */
+
 td a {
   color: #38bdf8;
   font-weight: 600;
@@ -189,10 +189,10 @@ td a:hover {
   text-decoration: underline;
 }
 
-/* Delete button */
-/* Moved delete button styles to player-actions in HTML */
 
-/* ===== Messages ===== */
+
+
+
 .loading-message,
 .no-players,
 .error-message {
@@ -238,7 +238,7 @@ td a:hover {
   animation: spin 0.8s linear infinite;
 }
 
-/* ===== Animation ===== */
+
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
@@ -250,7 +250,7 @@ td a:hover {
   border: 1px solid rgba(239,68,68,0.3);
 }
 
-/* ===== Modal ===== */
+
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -280,7 +280,7 @@ td a:hover {
   text-align: center;
 }
 
-/* Form */
+
 .form-group {
   margin-bottom: 18px;
 }
@@ -308,7 +308,7 @@ td a:hover {
   box-shadow: 0 0 10px rgba(59,130,246,0.5);
 }
 
-/* Modal buttons */
+
 .modal-actions {
   display: flex;
   justify-content: space-between;
@@ -398,9 +398,9 @@ td a:hover {
   padding: 20px;
 }
 
-/* CARD */
+
 .player-card {
-  position: relative; /* ВАЖЛИВО */
+  position: relative; 
   
   background: rgba(30, 41, 59, 0.55);
   backdrop-filter: blur(14px);
@@ -412,7 +412,7 @@ td a:hover {
 }
 
 
-/* HEADER */
+
 .player-header {
   display: flex;
   align-items: center;
@@ -441,7 +441,7 @@ td a:hover {
   opacity: 0.7;
 }
 
-/* INFO GRID */
+
 .player-info {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -463,7 +463,7 @@ td a:hover {
   color: #60a5fa;
 }
 
-/* BUTTON */
+
 .player-actions {
   position: absolute;
   bottom: 12px;
@@ -542,7 +542,7 @@ td a:hover {
 .item-level-value {
   font-size: 18px;
   font-weight: 600;
-  color: #60a5fa; /* Similar to M+ score color */
+  color: #60a5fa; 
 }
 
 

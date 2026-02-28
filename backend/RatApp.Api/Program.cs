@@ -6,33 +6,28 @@ using RatApp.Application.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using Microsoft.Extensions.DependencyInjection; // For CreateScope and GetRequiredService
-using Microsoft.Extensions.Logging; // For ILogger
-using System; // For Exception and Console
-using System.Linq; // For Any
-using System.Threading.Tasks; // For async/await
-using RatApp.Core.Entities; // Added for User, Role, UserRole
-using System.Text.Json.Serialization; // Added for ReferenceHandler
-using Npgsql.EntityFrameworkCore.PostgreSQL; // Added for UseNpgsql
-using System.Security.Claims; // Required for ClaimTypes
-using RatApp.Api.Hubs; // Added for GameHub
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
+using RatApp.Core.Entities;
+using System.Text.Json.Serialization;
+using Npgsql.EntityFrameworkCore.PostgreSQL;
+using System.Security.Claims;
+using RatApp.Api.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
-
-
-
-// Add services to the container.
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
     var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-    options.UseNpgsql(connectionString); // Changed from UseSqlServer to UseNpgsql
+    options.UseNpgsql(connectionString);
 });
 
 builder.Services.AddControllers().AddJsonOptions(x =>
     x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
-builder.Services.AddSignalR(); // Add SignalR services
+builder.Services.AddSignalR();
 
 const string MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 
@@ -47,21 +42,21 @@ builder.Services.AddCors(options =>
                                              "http://130.61.245.147:4200")
                                 .AllowAnyHeader()
                                 .AllowAnyMethod()
-                                .AllowCredentials(); // Allow credentials for JWT
+                                .AllowCredentials();
                       });
 });
 
 
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<AuthService>();
-builder.Services.AddScoped<PlayerService>(); // Re-register PlayerService
+builder.Services.AddScoped<PlayerService>();
 builder.Services.AddScoped<BingoService>();
-builder.Services.AddScoped<IGameRepository, GameRepository>(); // New: Register GameRepository
-builder.Services.AddScoped<GameService>(); // New: Register GameService
-builder.Services.AddScoped<IUserRepository, UserRepository>(); // New: Register UserRepository
-builder.Services.AddScoped<ICategoryRepository, CategoryRepository>(); // New: Register ICategoryRepository
-builder.Services.AddScoped<CategoryService>(); // New: Register CategoryService
-builder.Services.AddHttpClient(); // Add HttpClient for PlayerService
+builder.Services.AddScoped<IGameRepository, GameRepository>();
+builder.Services.AddScoped<GameService>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<CategoryService>();
+builder.Services.AddHttpClient();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -72,21 +67,18 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT Key not configured"))),
             ValidateIssuer = true,
             ValidIssuer = builder.Configuration["Jwt:Issuer"],
-            ValidateAudience = false, // For now, we are not validating audience
-            RoleClaimType = ClaimTypes.Role // Explicitly set the role claim type
+            ValidateAudience = false,
+            RoleClaimType = ClaimTypes.Role
         };
         options.Events = new JwtBearerEvents
         {
             OnMessageReceived = context =>
             {
                 var accessToken = context.Request.Query["access_token"];
-
-                // If the request is for our hub...
                 var path = context.HttpContext.Request.Path;
                 if (!string.IsNullOrEmpty(accessToken) &&
                     (path.StartsWithSegments("/gamehub")))
                 {
-                    // Read the token out of the query string
                     context.Token = accessToken;
                 }
                 return Task.CompletedTask;
@@ -96,33 +88,25 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddAuthorization();
 
 var app = builder.Build();
-
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
 
 app.UseHttpsRedirection();
-app.UseCors(MyAllowSpecificOrigins); // Enable CORS middleware
+app.UseCors(MyAllowSpecificOrigins);
 
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-app.MapHub<GameHub>("/gamehub"); // Map SignalR GameHub
-
-// Seed data
+app.MapHub<GameHub>("/gamehub");
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     try
     {
         var context = services.GetRequiredService<AppDbContext>();
-        // Ensure the database is created and migrations are applied (optional, but good for dev)
-        // context.Database.Migrate();
-
-        // Seed roles if they don't exist
         var adminRole = await context.Roles.SingleOrDefaultAsync(r => r.Name == "Admin");
         if (adminRole == null)
         {

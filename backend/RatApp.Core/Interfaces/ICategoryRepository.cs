@@ -10,6 +10,6 @@ namespace RatApp.Core.Interfaces
         Task<Category?> GetCategoryByIdAsync(int id);
         Task<Category?> GetCategoryByNameAsync(string name);
         Task AddCategoryAsync(Category category);
-        Task DeleteCategoryAsync(int id); // Added DeleteCategoryAsync
+        Task DeleteCategoryAsync(int id);
     }
 }

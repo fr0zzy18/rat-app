@@ -8,9 +8,9 @@ using Microsoft.EntityFrameworkCore;
 using RatApp.Application.Dtos;
 using RatApp.Core.Entities;
 using RatApp.Infrastructure.Persistence;
-using System.Text.Json; // For JsonSerializerOptions
-using System.Text.Json.Serialization; // Required for JsonPropertyName
-using RatApp.Application.Models; // Add this line
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using RatApp.Application.Models;
 
 namespace RatApp.Application.Services
 {
@@ -31,23 +31,19 @@ namespace RatApp.Application.Services
             try
             {
                 var response = await _httpClient.GetAsync($"{RaiderIoApiBaseUrl}?region={region}&realm={realm}&name={name}&fields=guild,mythic_plus_scores_by_season:current,gear");
-                response.EnsureSuccessStatusCode(); // Throws an exception if the HTTP response status is an error code
+                response.EnsureSuccessStatusCode();
 
                 var raiderIoPlayer = await response.Content.ReadFromJsonAsync<RaiderIoPlayerResponse>();
 
                 if (raiderIoPlayer == null) return null;
-
-                // Extract 'all' score from mythic_plus_scores_by_season:current
                 var mythicPlusScoreAll = raiderIoPlayer.MythicPlusScoresBySeason?
-                                                        .FirstOrDefault(s => s.season == "season-tww-3") // Assuming "current" resolves to a specific season
+                                                        .FirstOrDefault(s => s.season == "season-tww-3")
                                                         ?.scores?.all ?? 0;
-
-                // Extract ItemLevelEquipped from gear
                 var itemLevelEquipped = raiderIoPlayer.gear?.ItemLevelEquipped ?? 0.0;
 
                 return new PlayerDto
                 {
-                    Id = 0, // Placeholder, will be set after DB operation if adding new player
+                    Id = 0,
                     Name = raiderIoPlayer.name,
                     Race = raiderIoPlayer.race,
                     Class = raiderIoPlayer.Class, 
@@ -60,12 +56,11 @@ namespace RatApp.Application.Services
                     ProfileUrl = raiderIoPlayer.profile_url,
                     GuildName = raiderIoPlayer.guild?.name ?? string.Empty,
                     MythicPlusScore = mythicPlusScoreAll,
-                    ItemLevelEquipped = itemLevelEquipped // Include ItemLevelEquipped
+                    ItemLevelEquipped = itemLevelEquipped
                 };
             }
             catch (HttpRequestException ex)
             {
-                // Log the exception
                 Console.WriteLine($"Error fetching player from Raider.IO: {ex.Message}");
                 return null;
             }
@@ -73,33 +68,29 @@ namespace RatApp.Application.Services
 
         public async Task<PlayerDto?> AddPlayerAsync(AddPlayerRequestDto dto)
         {
-            // First, fetch details from Raider.IO to validate and get full data
             var raiderIoDetails = await GetPlayerDetailsFromRaiderIO(dto.Region, dto.Realm, dto.Name);
             if (raiderIoDetails == null)
             {
-                return null; // Player not found or error fetching from Raider.IO
+                return null;
             }
-
-            // Check if player already exists in our DB
             var existingPlayer = await _context.Players.FirstOrDefaultAsync(p =>
                 p.Name == dto.Name && p.Realm == dto.Realm && p.Region == dto.Region);
 
             if (existingPlayer != null)
             {
-                // If player exists, update its details
                 existingPlayer.Race = raiderIoDetails.Race;
                 existingPlayer.Class = raiderIoDetails.Class;
                 existingPlayer.ActiveSpecName = raiderIoDetails.ActiveSpecName;
                 existingPlayer.ActiveSpecRole = raiderIoDetails.ActiveSpecRole;
                 existingPlayer.Faction = raiderIoDetails.Faction;
                 existingPlayer.ThumbnailUrl = raiderIoDetails.ThumbnailUrl;
-                existingPlayer.LastUpdated = DateTime.UtcNow; // Update timestamp
-                existingPlayer.ProfileUrl = raiderIoDetails.ProfileUrl; // Update ProfileUrl
-                existingPlayer.GuildName = raiderIoDetails.GuildName; // Update GuildName
-                existingPlayer.MythicPlusScore = raiderIoDetails.MythicPlusScore; // Update MythicPlusScore
-                existingPlayer.Category = dto.Category; // Update Category
-                existingPlayer.StreamLink = dto.StreamLink; // Update StreamLink
-                existingPlayer.ItemLevelEquipped = raiderIoDetails.ItemLevelEquipped; // Update ItemLevelEquipped
+                existingPlayer.LastUpdated = DateTime.UtcNow;
+                existingPlayer.ProfileUrl = raiderIoDetails.ProfileUrl;
+                existingPlayer.GuildName = raiderIoDetails.GuildName;
+                existingPlayer.MythicPlusScore = raiderIoDetails.MythicPlusScore;
+                existingPlayer.Category = dto.Category;
+                existingPlayer.StreamLink = dto.StreamLink;
+                existingPlayer.ItemLevelEquipped = raiderIoDetails.ItemLevelEquipped;
                 
                 await _context.SaveChangesAsync();
                 raiderIoDetails.Id = existingPlayer.Id;
@@ -117,24 +108,22 @@ namespace RatApp.Application.Services
                 ActiveSpecRole = raiderIoDetails.ActiveSpecRole,
                 Faction = raiderIoDetails.Faction,
                 ThumbnailUrl = raiderIoDetails.ThumbnailUrl,
-                LastUpdated = DateTime.UtcNow, // Set timestamp for new player
+                LastUpdated = DateTime.UtcNow,
                 ProfileUrl = raiderIoDetails.ProfileUrl,
                 GuildName = raiderIoDetails.GuildName,
-                MythicPlusScore = raiderIoDetails.MythicPlusScore, // Set MythicPlusScore
-                Category = dto.Category, // Set Category
-                StreamLink = dto.StreamLink, // Set StreamLink
-                ItemLevelEquipped = raiderIoDetails.ItemLevelEquipped // Set ItemLevelEquipped
+                MythicPlusScore = raiderIoDetails.MythicPlusScore,
+                Category = dto.Category,
+                StreamLink = dto.StreamLink,
+                ItemLevelEquipped = raiderIoDetails.ItemLevelEquipped
             };
 
             _context.Players.Add(playerEntity);
             await _context.SaveChangesAsync();
-
-            // Return the combined DTO with the newly assigned Id from our DB
             raiderIoDetails.Id = playerEntity.Id;
             return raiderIoDetails;
         }
 
-        public async Task<IEnumerable<PlayerDto>> GetAllPlayersAsync(string? category = null) // Optional category parameter
+        public async Task<IEnumerable<PlayerDto>> GetAllPlayersAsync(string? category = null)
         {
             IQueryable<Player> playersQuery = _context.Players;
 
@@ -148,26 +137,23 @@ namespace RatApp.Application.Services
 
             foreach (var storedPlayer in storedPlayers)
             {
-                // Check if player data needs to be refreshed
                 if ((DateTime.UtcNow - storedPlayer.LastUpdated).TotalHours > 1)
                 {
                     Console.WriteLine($"Refreshing data for player: {storedPlayer.Name}");
                     var raiderIoDetails = await GetPlayerDetailsFromRaiderIO(storedPlayer.Region, storedPlayer.Realm, storedPlayer.Name);
                     if (raiderIoDetails != null)
                     {
-                        // Update stored player entity with new data
-                        storedPlayer.Race = raiderIoDetails.Race ?? storedPlayer.Race; // Coalesce to existing if null
-                        storedPlayer.Class = raiderIoDetails.Class ?? storedPlayer.Class; // Coalesce to existing if null
-                        storedPlayer.ActiveSpecName = raiderIoDetails.ActiveSpecName ?? string.Empty; // Ensure not null
-                        storedPlayer.ActiveSpecRole = raiderIoDetails.ActiveSpecRole ?? string.Empty; // Ensure not null
-                        storedPlayer.Faction = raiderIoDetails.Faction ?? storedPlayer.Faction; // Coalesce to existing if null
-                        storedPlayer.ThumbnailUrl = raiderIoDetails.ThumbnailUrl ?? string.Empty; // Ensure not null
-                        storedPlayer.LastUpdated = DateTime.UtcNow; // Update timestamp
-                        storedPlayer.ProfileUrl = raiderIoDetails.ProfileUrl ?? string.Empty; // Ensure not null
-                        storedPlayer.GuildName = raiderIoDetails.GuildName ?? string.Empty; // Ensure not null
-                        storedPlayer.MythicPlusScore = raiderIoDetails.MythicPlusScore; // Update MythicPlusScore
-                        storedPlayer.ItemLevelEquipped = raiderIoDetails.ItemLevelEquipped; // Update ItemLevelEquipped
-                        // Category is not refreshed from Raider.IO, it's set during import
+                        storedPlayer.Race = raiderIoDetails.Race ?? storedPlayer.Race;
+                        storedPlayer.Class = raiderIoDetails.Class ?? storedPlayer.Class;
+                        storedPlayer.ActiveSpecName = raiderIoDetails.ActiveSpecName ?? string.Empty;
+                        storedPlayer.ActiveSpecRole = raiderIoDetails.ActiveSpecRole ?? string.Empty;
+                        storedPlayer.Faction = raiderIoDetails.Faction ?? storedPlayer.Faction;
+                        storedPlayer.ThumbnailUrl = raiderIoDetails.ThumbnailUrl ?? string.Empty;
+                        storedPlayer.LastUpdated = DateTime.UtcNow;
+                        storedPlayer.ProfileUrl = raiderIoDetails.ProfileUrl ?? string.Empty;
+                        storedPlayer.GuildName = raiderIoDetails.GuildName ?? string.Empty;
+                        storedPlayer.MythicPlusScore = raiderIoDetails.MythicPlusScore;
+                        storedPlayer.ItemLevelEquipped = raiderIoDetails.ItemLevelEquipped;
                         await _context.SaveChangesAsync();
                     }
                 }
@@ -187,9 +173,9 @@ namespace RatApp.Application.Services
                     ProfileUrl = storedPlayer.ProfileUrl,
                     GuildName = storedPlayer.GuildName,
                     MythicPlusScore = storedPlayer.MythicPlusScore,
-                    Category = storedPlayer.Category, // Include Category
-                    StreamLink = storedPlayer.StreamLink, // Include StreamLink
-                    ItemLevelEquipped = storedPlayer.ItemLevelEquipped // Include ItemLevelEquipped
+                    Category = storedPlayer.Category,
+                    StreamLink = storedPlayer.StreamLink,
+                    ItemLevelEquipped = storedPlayer.ItemLevelEquipped
                 });
             }
             return playerDtos;
@@ -207,13 +193,11 @@ namespace RatApp.Application.Services
             await _context.SaveChangesAsync();
             return true;
         }
-
-        // New method to check if a category has any associated players
         public async Task<bool> DoesCategoryHavePlayersAsync(string categoryName)
         {
             if (string.IsNullOrWhiteSpace(categoryName))
             {
-                return false; // An empty or whitespace category name doesn't "have players" in a meaningful way for deletion check
+                return false;
             }
             return await _context.Players.AnyAsync(p => p.Category == categoryName);
         }

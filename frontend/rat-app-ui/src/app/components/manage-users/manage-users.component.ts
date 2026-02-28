@@ -1,15 +1,15 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core'; // Import ChangeDetectorRef
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../core/services/auth.service';
 import { User } from '../../core/models/user.model';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { ChangePasswordModalComponent } from '../change-password-modal/change-password-modal.component'; // Import ChangePasswordModalComponent
+import { ChangePasswordModalComponent } from '../change-password-modal/change-password-modal.component';
 import { Role } from '../../core/entities/role';
 
 @Component({
   selector: 'app-manage-users',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, ChangePasswordModalComponent], // Add ChangePasswordModalComponent to imports
+  imports: [CommonModule, ReactiveFormsModule, ChangePasswordModalComponent],
   templateUrl: './manage-users.component.html',
   styleUrls: ['./manage-users.component.css']
 })
@@ -27,7 +27,7 @@ export class ManageUsersComponent implements OnInit {
   constructor(
     private authService: AuthService,
     private fb: FormBuilder,
-    private cdr: ChangeDetectorRef // Inject ChangeDetectorRef
+    private cdr: ChangeDetectorRef
   ) {
     this.editUserForm = this.fb.group({
       id: [''],
@@ -46,7 +46,7 @@ export class ManageUsersComponent implements OnInit {
       next: (users) => {
         this.users = users;
         console.log('Loaded users:', this.users);
-        this.cdr.detectChanges(); // Trigger change detection
+        this.cdr.detectChanges();
       },
       error: (err) => {
         this.errorMessage = 'Failed to load users.';
@@ -92,8 +92,6 @@ export class ManageUsersComponent implements OnInit {
 
     let usernameUpdated = false;
     let roleUpdated = false;
-
-    // Update Username
     if (this.editingUser?.username !== username) {
       usernameUpdated = true;
       this.authService.updateUsername(id, username).subscribe({
@@ -107,8 +105,6 @@ export class ManageUsersComponent implements OnInit {
         }
       });
     }
-
-    // Update Role
     if (this.editingUser?.roles && this.editingUser?.roles[0] !== roleName) {
       roleUpdated = true;
       this.authService.updateRole(id, roleName).subscribe({
@@ -153,13 +149,13 @@ export class ManageUsersComponent implements OnInit {
   closeChangePasswordModal(): void {
     this.showChangePasswordModal = false;
     this.selectedUserIdForPasswordChange = null;
-    this.successMessage = null; // Clear success message if any
-    this.errorMessage = null; // Clear error message if any
+    this.successMessage = null;
+    this.errorMessage = null;
   }
 
   onPasswordChanged(): void {
     this.successMessage = 'Password changed successfully for user ID ' + this.selectedUserIdForPasswordChange + '.';
     this.closeChangePasswordModal();
-    this.loadUsers(); // Refresh user list just in case
+    this.loadUsers();
   }
 }

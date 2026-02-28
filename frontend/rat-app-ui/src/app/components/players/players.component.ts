@@ -1,53 +1,46 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { CommonModule, NgClass } from '@angular/common'; // Import NgClass for dynamic styling
-import { FormsModule } from '@angular/forms'; // FormsModule for ngModel
-import { PlayerService, Player, AddPlayerRequestDto } from '../../core/services/player.service'; // Only import Player
+import { CommonModule, NgClass } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { PlayerService, Player, AddPlayerRequestDto } from '../../core/services/player.service';
 import { AuthService } from '../../core/services/auth.service';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { CategoryService, Category } from '../../core/services/category.service'; // Import CategoryService and Category
+import { CategoryService, Category } from '../../core/services/category.service';
 
 @Component({
   selector: 'app-players',
   standalone: true,
-  imports: [CommonModule, FormsModule, NgClass], // Add NgClass
+  imports: [CommonModule, FormsModule, NgClass],
   templateUrl: './players.component.html',
-  styleUrls: ['./players.component.css'] // Use styleUrls
+  styleUrls: ['./players.component.css']
 })
 export class PlayersComponent implements OnInit {
   players: Player[] = [];
-  // Initialize newPlayerInput with default category
   newPlayerInput: AddPlayerRequestDto = { region: 'eu', realm: '', name: '', category: '', streamLink: '' };
   loading = false;
   errorMessage: string | null = null;
   addPlayerError: string | null = null;
-  canManagePlayers: Observable<boolean>; // Change to Observable
-
-  // New properties for Category Management (Add Category)
-  availableCategories: Category[] = []; // Dynamic list of categories
-  newCategoryName: string = ''; // For adding new category via popup
-  showNewCategoryPopup: boolean = false; // Controls visibility of new category popup
-  canManageCategories: Observable<boolean>; // RBAC for category management
-
-  // New properties for Category Management (Delete Category)
-  showDeleteCategoryPopup: boolean = false; // Controls visibility of delete category popup
-  selectedCategoryToDelete: Category | null = null; // Holds the category selected for deletion
+  canManagePlayers: Observable<boolean>;
+  availableCategories: Category[] = [];
+  newCategoryName: string = '';
+  showNewCategoryPopup: boolean = false;
+  canManageCategories: Observable<boolean>;
+  showDeleteCategoryPopup: boolean = false;
+  selectedCategoryToDelete: Category | null = null;
 
   showAddPlayerModal: boolean = false;
   
-  selectedCategory: string = 'All'; // Default selected category
+  selectedCategory: string = 'All';
 
   constructor(
     private playerService: PlayerService, 
     public authService: AuthService, 
     private cdr: ChangeDetectorRef,
-    private categoryService: CategoryService // Inject CategoryService
+    private categoryService: CategoryService
   ) {
-    // Initialize canManagePlayers as an Observable
     this.canManagePlayers = this.authService.currentUser.pipe(
       map(user => user?.roles?.includes('Admin') || user?.roles?.includes('Manager') || false)
     );
-    // Initialize canManageCategories for Admin/Manager roles
     this.canManageCategories = this.authService.currentUser.pipe(
       map(user => user?.roles?.includes('Admin') || user?.roles?.includes('Manager') || false)
     );
@@ -55,13 +48,13 @@ export class PlayersComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadPlayers(); 
-    this.loadCategories(); // Load categories on init
+    this.loadCategories();
   }
 
   loadCategories(): void {
     this.categoryService.getAllCategories().subscribe({
       next: (categories) => {
-        this.availableCategories = [{ id: 0, name: 'All' }, ...categories]; // Add 'All' as a virtual category
+        this.availableCategories = [{ id: 0, name: 'All' }, ...categories];
         this.cdr.detectChanges();
       },
       error: (err) => {
@@ -73,7 +66,7 @@ export class PlayersComponent implements OnInit {
 
   openNewCategoryPopup(): void {
     this.showNewCategoryPopup = true;
-    this.newCategoryName = ''; // Clear previous input
+    this.newCategoryName = '';
     this.errorMessage = null;
     this.cdr.detectChanges();
   }
@@ -90,7 +83,7 @@ export class PlayersComponent implements OnInit {
       this.categoryService.addCategory(this.newCategoryName.trim()).subscribe({
         next: (category) => {
           this.closeNewCategoryPopup();
-          this.loadCategories(); // Reload categories to include the new one
+          this.loadCategories();
           this.cdr.detectChanges();
         },
         error: (err) => {
@@ -102,12 +95,10 @@ export class PlayersComponent implements OnInit {
       this.errorMessage = 'Category name cannot be empty.';
     }
   }
-
-  // Delete Category Popup
   openDeleteCategoryPopup(): void {
     this.showDeleteCategoryPopup = true;
-    this.selectedCategoryToDelete = null; // Clear previous selection
-    this.errorMessage = null; // Clear any previous error messages
+    this.selectedCategoryToDelete = null;
+    this.errorMessage = null;
     this.cdr.detectChanges();
   }
 
@@ -129,7 +120,7 @@ export class PlayersComponent implements OnInit {
         this.categoryService.deleteCategory(this.selectedCategoryToDelete.id).subscribe({
           next: () => {
             this.closeDeleteCategoryPopup();
-            this.loadCategories(); // Reload categories to update the list
+            this.loadCategories();
             this.cdr.detectChanges();
           },
           error: (err) => {
@@ -184,18 +175,16 @@ getClassColor(className: string): string {
 
   onCategoryChange(categoryName: string): void {
     this.selectedCategory = categoryName;
-    this.loadPlayers(); // Reload players for the selected category
+    this.loadPlayers();
   }
 
   get categoriesForDeleteDropdown(): Category[] {
-    // Filter out the "All" virtual category
     return this.availableCategories.filter(c => c.name !== 'All');
   }
 
   openAddPlayerModal(): void {
     this.showAddPlayerModal = true;
     this.addPlayerError = null;
-    // Reset form for new entry, category will be assigned from selectedCategory on add
     this.newPlayerInput = { region: 'eu', realm: '', name: '', category: '', streamLink: '' }; 
     this.cdr.detectChanges();
   }
@@ -203,15 +192,13 @@ getClassColor(className: string): string {
   closeAddPlayerModal(): void {
     this.showAddPlayerModal = false;
     this.addPlayerError = null;
-    this.newPlayerInput = { region: 'eu', realm: '', name: '', category: '', streamLink: '' }; // Reset form
+    this.newPlayerInput = { region: 'eu', realm: '', name: '', category: '', streamLink: '' };
     this.cdr.detectChanges();
   }
 
   onAddPlayer(): void { 
     this.addPlayerError = null;
     const { region, realm, name, streamLink } = this.newPlayerInput; 
-
-    // Assign category based on selectedCategory
     const categoryToAssign = this.selectedCategory === 'All' ? '' : this.selectedCategory;
     this.newPlayerInput.category = categoryToAssign;
 
@@ -224,7 +211,7 @@ getClassColor(className: string): string {
     this.loading = true;
     this.playerService.addPlayer(this.newPlayerInput).subscribe({ 
       next: (player) => {
-        this.loadPlayers(); // Refresh list after adding
+        this.loadPlayers();
         this.closeAddPlayerModal();
         this.loading = false;
       },
@@ -252,20 +239,16 @@ getClassColor(className: string): string {
       }
     });
   }
-
-  // Generate WarcraftLogs URL
   getWarcraftLogsUrl(player: Player): string {
     if (!player || !player.region || !player.realm || !player.name) {
-      return '#'; // Return a placeholder or empty string if data is incomplete
+      return '#';
     }
     const slugifiedRealm = player.realm.toLowerCase().replace(/\s/g, '-');
     return `https://www.warcraftlogs.com/character/${player.region}/${slugifiedRealm}/${player.name}`;
   }
-
-  // Generate WoW Official Profile URL
   getWoWProfileUrl(player: Player): string {
     if (!player || !player.region || !player.realm || !player.name) {
-      return '#'; // Return a placeholder or empty string if data is incomplete
+      return '#';
     }
     const slugifiedRealm = player.realm.toLowerCase().replace(/\s/g, '-');
     return `https://worldofwarcraft.blizzard.com/en-gb/character/${player.region}/${slugifiedRealm}/${player.name}`;

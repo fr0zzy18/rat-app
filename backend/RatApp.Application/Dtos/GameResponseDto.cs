@@ -12,13 +12,13 @@ namespace RatApp.Application.Dtos
         public int? Player2UserId { get; set; }
         public List<int>? Player2SelectedCardIds { get; set; }
         public List<int>? Player2CheckedCardIds { get; set; }
-        public List<int>? Player1BoardLayout { get; set; } // New
-        public List<int>? Player2BoardLayout { get; set; } // New
-        public string CreatedByUsername { get; set; } = string.Empty; // New
-        public string? Player2Username { get; set; } // New
+        public List<int>? Player1BoardLayout { get; set; }
+        public List<int>? Player2BoardLayout { get; set; }
+        public string CreatedByUsername { get; set; } = string.Empty;
+        public string? Player2Username { get; set; }
         public string Status { get; set; } = "WaitingForPlayer";
         public DateTime CreatedDate { get; set; }
         public DateTime? GameStartedDate { get; set; }
-        public DateTime? LastActivityDate { get; set; } // New property for LastActivityDate
+        public DateTime? LastActivityDate { get; set; }
     }
 }

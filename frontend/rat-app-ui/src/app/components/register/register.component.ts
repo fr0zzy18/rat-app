@@ -15,7 +15,7 @@ import { Role } from '../../core/entities/role';
 export class RegisterComponent implements OnInit {
   registerForm: FormGroup;
   roles: Role[] = [];
-  selectedRole: string = 'Player'; // Default role
+  selectedRole: string = 'Player';
   error = '';
   successMessage: string | null = null;
 
@@ -36,7 +36,7 @@ export class RegisterComponent implements OnInit {
       next: (roles) => {
         this.roles = roles;
         if (roles.length > 0 && !roles.some(r => r.name === this.selectedRole)) {
-          this.selectedRole = roles[0].name; // Set default if 'Player' is not available
+          this.selectedRole = roles[0].name;
           this.registerForm.get('roleName')?.setValue(this.selectedRole);
         }
       },
@@ -62,7 +62,7 @@ export class RegisterComponent implements OnInit {
         next: () => {
           this.successMessage = `User ${username} registered successfully with role ${roleName}.`;
           this.registerForm.reset();
-          this.registerForm.get('roleName')?.setValue(this.selectedRole); // Reset role dropdown
+          this.registerForm.get('roleName')?.setValue(this.selectedRole);
         },
         error: error => {
           this.error = error.error || 'Registration failed.';

@@ -23,11 +23,10 @@ export class AuthService {
       console.log('AuthService: Token found in localStorage:', token);
       const decodedToken: any = jwtDecode(token);
       console.log('AuthService: Decoded token in constructor:', decodedToken);
-      // Map JWT claims to UserDto
       user = {
-        id: decodedToken.sub?.toString() || '', // Ensure ID is always a string
-        username: decodedToken.unique_name || decodedToken.name, // Prioritize unique_name, fallback to name
-        roles: Array.isArray(decodedToken.role) ? decodedToken.role : [decodedToken.role] // 'role' can be string or array
+        id: decodedToken.sub?.toString() || '',
+        username: decodedToken.unique_name || decodedToken.name,
+        roles: Array.isArray(decodedToken.role) ? decodedToken.role : [decodedToken.role]
       };
     }
     this.currentUserSubject = new BehaviorSubject<UserDto | null>(user);
@@ -47,7 +46,7 @@ export class AuthService {
         console.log('AuthService: Decoded token in login:', decodedToken);
         const user: UserDto = {
           id: decodedToken.sub?.toString() || '',
-          username: decodedToken.unique_name || decodedToken.name, // Prioritize unique_name, fallback to name
+          username: decodedToken.unique_name || decodedToken.name,
           roles: Array.isArray(decodedToken.role) ? decodedToken.role : [decodedToken.role]
         };
         this.currentUserSubject.next(user);

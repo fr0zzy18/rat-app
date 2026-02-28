@@ -1,16 +1,16 @@
 import { environment } from '@env/environment';
 import { Injectable, OnDestroy } from '@angular/core';
 import { BingoCard } from '../models/bingo-card.model';
-import * as signalR from '@microsoft/signalr'; // Import SignalR
-import { Observable, Subject } from 'rxjs'; // Import Observable and Subject
-import { GameResponse } from '../models/game-response.model'; // Import GameResponse
+import * as signalR from '@microsoft/signalr';
+import { Observable, Subject } from 'rxjs';
+import { GameResponse } from '../models/game-response.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class GameService implements OnDestroy {
   private selectedCards: BingoCard[] = [];
-  private gameId: string | null = null; // New: Property to store the Game ID
+  private gameId: string | null = null;
 
   private hubConnection: signalR.HubConnection;
   private waitingGameAddedSubject = new Subject<GameResponse>();
@@ -39,7 +39,7 @@ export class GameService implements OnDestroy {
       console.log('SignalR Connected!');
     } catch (err) {
       console.error('Error while starting SignalR connection: ' + err);
-      setTimeout(() => this.startConnection(), 5000); // Retry connection after 5 seconds
+      setTimeout(() => this.startConnection(), 5000);
     }
   }
 
@@ -54,7 +54,6 @@ export class GameService implements OnDestroy {
       console.log('Received WaitingGameAdded:', game);
       this.waitingGameAddedSubject.next(game);
     });
-    // You can add other listeners here for game updates, etc.
   }
 
   setSelectedCards(cards: BingoCard[]): void {
@@ -65,17 +64,17 @@ export class GameService implements OnDestroy {
     return this.selectedCards;
   }
 
-  setGameId(id: string): void { // New: Method to set Game ID
+  setGameId(id: string): void {
     this.gameId = id;
   }
 
-  getGameId(): string | null { // New: Method to get Game ID
+  getGameId(): string | null {
     return this.gameId;
   }
 
   clearSelectedCards(): void {
     this.selectedCards = [];
-    this.gameId = null; // New: Clear Game ID when cards are cleared
+    this.gameId = null;
   }
 }
 

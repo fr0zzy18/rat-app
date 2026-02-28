@@ -7,7 +7,6 @@ import { GameService } from '../../core/services/game.service';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { AuthService } from '../../core/services/auth.service';
 import { BingoService } from '../../core/services/bingo.service';
-// SignalR imports
 import { SignalRService } from '../../core/services/signalr.service';
 import { Subscription } from 'rxjs';
 
@@ -28,33 +27,29 @@ interface GameBoardCell {
 export class GameRoomComponent implements OnInit, OnDestroy {
   gameBoard: GameBoardCell[][] = [];
   opponentGameBoard: GameBoardCell[][] = [];
-  selectedBingoCards: BingoCard[] = []; // Still needed for selected card list
-  opponentSelectedCards: BingoCard[] = []; // Still needed for selected card list
+  selectedBingoCards: BingoCard[] = [];
+  opponentSelectedCards: BingoCard[] = [];
   boardSize: number = 5;
   gameId: string | null = null;
   errorMessage: string | null = null;
   loading: boolean = true;
-  private gameUpdateSubscription: Subscription | undefined; // For SignalR updates
-  private signalRReconnectedSubscription: Subscription | undefined; // New subscription
+  private gameUpdateSubscription: Subscription | undefined;
+  private signalRReconnectedSubscription: Subscription | undefined;
   
   myBoardDisplayName: string = 'Your Board';
   opponentBoardDisplayName: string = "Opponent's Board";
 
   winnerMessage: string | null = null;
   isGameFinished: boolean = false;
-
-  // Properties for Game ID visibility and copy functionality
   showGameIdSection: boolean = false;
   copyFeedbackMessage: string = '';
   isGameCreator: boolean = false;
-
-  // New properties for timer functionality
   isPlayer2Joined: boolean = false;
   isGameInProgress: boolean = false;
-  isGamePaused: boolean = false; // New property for game paused state
+  isGamePaused: boolean = false;
   gameStartTime: Date | null = null;
-  pausedTime: Date | null = null; // New property to store the time when the game was paused
-  private timerInterval: any; // To store setInterval reference
+  pausedTime: Date | null = null;
+  private timerInterval: any;
   displayTimer: string = '00:00:00';
 
   get isBoardInactiveAndFaded(): boolean {
@@ -97,10 +92,10 @@ export class GameRoomComponent implements OnInit, OnDestroy {
     if (this.gameUpdateSubscription) {
       this.gameUpdateSubscription.unsubscribe();
     }
-    if (this.signalRReconnectedSubscription) { // Unsubscribe from new subscription
+    if (this.signalRReconnectedSubscription) {
       this.signalRReconnectedSubscription.unsubscribe();
     }
-    this.stopTimer(); // Ensure timer is stopped on component destruction
+    this.stopTimer();
   }
 
   async setupSignalR(): Promise<void> {
@@ -120,14 +115,11 @@ export class GameRoomComponent implements OnInit, OnDestroy {
             console.error('SignalR GameUpdate error:', error);
           }
         );
-
-        // New: Subscribe to reconnection events and rejoin group
         this.signalRReconnectedSubscription = this.signalrService.reconnected$.subscribe(
           (connectionId) => {
             console.log(`GameRoomComponent: SignalR reconnected with ID: ${connectionId}. Rejoining game group: ${this.gameId}`);
             if (this.gameId) {
               this.signalrService.joinGameGroup(this.gameId);
-              // Re-fetch game details to ensure UI is up-to-date after reconnection
               this.fetchGameDetails(); 
             }
           }
@@ -163,8 +155,8 @@ export class GameRoomComponent implements OnInit, OnDestroy {
   }
 
   updateGameRoomUI(gameDetails: any): void {
-    console.log('updateGameRoomUI: Received gameDetails:', gameDetails); // ADD THIS
-    console.log('updateGameRoomUI: gameDetails.status:', gameDetails.status); // ADD THIS
+    console.log('updateGameRoomUI: Received gameDetails:', gameDetails);
+    console.log('updateGameRoomUI: gameDetails.status:', gameDetails.status);
 
     const currentUserId = Number(this.authService.currentUserValue?.id);
     if (isNaN(currentUserId)) {
@@ -173,27 +165,21 @@ export class GameRoomComponent implements OnInit, OnDestroy {
       this.router.navigate(['/login']);
       return;
     }
-
-    // Determine if current user is the game creator
     this.isGameCreator = (currentUserId === gameDetails.createdByUserId);
-    this.isPlayer2Joined = gameDetails.player2UserId !== null; // Update player2 joined status
-    this.isGameInProgress = gameDetails.status === "InProgress"; // Update game in progress status
-    this.isGamePaused = gameDetails.status === "Paused"; // New: Set game paused status
-    this.gameStartTime = new Date(gameDetails.gameStartedDate); // Set game start time
+    this.isPlayer2Joined = gameDetails.player2UserId !== null;
+    this.isGameInProgress = gameDetails.status === "InProgress";
+    this.isGamePaused = gameDetails.status === "Paused";
+    this.gameStartTime = new Date(gameDetails.gameStartedDate);
 
-    console.log('updateGameRoomUI: isGameInProgress set to:', this.isGameInProgress); // ADD THIS
-    console.log('updateGameRoomUI: isGamePaused set to:', this.isGamePaused); // ADD THIS
-    console.log('updateGameRoomUI: gameStartTime set to:', this.gameStartTime); // ADD THIS
-
-    // New: Handle pausedTime
-    if (this.isGamePaused && gameDetails.lastActivityDate) { // Assuming backend sends lastActivityDate
+    console.log('updateGameRoomUI: isGameInProgress set to:', this.isGameInProgress);
+    console.log('updateGameRoomUI: isGamePaused set to:', this.isGamePaused);
+    console.log('updateGameRoomUI: gameStartTime set to:', this.gameStartTime);
+    if (this.isGamePaused && gameDetails.lastActivityDate) {
       this.pausedTime = new Date(gameDetails.lastActivityDate);
     } else {
       this.pausedTime = null;
     }
-    console.log('updateGameRoomUI: pausedTime set to:', this.pausedTime); // ADD THIS
-
-    // Set display
+    console.log('updateGameRoomUI: pausedTime set to:', this.pausedTime);
     if (this.isGameCreator) {
       this.myBoardDisplayName = gameDetails.createdByUsername;
       this.opponentBoardDisplayName = gameDetails.player2Username ?? "Waiting for Opponent...";
@@ -206,27 +192,22 @@ export class GameRoomComponent implements OnInit, OnDestroy {
       this.router.navigate(['/bingo']);
       return;
     }
-
-    // --- Handle game finished state and winner message ---
-    this.isGameFinished = false; // Reset by default
-    this.winnerMessage = null;   // Reset by default
+    this.isGameFinished = false;
+    this.winnerMessage = null;
 
     if (gameDetails.status === "Player1Won" || gameDetails.status === "Player2Won") {
       this.isGameFinished = true;
-      this.stopTimer(); // Stop timer when game is finished
+      this.stopTimer();
       const winnerName = gameDetails.status === "Player1Won"
         ? gameDetails.createdByUsername
         : gameDetails.player2Username;
       this.winnerMessage = `Congratulations, ${winnerName}! You won the game!`;
     }
-
-    // --- Timer logic ---
     if (this.isGameInProgress && !this.isGameFinished && !this.isGamePaused && !this.timerInterval) {
       this.startTimer();
-    } else if (!this.isGameInProgress || this.isGameFinished || this.isGamePaused) { // Updated condition
+    } else if (!this.isGameInProgress || this.isGameFinished || this.isGamePaused) {
       this.stopTimer();
     }
-    // --- End Timer logic ---
 
     let playerSelectedCardIds: number[] = [];
     let playerCheckedIds: number[] = [];
@@ -288,7 +269,7 @@ export class GameRoomComponent implements OnInit, OnDestroy {
 
   initializeGameBoard(board: GameBoardCell[][], allBingoCards: BingoCard[], boardLayout: number[], playerCheckedIds: number[]): void {
     console.log('initializeGameBoard: board (before init):', board, 'allBingoCards count:', allBingoCards.length, 'boardLayout:', boardLayout, 'playerCheckedIds:', playerCheckedIds);
-    board.splice(0, board.length); // Explicitly clear the board before populating
+    board.splice(0, board.length);
 
     let cardIndex = 0;
     for (let i = 0; i < this.boardSize; i++) {
@@ -308,7 +289,7 @@ export class GameRoomComponent implements OnInit, OnDestroy {
             };
           } else {
             console.error('initializeGameBoard: BingoCard not found for ID:', cardId, 'Board Layout:', boardLayout);
-            board[i][j] = { phrase: null, isEmpty: true, isChecked: false }; // Fallback
+            board[i][j] = { phrase: null, isEmpty: true, isChecked: false };
           }
           cardIndex++;
         } else {
@@ -331,15 +312,13 @@ export class GameRoomComponent implements OnInit, OnDestroy {
   }
 
   toggleCellChecked(cell: GameBoardCell): void {
-    if (this.isGameFinished || this.isGamePaused || this.isBoardInactiveAndFaded) { // Prevent clicks if game is finished, paused, or board is inactive
+    if (this.isGameFinished || this.isGamePaused || this.isBoardInactiveAndFaded) {
       console.log('Game is finished, paused, or board is inactive, cannot click cells.');
       return;
     }
     if (!cell.isEmpty && cell.id !== undefined && this.gameId) {
       this.http.post<any>(`${this.gameApiUrl}/${this.gameId}/checkCell`, { cardId: cell.id }).subscribe({
         next: (updatedGame) => {
-          // No need to optimistically update cell.isChecked here, as SignalR will update it.
-          // The GameUpdated message will trigger updateGameRoomUI
         },
         error: (err) => {
           this.errorMessage = err.error || 'Failed to toggle cell.';
@@ -348,44 +327,36 @@ export class GameRoomComponent implements OnInit, OnDestroy {
       });
     }
   }
-
-  // New: Navigate back to the bingo selection page
   goBackToBingo(): void {
     this.router.navigate(['/bingo']);
   }
-
-  // New: Toggle visibility of Game ID section
   toggleGameIdVisibility(): void {
     this.showGameIdSection = !this.showGameIdSection;
     if (!this.showGameIdSection) {
-      this.copyFeedbackMessage = ''; // Clear message when hiding
+      this.copyFeedbackMessage = '';
     }
   }
-
-  // New: Copy Game ID to clipboard
   async copyGameIdToClipboard(): Promise<void> {
     if (this.gameId) {
       try {
         await navigator.clipboard.writeText(this.gameId);
         this.copyFeedbackMessage = 'Copied!';
-        this.cdr.detectChanges(); // Manually trigger change detection
+        this.cdr.detectChanges();
         setTimeout(() => {
           this.copyFeedbackMessage = '';
-          this.cdr.detectChanges(); // Manually trigger change detection to clear the message
-        }, 2000); // Clear message after 2 seconds
+          this.cdr.detectChanges();
+        }, 2000);
       } catch (err) {
         console.error('Failed to copy Game ID:', err);
         this.copyFeedbackMessage = 'Copy failed!';
-        this.cdr.detectChanges(); // Manually trigger change detection
+        this.cdr.detectChanges();
         setTimeout(() => {
           this.copyFeedbackMessage = '';
-          this.cdr.detectChanges(); // Manually trigger change detection to clear the message
+          this.cdr.detectChanges();
         }, 2000);
       }
     }
   }
-
-  // New: Start the game timer
   private startTimer(): void {
     if (this.gameStartTime && !this.timerInterval) {
       this.timerInterval = setInterval(() => {
@@ -399,20 +370,16 @@ export class GameRoomComponent implements OnInit, OnDestroy {
 
         this.displayTimer = 
           `${this.pad(hours)}:${this.pad(minutes)}:${this.pad(seconds)}`;
-        this.cdr.detectChanges(); // Manually trigger change detection for timer update
+        this.cdr.detectChanges();
       }, 1000);
     }
   }
-
-  // New: Stop the game timer
   private stopTimer(): void {
     if (this.timerInterval) {
       clearInterval(this.timerInterval);
       this.timerInterval = undefined;
     }
   }
-
-  // Helper function to pad single digits with a leading zero
   private pad(num: number): string {
     return num < 10 ? '0' + num : num.toString();
   }
