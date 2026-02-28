@@ -55,9 +55,11 @@
   </div>
 
   <div *ngIf="canManageSuggestions" class="suggestions-section">
-    <h2>Manage Suggestions</h2>
+    <h2>Manage Suggestions
+      <button (click)="openHistoryModal()" class="history-button">History</button>
+    </h2>
     <div *ngIf="suggestions.length === 0; else suggestionsList">
-      <p>No new suggestions at the moment.</p>
+      <p>No new pending suggestions at the moment.</p>
     </div>
     <ng-template #suggestionsList>
       <div *ngFor="let suggestion of suggestions" class="suggestion-item">
@@ -69,21 +71,43 @@
           </div>
         </ng-container>
         <ng-container *ngIf="editingSuggestionId !== suggestion.id">
-          <span>"{{ suggestion.phrase }}" suggested by {{ suggestion.suggestedByUserName }}</span>
+          <span>"{{ suggestion.phrase }}" --by {{ suggestion.suggestedByUserName }}</span>
           <span [ngClass]="{
             'status-pending': suggestion.status === 0,
             'status-approved': suggestion.status === 1,
             'status-rejected': suggestion.status === 2
-          }"> (Status: {{ suggestion.status === 0 ? 'Pending' : suggestion.status === 1 ? 'Approved' : 'Rejected' }})</span>
+          }"> {{ suggestion.status === 0 ? 'Pending' : suggestion.status === 1 ? 'Approved' : 'Rejected' }}</span>
 
           <div class="button-group" *ngIf="suggestion.status === 0">
-            <button class="crud-button edit-button" (click)="editSuggestion(suggestion)">&#9998;</button>
+            <button class="crud-button edit-button" (click)="editSuggestion(suggestion)">Edit</button>
             <button class="crud-button approve-button" (click)="approveSuggestion(suggestion.id!)">Approve</button>
             <button class="crud-button reject-button" (click)="rejectSuggestion(suggestion.id!)">Reject</button>
           </div>
         </ng-container>
       </div>
     </ng-template>
+  </div>
+
+  <!-- History Modal -->
+  <div *ngIf="showHistoryModal" class="modal-overlay">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Historical Suggestions</h2>
+        <button class="close-button" (click)="closeHistoryModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div *ngIf="historicalSuggestions.length === 0">
+          <p>No historical suggestions to display.</p>
+        </div>
+        <div *ngFor="let suggestion of historicalSuggestions" class="historical-suggestion-item">
+          <span>"{{ suggestion.phrase }}" --by {{ suggestion.suggestedByUserName }}</span>
+          <span [ngClass]="{
+            'status-approved': suggestion.status === 1,
+            'status-rejected': suggestion.status === 2
+          }"> {{ suggestion.status === 1 ? 'Approved' : 'Rejected' }}</span>
+        </div>
+      </div>
+    </div>
   </div>
 
   <div class="card-list">

@@ -38,6 +38,8 @@ export class BingoComponent implements OnInit, OnDestroy {
   canManageSuggestions: boolean = false; // New property for managing suggestions
   editingSuggestionId: number | null = null;
   editedSuggestionPhrase: string = '';
+  showHistoryModal: boolean = false; // New property to control history modal visibility
+  historicalSuggestions: Suggestion[] = []; // New property to store approved/rejected suggestions
 
 
   private showAndClearMessage(type: 'success' | 'error', message: string): void {
@@ -250,16 +252,41 @@ export class BingoComponent implements OnInit, OnDestroy {
 
   // New methods for managing suggestions
   getSuggestions(): void {
-    this.bingoService.getAllSuggestions().subscribe({
+    // Only get pending suggestions for the main view
+    this.bingoService.getPendingSuggestions().subscribe({
       next: (suggestions) => {
         this.suggestions = suggestions;
         this.cdr.detectChanges();
       },
       error: (err) => {
-        this.showAndClearMessage('error', 'Failed to load suggestions.');
-        console.error('Error loading suggestions:', err);
+        this.showAndClearMessage('error', 'Failed to load pending suggestions.');
+        console.error('Error loading pending suggestions:', err);
       }
     });
+  }
+
+  loadHistoricalSuggestions(): void {
+    this.bingoService.getAllSuggestions().subscribe({
+      next: (allSuggestions) => {
+        this.historicalSuggestions = allSuggestions.filter(s =>
+          s.status === SuggestionStatus.Approved || s.status === SuggestionStatus.Rejected
+        );
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.showAndClearMessage('error', 'Failed to load historical suggestions.');
+        console.error('Error loading historical suggestions:', err);
+      }
+    });
+  }
+
+  openHistoryModal(): void {
+    this.showHistoryModal = true;
+    this.loadHistoricalSuggestions();
+  }
+
+  closeHistoryModal(): void {
+    this.showHistoryModal = false;
   }
 
   approveSuggestion(id: number): void {
