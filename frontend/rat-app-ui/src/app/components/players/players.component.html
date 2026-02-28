@@ -13,10 +13,18 @@
       </button>
     </div>
 
-    <div class="actions">
-      <button *ngIf="canManagePlayers | async" class="add-player-button" (click)="openAddPlayerModal()">Add New Player</button>
-      <button *ngIf="canManageCategories | async" class="new-category-button" (click)="openNewCategoryPopup()">New Category</button>
-      <button *ngIf="canManageCategories | async" class="delete-category-button" (click)="openDeleteCategoryPopup()">Delete Category</button>
+    <div class="actions" *ngIf="canManagePlayers | async">
+      <div class="actions-dropdown" (click)="$event.stopPropagation()">
+        <button class="actions-dropdown-trigger" (click)="toggleActionsDropdown()">
+          Actions
+          <span class="dropdown-chevron">▼</span>
+        </button>
+        <div class="actions-dropdown-menu" *ngIf="showActionsDropdown">
+          <button class="dropdown-item" (click)="openAddPlayerModal(); closeActionsDropdown()">Add New Player</button>
+          <button class="dropdown-item" (click)="openNewCategoryPopup(); closeActionsDropdown()">New Category</button>
+          <button class="dropdown-item dropdown-item-danger" (click)="openDeleteCategoryPopup(); closeActionsDropdown()">Delete Category</button>
+        </div>
+      </div>
     </div>
   </div>
 

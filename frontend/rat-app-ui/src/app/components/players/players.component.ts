@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef, HostListener } from '@angular/core';
 import { CommonModule, NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PlayerService, Player, AddPlayerRequestDto } from '../../core/services/player.service';
@@ -29,6 +29,7 @@ export class PlayersComponent implements OnInit {
   selectedCategoryToDelete: Category | null = null;
 
   showAddPlayerModal: boolean = false;
+  showActionsDropdown: boolean = false;
   updatingCategoryPlayerId: number | null = null;
   selectedCategory: string = 'All';
 
@@ -62,6 +63,24 @@ export class PlayersComponent implements OnInit {
         this.errorMessage = 'Failed to load categories.';
       }
     });
+  }
+
+  toggleActionsDropdown(): void {
+    this.showActionsDropdown = !this.showActionsDropdown;
+    this.cdr.detectChanges();
+  }
+
+  closeActionsDropdown(): void {
+    this.showActionsDropdown = false;
+    this.cdr.detectChanges();
+  }
+
+  @HostListener('document:click')
+  onDocumentClick(): void {
+    if (this.showActionsDropdown) {
+      this.showActionsDropdown = false;
+      this.cdr.detectChanges();
+    }
   }
 
   openNewCategoryPopup(): void {
