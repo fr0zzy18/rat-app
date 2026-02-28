@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.DependencyInjection;
 using System.Threading.Tasks;
 using RatApp.Application.Services;
 using RatApp.Core.Interfaces;
@@ -6,6 +7,7 @@ using System.Security.Claims;
 using System;
 using System.Linq;
 using System.Collections.Concurrent;
+using System.Threading;
 
 namespace RatApp.Api.Hubs
 {
@@ -13,13 +15,20 @@ namespace RatApp.Api.Hubs
     {
         private readonly GameService _gameService;
         private readonly IUserRepository _userRepository;
+        private readonly IHubContext<GameHub> _hubContext;
+        private readonly IServiceScopeFactory _scopeFactory;
         private static ConcurrentDictionary<string, int> ConnectedUsers = new ConcurrentDictionary<string, int>();
         private static ConcurrentDictionary<string, string> ConnectedGameConnections = new ConcurrentDictionary<string, string>();
+        private static ConcurrentDictionary<string, Timer> PendingDisconnectTimers = new ConcurrentDictionary<string, Timer>();
 
-        public GameHub(GameService gameService, IUserRepository userRepository)
+        private const int DisconnectGracePeriodMs = 3000;
+
+        public GameHub(GameService gameService, IUserRepository userRepository, IHubContext<GameHub> hubContext, IServiceScopeFactory scopeFactory)
         {
             _gameService = gameService;
             _userRepository = userRepository;
+            _hubContext = hubContext;
+            _scopeFactory = scopeFactory;
         }
 
         public override async Task OnConnectedAsync()
@@ -40,6 +49,7 @@ namespace RatApp.Api.Hubs
 
         public async Task JoinGame(string gameId)
         {
+            CancelPendingDisconnect(gameId);
             await Groups.AddToGroupAsync(Context.ConnectionId, gameId);
             ConnectedGameConnections.TryAdd(Context.ConnectionId, gameId);
             await Clients.Group(gameId).SendAsync("ReceiveMessage", $"{Context.User?.Identity?.Name ?? Context.ConnectionId} has joined game {gameId}.");
@@ -52,6 +62,7 @@ namespace RatApp.Api.Hubs
 
             int userId;
             ConnectedUsers.TryGetValue(Context.ConnectionId, out userId);
+            CancelPendingDisconnect(gameId);
             await UpdateGameStatusOnLeave(Guid.Parse(gameId), userId);
             
             await Clients.Group(gameId).SendAsync("ReceiveMessage", $"{Context.User?.Identity?.Name ?? Context.ConnectionId} has left game {gameId}.");
@@ -65,9 +76,71 @@ namespace RatApp.Api.Hubs
             string? gameIdString;
             if (ConnectedGameConnections.TryRemove(Context.ConnectionId, out gameIdString))
             {
-                await UpdateGameStatusOnLeave(Guid.Parse(gameIdString), userIdDisconnected);
+                var gameId = Guid.Parse(gameIdString);
+                var key = $"{gameIdString}_{userIdDisconnected}";
+                var hubContext = _hubContext;
+                var scopeFactory = _scopeFactory;
+
+                var timer = new Timer(async _ =>
+                {
+                    PendingDisconnectTimers.TryRemove(key, out var discarded);
+                    using var scope = scopeFactory.CreateScope();
+                    var gameService = scope.ServiceProvider.GetRequiredService<GameService>();
+                    await UpdateGameStatusOnLeaveFromTimer(gameId, hubContext, gameService);
+                }, null, DisconnectGracePeriodMs, Timeout.Infinite);
+
+                PendingDisconnectTimers.TryAdd(key, timer);
             }
             await base.OnDisconnectedAsync(exception);
+        }
+
+        private void CancelPendingDisconnect(string gameId)
+        {
+            int userId;
+            if (ConnectedUsers.TryGetValue(Context.ConnectionId, out userId))
+            {
+                var key = $"{gameId}_{userId}";
+                if (PendingDisconnectTimers.TryRemove(key, out var timer))
+                {
+                    timer.Dispose();
+                }
+            }
+        }
+
+        private static async Task UpdateGameStatusOnLeaveFromTimer(Guid gameId, IHubContext<GameHub> hubContext, GameService gameService)
+        {
+            var game = await gameService.GetGameByIdAsync(gameId);
+            if (game == null) return;
+
+            var activeConnectionIdsForThisGame = ConnectedGameConnections
+                .Where(x => x.Value == gameId.ToString())
+                .Select(x => x.Key)
+                .ToList();
+            var currentlyConnectedParticipantUserIds = activeConnectionIdsForThisGame
+                .Select(connId =>
+                {
+                    ConnectedUsers.TryGetValue(connId, out int user);
+                    return user;
+                })
+                .Where(uId => uId != 0 && (uId == game.CreatedByUserId || (game.Player2UserId.HasValue && uId == game.Player2UserId.Value)))
+                .Distinct()
+                .ToList();
+
+            if (game.Status == "InProgress" || game.Status == "Paused")
+            {
+                if (currentlyConnectedParticipantUserIds.Count == 0)
+                {
+                    await gameService.AbandonGameAsync(gameId);
+                    await hubContext.Clients.Group(gameId.ToString()).SendAsync("GameAbandoned", gameId.ToString());
+                }
+                else if (currentlyConnectedParticipantUserIds.Count == 1 && game.Status == "InProgress")
+                {
+                    game.Status = "Paused";
+                    game.LastActivityDate = DateTime.UtcNow;
+                    await gameService.UpdateGameAsync(game);
+                    await hubContext.Clients.Group(game.Id.ToString()).SendAsync("GameUpdated", game);
+                }
+            }
         }
         private async Task UpdateGameStatusOnLeave(Guid gameId, int leavingUserId)
         {
