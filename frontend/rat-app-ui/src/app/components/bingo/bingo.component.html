@@ -1,13 +1,4 @@
 <div class="container">
-  <div class="header-section">
-    <h1>Bingo Game</h1>
-  </div>
-
-  <div *ngIf="reconnectGameId" class="reconnect-game-section">
-    <p>You have an active game. Would you like to reconnect?</p>
-    <button (click)="onReconnect()" class="reconnect-button">Reconnect to Game</button>
-  </div>
-
   <div class="message-area">
     <div *ngIf="successMessage" class="alert alert-success">
       {{ successMessage }}
@@ -17,119 +8,180 @@
     </div>
   </div>
 
-  <div class="game-overview-section">
-    <div class="game-section">
-      <h2>Game Setup</h2>
-      <div class="selection-info">
-        Selected Cards: {{ selectedCards.length }} / 24
-        <button (click)="selectRandomCards()">Select 24 random Cards</button>
-        <button (click)="clearSelection()">Clear Selected Cards</button>
-        <button [disabled]="!canStartGame" (click)="startGame()">Start Game</button>
-      </div>
-    </div>
+  <header class="header-section">
+    <h1>Rat Bingo</h1>
+  </header>
 
-    <div class="available-games-section">
-      <h2>Games List</h2>
+  <!-- Reconnect Banner -->
+  <div *ngIf="reconnectGameId" class="lobby-panel reconnect-game-section" style="max-width: 800px; width: 100%;">
+    <div>
+      <h2 style="margin: 0; color: var(--primary);">Active Game Found</h2>
+      <p style="margin: 5px 0 0 0; opacity: 0.7;">You have a session in progress. Jump back in!</p>
+    </div>
+    <button (click)="onReconnect()" class="primary-btn">
+      Reconnect Now
+    </button>
+  </div>
+
+  <!-- Selection Controls (Sticky) -->
+  <div class="selection-bar">
+    <div class="selection-info">
+      <span class="selection-count">{{ selectedCards.length }}</span>
+      <span style="text-transform: uppercase; font-size: 0.7rem; font-weight: 800; opacity: 0.6;">Cards<br>Selected</span>
+    </div>
+    
+    <div style="height: 30px; width: 1px; background: var(--border);"></div>
+
+    <div class="button-group">
+      <button class="secondary-btn" (click)="selectRandomCards()">
+        <span>Randomize</span>
+      </button>
+      <button class="ghost-btn" (click)="clearSelection()" [disabled]="selectedCards.length === 0">
+        <span>Clear</span>
+      </button>
+      <button class="primary-btn" [disabled]="!canStartGame" (click)="startGame()">
+        <span>Initialize Game</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Lobby Grid -->
+  <div class="lobby-grid">
+    <div class="lobby-panel">
+      <h2>Available Lobbies</h2>
       <div *ngIf="waitingGames.length === 0; else gamesList">
-        <p>No games at the moment... But you can create one!</p>
+        <p style="opacity: 0.5; font-style: italic;">No active lobbies found. Start your own!</p>
       </div>
       <ng-template #gamesList>
-        <ul>
-          <li *ngFor="let game of waitingGames" class="waiting-game-item" (click)="joinAvailableGame(game.id!)">
-            <span>Join Game created by {{ game.createdByUsername }}</span>
-          </li>
-        </ul>
+        <div class="waiting-games-list">
+          <div *ngFor="let game of waitingGames" class="waiting-game-item" (click)="joinAvailableGame(game.id!)">
+            <span>{{ game.createdByUsername }}'s Game</span>
+            <button class="ghost-btn" style="font-size: 0.7rem;">Join &rarr;</button>
+          </div>
+        </div>
       </ng-template>
     </div>
-  </div>
 
-  <div *ngIf="canSuggest" class="suggest-card-form">
-    <h2>Suggest a new Bingo Phrase</h2>
-    <input type="text" [(ngModel)]="newSuggestionPhrase" placeholder="Enter your suggestion here.">
-    <button (click)="submitSuggestion()">Suggest Card</button>
-  </div>
-
-    <div *ngIf="canCreate" class="create-card-form">
-    <input type="text" [(ngModel)]="newCardPhrase" placeholder="Enter a funny quote.">
-    <button (click)="createBingoCard()">Create Card</button>
-  </div>
-
-  <div *ngIf="canManageSuggestions" class="suggestions-section">
-    <h2>Manage Suggestions
-      <button (click)="openHistoryModal()" class="history-button">History</button>
-    </h2>
-    <div *ngIf="suggestions.length === 0; else suggestionsList">
-      <p>No new pending suggestions at the moment.</p>
-    </div>
-    <ng-template #suggestionsList>
-      <div *ngFor="let suggestion of suggestions" class="suggestion-item">
-        <ng-container *ngIf="editingSuggestionId === suggestion.id">
-          <div class="suggestion-edit-input-wrapper">
-            <input type="text" [(ngModel)]="editedSuggestionPhrase" class="edit-input">
-            <button class="crud-button update-button" (click)="updateSuggestion(suggestion)">&#10003;</button>
-            <button class="crud-button cancel-button" (click)="cancelSuggestionEdit()">&#10006;</button>
-          </div>
-        </ng-container>
-        <ng-container *ngIf="editingSuggestionId !== suggestion.id">
-          <span>"{{ suggestion.phrase }}" --by {{ suggestion.suggestedByUserName }}</span>
-          <span [ngClass]="{
-            'status-pending': suggestion.status === 0,
-            'status-approved': suggestion.status === 1,
-            'status-rejected': suggestion.status === 2
-          }"> {{ suggestion.status === 0 ? 'Pending' : suggestion.status === 1 ? 'Approved' : 'Rejected' }}</span>
-
-          <div class="button-group" *ngIf="suggestion.status === 0">
-            <button class="crud-button edit-button" (click)="editSuggestion(suggestion)">Edit</button>
-            <button class="crud-button approve-button" (click)="approveSuggestion(suggestion.id!)">Approve</button>
-            <button class="crud-button reject-button" (click)="rejectSuggestion(suggestion.id!)">Reject</button>
-          </div>
-        </ng-container>
+    <!-- Quick Suggest (For Players) -->
+    <div *ngIf="canSuggest" class="lobby-panel">
+      <h2>Suggest a Phrase</h2>
+      <div class="input-group">
+        <input type="text" [(ngModel)]="newSuggestionPhrase" placeholder="Enter a funny quote...">
+        <button class="primary-btn" (click)="submitSuggestion()">Submit</button>
       </div>
-    </ng-template>
+    </div>
+  </div>
+
+  <!-- Bingo Card Grid -->
+  <div class="card-list">
+    <div
+      *ngFor="let card of bingoCards"
+      class="card"
+      [class.selected]="isCardSelected(card)"
+      (click)="toggleCardSelection(card)"
+      (mouseenter)="onMouseEnter(card.id!)"
+      (mouseleave)="onMouseLeave()">
+      
+      <ng-container *ngIf="editingCardId === card.id">
+        <div class="card-edit-wrapper">
+          <input type="text" [(ngModel)]="editedCardPhrase" (click)="$event.stopPropagation()" class="edit-input">
+          <div class="button-group" style="margin-top: 10px;">
+            <button class="primary-btn" style="padding: 5px 10px;" (click)="updateBingoCard(card); $event.stopPropagation()">Save</button>
+            <button class="ghost-btn" style="padding: 5px 10px;" (click)="cancelEdit(); $event.stopPropagation()">Cancel</button>
+          </div>
+        </div>
+      </ng-container>
+
+      <ng-container *ngIf="!editingCardId || editingCardId !== card.id">
+        <span>{{ card.phrase }}</span>
+        
+        <!-- Admin Controls on Hover -->
+        <div class="button-group" *ngIf="hoveredCardId === card.id && (canEdit || canDelete)" style="position: absolute; bottom: 10px; right: 10px;">
+          <button *ngIf="canEdit" class="secondary-btn" style="padding: 5px; border-radius: 8px;" (click)="editBingoCard(card); $event.stopPropagation()">
+            <span style="font-size: 0.8rem;">✎</span>
+          </button>
+          <button *ngIf="canDelete" class="secondary-btn" style="padding: 5px; border-radius: 8px; color: #f87171;" (click)="deleteBingoCard(card.id); $event.stopPropagation()">
+            <span style="font-size: 0.8rem;">✕</span>
+          </button>
+        </div>
+      </ng-container>
+    </div>
+  </div>
+
+  <!-- Admin / Management Section -->
+  <div *ngIf="canCreate || canManageSuggestions" class="admin-section">
+    <header style="display: flex; justify-content: space-between; align-items: center;">
+      <h2 style="font-family: var(--font-display); text-transform: uppercase; margin: 0;">Management Console</h2>
+      <button *ngIf="canManageSuggestions" class="secondary-btn" (click)="openHistoryModal()">
+        View History
+      </button>
+    </header>
+
+    <div class="lobby-grid">
+      <!-- Create New Card -->
+      <div *ngIf="canCreate" class="lobby-panel">
+        <h2>Deploy New Card</h2>
+        <div class="input-group">
+          <input type="text" [(ngModel)]="newCardPhrase" placeholder="Directly add to pool...">
+          <button class="primary-btn" (click)="createBingoCard()">Create</button>
+        </div>
+      </div>
+
+      <!-- Manage Suggestions -->
+      <div *ngIf="canManageSuggestions" class="lobby-panel" style="grid-column: span 2;">
+        <h2>Pending Suggestions</h2>
+        <div *ngIf="suggestions.length === 0; else suggestionsList">
+          <p style="opacity: 0.5;">No pending suggestions to review.</p>
+        </div>
+        <ng-template #suggestionsList>
+          <div *ngFor="let suggestion of suggestions" class="suggestion-item">
+            <ng-container *ngIf="editingSuggestionId === suggestion.id">
+              <div class="input-group">
+                <input type="text" [(ngModel)]="editedSuggestionPhrase">
+                <button class="primary-btn" (click)="updateSuggestion(suggestion)">Update</button>
+                <button class="ghost-btn" (click)="cancelSuggestionEdit()">Cancel</button>
+              </div>
+            </ng-container>
+            <ng-container *ngIf="editingSuggestionId !== suggestion.id">
+              <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                <div>
+                  <p style="margin: 0; font-weight: 600;">"{{ suggestion.phrase }}"</p>
+                  <p style="margin: 5px 0 0 0; font-size: 0.8rem; opacity: 0.6;">by {{ suggestion.suggestedByUserName }}</p>
+                </div>
+                <div class="button-group">
+                  <button class="ghost-btn" (click)="editSuggestion(suggestion)">Edit</button>
+                  <button class="secondary-btn" style="color: #4ade80;" (click)="approveSuggestion(suggestion.id!)">Approve</button>
+                  <button class="secondary-btn" style="color: #f87171;" (click)="rejectSuggestion(suggestion.id!)">Reject</button>
+                </div>
+              </div>
+            </ng-container>
+          </div>
+        </ng-template>
+      </div>
+    </div>
   </div>
 
   <!-- History Modal -->
-  <div *ngIf="showHistoryModal" class="modal-overlay">
-    <div class="modal-content">
+  <div *ngIf="showHistoryModal" class="modal-overlay" (click)="closeHistoryModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <h2>Historical Suggestions</h2>
+        <h2 style="font-family: var(--font-display); text-transform: uppercase;">Historical Data</h2>
         <button class="close-button" (click)="closeHistoryModal()">&times;</button>
       </div>
       <div class="modal-body">
         <div *ngIf="historicalSuggestions.length === 0">
-          <p>No historical suggestions to display.</p>
+          <p style="opacity: 0.5; text-align: center;">No archive records found.</p>
         </div>
-        <div *ngFor="let suggestion of historicalSuggestions" class="historical-suggestion-item">
-          <span>"{{ suggestion.phrase }}" --by {{ suggestion.suggestedByUserName }}</span>
-          <span [ngClass]="{
-            'status-approved': suggestion.status === 1,
-            'status-rejected': suggestion.status === 2
-          }"> {{ suggestion.status === 1 ? 'Approved' : 'Rejected' }}</span>
+        <div *ngFor="let suggestion of historicalSuggestions" class="historical-suggestion-item" style="border-bottom: 1px solid var(--border); padding: 15px 0;">
+          <div>
+            <p style="margin: 0; font-weight: 600;">"{{ suggestion.phrase }}"</p>
+            <p style="margin: 5px 0 0 0; font-size: 0.8rem; opacity: 0.6;">by {{ suggestion.suggestedByUserName }}</p>
+          </div>
+          <span class="status-badge" [ngClass]="suggestion.status === 1 ? 'status-approved' : 'status-rejected'">
+            {{ suggestion.status === 1 ? 'Approved' : 'Rejected' }}
+          </span>
         </div>
       </div>
     </div>
-  </div>
-
-  <div class="card-list">
-          <div
-            *ngFor="let card of bingoCards"
-            class="card"
-            [class.selected]="isCardSelected(card)"
-            (click)="toggleCardSelection(card)"
-            (mouseenter)="onMouseEnter(card.id!)"
-            (mouseleave)="onMouseLeave()">              <ng-container *ngIf="editingCardId === card.id">
-                          <div class="card-edit-input-wrapper">
-                            <input type="text" [(ngModel)]="editedCardPhrase" (click)="$event.stopPropagation()" class="edit-input">
-                          </div>
-                          <div class="button-group">
-                            <button class="crud-button update-button" (click)="updateBingoCard(card); $event.stopPropagation()">&#10003;</button>
-                            <button class="crud-button cancel-button" (click)="cancelEdit(); $event.stopPropagation()">&#10006;</button>
-                          </div>              </ng-container>
-              <ng-container *ngIf="!editingCardId || editingCardId !== card.id">
-                <span>{{ card.phrase }}</span>
-                <div class="button-group">
-                            <button *ngIf="canEdit && hoveredCardId === card.id" class="crud-button edit-button" (click)="editBingoCard(card); $event.stopPropagation()">&#9998;</button>
-                            <button *ngIf="canDelete && hoveredCardId === card.id" class="crud-button delete-button" (click)="deleteBingoCard(card.id); $event.stopPropagation()">&#128465;</button>                </div>
-              </ng-container>    </div>
   </div>
 </div>
