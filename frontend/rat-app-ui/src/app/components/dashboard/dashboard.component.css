@@ -299,8 +299,8 @@ tr { border-top: 1px solid var(--border); border-bottom: 1px solid var(--border)
 .nav-btn:disabled {
   opacity: 0.2;
   cursor: not-allowed;
-  border-color: var(--text-dim);
-  color: var(--text-dim);
+  border-color: #ffffff;
+  color: #ffffff;
 }
 
 .page-indicator {
