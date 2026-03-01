@@ -1,0 +1,84 @@
+<div class="dashboard-container">
+  <div class="ranking-panel">
+    <header class="ranking-header">
+      <h2>M+ Rankings</h2>
+    </header>
+
+    <div class="table-wrapper">
+      <div *ngIf="loading" class="loading-state">
+        <div class="scanner-bar"></div>
+        <p>SCANNING DATABASE...</p>
+      </div>
+
+      <div *ngIf="!loading && players.length === 0" class="empty-state">
+        <p>[ NO OPERATIVES DETECTED IN SECTOR ]</p>
+        <p class="hint">Initialize recruitment via the Players deck.</p>
+      </div>
+
+      <table *ngIf="!loading && players.length > 0" class="ranking-table">
+        <thead>
+          <tr>
+            <th class="rank-col">Rank</th>
+            <th>Operative</th>
+            <th>Guild</th>
+            <th>Spec / Class</th>
+            <th class="center">ILVL</th>
+            <th class="right">M+ Score</th>
+            <th class="center">Faction</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let player of pagedPlayers; let i = index" class="ranking-row">
+            <td class="rank-col">
+              <span class="rank-badge" [class.top-three]="((currentPage - 1) * pageSize) + i < 3">
+                #{{ ((currentPage - 1) * pageSize) + i + 1 }}
+              </span>
+            </td>
+            <td class="operative-col">
+              <div class="operative-info">
+                <img [src]="player.thumbnail_url" class="avatar" alt="">
+                <span class="name" [style.color]="getClassColor(player.class)">{{ player.name }}</span>
+              </div>
+            </td>
+            <td class="guild-col">{{ player.guildName || '---' }}</td>
+            <td class="spec-class-col">
+              <span class="spec-class" [style.color]="getClassColor(player.class)">
+                {{ player.active_spec_name }} {{ player.class }}
+              </span>
+            </td>
+            <td class="center ilvl-col">{{ player.itemLevelEquipped | number:'1.0-1' }}</td>
+            <td class="right score-col">{{ player.mythicPlusScore | number:'1.0-0' }}</td>
+            <td class="center faction-col">
+              <img [src]="'assets/icon/' + (player.faction | lowercase) + '.png'" class="faction-icon" alt="">
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Pagination Controls -->
+      <div *ngIf="!loading && totalPages > 1" class="pagination-container">
+        <button 
+          class="nav-btn" 
+          [disabled]="currentPage === 1" 
+          (click)="setPage(currentPage - 1)"
+        >
+          &laquo; PREV
+        </button>
+        
+        <div class="page-indicator">
+          <span class="current">{{ currentPage }}</span>
+          <span class="separator">/</span>
+          <span class="total">{{ totalPages }}</span>
+        </div>
+
+        <button 
+          class="nav-btn" 
+          [disabled]="currentPage === totalPages" 
+          (click)="setPage(currentPage + 1)"
+        >
+          NEXT &raquo;
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

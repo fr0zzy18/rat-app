@@ -7,75 +7,18 @@ import { PlayerService, Player } from '../../core/services/player.service';
   selector: 'app-dashboard',
   standalone: true,
   imports: [CommonModule],
-  template: `
-   <div class="dashboard-container">
-    <div class="ranking-panel">
-      <header class="ranking-header">
-        <h2>Global Rankings</h2>
-        <div class="status-readout">
-          <span class="label">Total Operatives:</span>
-          <span class="value">{{ players.length }}</span>
-        </div>
-      </header>
-
-      <div class="table-wrapper">
-        <div *ngIf="loading" class="loading-state">
-          <div class="scanner-bar"></div>
-          <p>SCANNING DATABASE...</p>
-        </div>
-
-        <div *ngIf="!loading && players.length === 0" class="empty-state">
-          <p>[ NO OPERATIVES DETECTED IN SECTOR ]</p>
-          <p class="hint">Initialize recruitment via the Players deck.</p>
-        </div>
-
-        <table *ngIf="!loading && players.length > 0" class="ranking-table">
-          <thead>
-            <tr>
-              <th class="rank-col">Rank</th>
-              <th>Operative</th>
-              <th>Guild</th>
-              <th>Spec / Class</th>
-              <th class="center">ILVL</th>
-              <th class="right">M+ Score</th>
-              <th class="center">Faction</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let player of players; let i = index" class="ranking-row">
-              <td class="rank-col">
-                <span class="rank-badge" [class.top-three]="i < 3">#{{ i + 1 }}</span>
-              </td>
-              <td class="operative-col">
-                <div class="operative-info">
-                  <img [src]="player.thumbnail_url" class="avatar" alt="">
-                  <span class="name" [style.color]="getClassColor(player.class)">{{ player.name }}</span>
-                </div>
-              </td>
-              <td class="guild-col">{{ player.guildName || '---' }}</td>
-              <td class="spec-class-col">
-                <span class="spec-class" [style.color]="getClassColor(player.class)">
-                  {{ player.active_spec_name }} {{ player.class }}
-                </span>
-              </td>
-              <td class="center ilvl-col">{{ player.itemLevelEquipped | number:'1.0-1' }}</td>
-              <td class="right score-col">{{ player.mythicPlusScore | number:'1.0-0' }}</td>
-              <td class="center faction-col">
-                <img [src]="'assets/icon/' + (player.faction | lowercase) + '.png'" class="faction-icon" alt="">
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-  `,
+  templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
 })
 export class DashboardComponent implements OnInit {
   players: Player[] = [];
   loading: boolean = true;
   
+  // Pagination
+  currentPage: number = 1;
+  pageSize: number = 20;
+  totalPages: number = 1;
+
   classColors: { [key: string]: string } = {
     'Death Knight': '#C41F3B',
     'Demon Hunter': '#A330C9',
@@ -102,6 +45,7 @@ export class DashboardComponent implements OnInit {
     this.playerService.getAllPlayers().subscribe({
       next: (players) => {
         this.players = players.sort((a, b) => b.mythicPlusScore - a.mythicPlusScore);
+        this.totalPages = Math.ceil(this.players.length / this.pageSize);
         this.loading = false;
         this.cdr.detectChanges();
       },
@@ -111,6 +55,20 @@ export class DashboardComponent implements OnInit {
         this.cdr.detectChanges();
       }
     });
+  }
+
+  get pagedPlayers(): Player[] {
+    const startIndex = (this.currentPage - 1) * this.pageSize;
+    return this.players.slice(startIndex, startIndex + this.pageSize);
+  }
+
+  setPage(page: number): void {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.cdr.detectChanges();
+      // Scroll to top of panel on page change
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   }
 
   getClassColor(className: string): string {

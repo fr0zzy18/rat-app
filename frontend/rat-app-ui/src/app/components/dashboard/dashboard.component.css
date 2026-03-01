@@ -95,7 +95,7 @@ th {
   text-transform: uppercase;
   font-size: 0.75rem;
   font-weight: 700;
-  color: var(--text-dim);
+  color: #ffffff; /* Explicit white */
   text-align: left;
   padding: 0 20px 15px 20px;
   letter-spacing: 1px;
@@ -128,7 +128,7 @@ tr { border-top: 1px solid var(--border); border-bottom: 1px solid var(--border)
   font-family: var(--font-mono);
   font-weight: 800;
   font-size: 1.1rem;
-  color: var(--text-dim);
+  color: #ffffff; /* Explicit white */
 }
 
 .rank-badge.top-three {
@@ -163,7 +163,7 @@ tr { border-top: 1px solid var(--border); border-bottom: 1px solid var(--border)
 .guild-col {
   font-family: var(--font-mono);
   font-size: 0.85rem;
-  color: var(--text-dim);
+  color: #ffffff; /* Explicit white */
 }
 
 .spec-class-col .spec-class {
@@ -262,4 +262,66 @@ tr { border-top: 1px solid var(--border); border-bottom: 1px solid var(--border)
   font-size: 0.8rem;
   opacity: 0.5;
   letter-spacing: 0;
+}
+
+/* Pagination */
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 30px;
+  margin-top: 40px;
+  padding-top: 30px;
+  border-top: 1px solid var(--border);
+}
+
+.nav-btn {
+  background: transparent;
+  border: 1px solid var(--primary);
+  color: var(--primary);
+  font-family: var(--font-display);
+  font-weight: 800;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  padding: 10px 24px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+  letter-spacing: 2px;
+}
+
+.nav-btn:hover:not(:disabled) {
+  background: var(--primary);
+  color: #000;
+  box-shadow: 0 0 20px var(--primary-glow);
+}
+
+.nav-btn:disabled {
+  opacity: 0.2;
+  cursor: not-allowed;
+  border-color: var(--text-dim);
+  color: var(--text-dim);
+}
+
+.page-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-weight: 700;
+}
+
+.page-indicator .current {
+  color: var(--primary);
+  font-size: 1.2rem;
+  text-shadow: 0 0 10px var(--primary-glow);
+}
+
+.page-indicator .separator {
+  color: var(--text-dim);
+  opacity: 0.5;
+}
+
+.page-indicator .total {
+  color: var(--text-dim);
 }
