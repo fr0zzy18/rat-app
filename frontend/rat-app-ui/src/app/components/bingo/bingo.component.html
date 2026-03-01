@@ -165,17 +165,17 @@
   <div *ngIf="showHistoryModal" class="modal-overlay" (click)="closeHistoryModal()">
     <div class="modal-content" (click)="$event.stopPropagation()">
       <div class="modal-header">
-        <h2 style="font-family: var(--font-display); text-transform: uppercase;">Historical Data</h2>
-        <button class="close-button" (click)="closeHistoryModal()">&times;</button>
+        <h2>Archive Records</h2>
+        <div class="close-button" (click)="closeHistoryModal()">&times;</div>
       </div>
       <div class="modal-body">
-        <div *ngIf="historicalSuggestions.length === 0">
-          <p style="opacity: 0.5; text-align: center;">No archive records found.</p>
+        <div *ngIf="historicalSuggestions.length === 0" style="padding: 60px 20px; text-align: center;">
+          <p style="opacity: 0.5; font-family: var(--font-mono);">[ NO DATA FOUND IN ARCHIVE ]</p>
         </div>
-        <div *ngFor="let suggestion of historicalSuggestions" class="historical-suggestion-item" style="border-bottom: 1px solid var(--border); padding: 15px 0;">
-          <div>
-            <p style="margin: 0; font-weight: 600;">"{{ suggestion.phrase }}"</p>
-            <p style="margin: 5px 0 0 0; font-size: 0.8rem; opacity: 0.6;">by {{ suggestion.suggestedByUserName }}</p>
+        <div *ngFor="let suggestion of historicalSuggestions" class="historical-suggestion-item">
+          <div style="flex: 1; padding-right: 20px;">
+            <p class="history-phrase">"{{ suggestion.phrase }}"</p>
+            <p class="history-meta">Suggested by {{ suggestion.suggestedByUserName }}</p>
           </div>
           <span class="status-badge" [ngClass]="suggestion.status === 1 ? 'status-approved' : 'status-rejected'">
             {{ suggestion.status === 1 ? 'Approved' : 'Rejected' }}
