@@ -318,10 +318,10 @@ tr { border-top: 1px solid var(--border); border-bottom: 1px solid var(--border)
 }
 
 .page-indicator .separator {
-  color: var(--text-dim);
+  color: #ffffff; /* White separator */
   opacity: 0.5;
 }
 
 .page-indicator .total {
-  color: var(--text-dim);
+  color: #ffffff; /* White total count */
 }
