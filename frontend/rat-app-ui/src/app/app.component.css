@@ -98,6 +98,7 @@
 
 .user-section {
   position: relative;
+  margin-left: 60px; /* Increased space from management links */
 }
 
 .username {

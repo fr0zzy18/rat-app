@@ -64,7 +64,7 @@
 
     <!-- Quick Suggest (For Players) -->
     <div *ngIf="canSuggest" class="lobby-panel">
-      <h2>Suggest a Phrase</h2>
+      <h2>Suggest a new Card</h2>
       <div class="input-group">
         <input type="text" [(ngModel)]="newSuggestionPhrase" placeholder="Enter a funny quote...">
         <button class="primary-btn" (click)="submitSuggestion()">Submit</button>
