@@ -27,6 +27,7 @@
   <div class="selection-bar">
     <div class="selection-info">
       <span class="selection-count">{{ selectedCards.length }}</span>
+      <br>
       <span style="text-transform: uppercase; font-size: 0.7rem; font-weight: 800; opacity: 0.6;">Cards<br>Selected</span>
     </div>
     
@@ -40,7 +41,7 @@
         <span>Clear</span>
       </button>
       <button class="primary-btn" [disabled]="!canStartGame" (click)="startGame()">
-        <span>Initialize Game</span>
+        <span>New Game</span>
       </button>
     </div>
   </div>
@@ -131,7 +132,7 @@
       <div *ngIf="canManageSuggestions" class="lobby-panel" style="grid-column: span 2;">
         <h2>Pending Suggestions</h2>
         <div *ngIf="suggestions.length === 0; else suggestionsList">
-          <p style="opacity: 0.5;">No pending suggestions to review.</p>
+          <p class="empty-state-text">No pending suggestions to review.</p>
         </div>
         <ng-template #suggestionsList>
           <div *ngFor="let suggestion of suggestions" class="suggestion-item">
@@ -145,8 +146,8 @@
             <ng-container *ngIf="editingSuggestionId !== suggestion.id">
               <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                 <div>
-                  <p style="margin: 0; font-weight: 600;">"{{ suggestion.phrase }}"</p>
-                  <p style="margin: 5px 0 0 0; font-size: 0.8rem; opacity: 0.6;">by {{ suggestion.suggestedByUserName }}</p>
+                  <p class="suggestion-phrase">"{{ suggestion.phrase }}"</p>
+                  <p class="suggestion-author">by {{ suggestion.suggestedByUserName }}</p>
                 </div>
                 <div class="button-group">
                   <button class="ghost-btn" (click)="editSuggestion(suggestion)">Edit</button>
