@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using RatApp.Application.Dtos;
 using RatApp.Core.Entities;
 using RatApp.Infrastructure.Persistence;
@@ -18,19 +19,22 @@ namespace RatApp.Application.Services
     {
         private readonly AppDbContext _context;
         private readonly HttpClient _httpClient;
+        private readonly IServiceScopeFactory _scopeFactory;
         private const string RaiderIoApiBaseUrl = "https://raider.io/api/v1/characters/profile";
 
-        public PlayerService(AppDbContext context, HttpClient httpClient)
+        public PlayerService(AppDbContext context, HttpClient httpClient, IServiceScopeFactory scopeFactory)
         {
             _context = context;
             _httpClient = httpClient;
+            _scopeFactory = scopeFactory;
         }
 
-        private async Task<PlayerDto?> GetPlayerDetailsFromRaiderIO(string region, string realm, string name)
+        private async Task<PlayerDto?> GetPlayerDetailsFromRaiderIO(string region, string realm, string name, HttpClient? client = null)
         {
             try
             {
-                var response = await _httpClient.GetAsync($"{RaiderIoApiBaseUrl}?region={region}&realm={realm}&name={name}&fields=guild,mythic_plus_scores_by_season:current,gear");
+                var httpClient = client ?? _httpClient;
+                var response = await httpClient.GetAsync($"{RaiderIoApiBaseUrl}?region={region}&realm={realm}&name={name}&fields=guild,mythic_plus_scores_by_season:current,gear");
                 response.EnsureSuccessStatusCode();
 
                 var raiderIoPlayer = await response.Content.ReadFromJsonAsync<RaiderIoPlayerResponse>();
@@ -133,52 +137,81 @@ namespace RatApp.Application.Services
             }
 
             var storedPlayers = await playersQuery.ToListAsync();
-            var playerDtos = new List<PlayerDto>();
 
-            foreach (var storedPlayer in storedPlayers)
+            var playersToRefresh = storedPlayers
+                .Where(p => (DateTime.UtcNow - p.LastUpdated).TotalHours > 1)
+                .Select(p => p.Id)
+                .ToList();
+
+            if (playersToRefresh.Any())
             {
-                if ((DateTime.UtcNow - storedPlayer.LastUpdated).TotalHours > 1)
+                StartBackgroundRefresh(playersToRefresh);
+            }
+
+            return storedPlayers.Select(storedPlayer => new PlayerDto
+            {
+                Id = storedPlayer.Id,
+                Name = storedPlayer.Name,
+                Race = storedPlayer.Race,
+                Class = storedPlayer.Class,
+                ActiveSpecName = storedPlayer.ActiveSpecName,
+                ActiveSpecRole = storedPlayer.ActiveSpecRole,
+                Faction = storedPlayer.Faction,
+                Region = storedPlayer.Region,
+                Realm = storedPlayer.Realm,
+                ThumbnailUrl = storedPlayer.ThumbnailUrl,
+                ProfileUrl = storedPlayer.ProfileUrl,
+                GuildName = storedPlayer.GuildName,
+                MythicPlusScore = storedPlayer.MythicPlusScore,
+                Category = storedPlayer.Category,
+                StreamLink = storedPlayer.StreamLink,
+                ItemLevelEquipped = storedPlayer.ItemLevelEquipped
+            }).ToList();
+        }
+
+        private void StartBackgroundRefresh(List<int> playerIds)
+        {
+            _ = Task.Run(async () =>
+            {
+                try
                 {
-                    Console.WriteLine($"Refreshing data for player: {storedPlayer.Name}");
-                    var raiderIoDetails = await GetPlayerDetailsFromRaiderIO(storedPlayer.Region, storedPlayer.Realm, storedPlayer.Name);
-                    if (raiderIoDetails != null)
+                    using (var scope = _scopeFactory.CreateScope())
                     {
-                        storedPlayer.Race = raiderIoDetails.Race ?? storedPlayer.Race;
-                        storedPlayer.Class = raiderIoDetails.Class ?? storedPlayer.Class;
-                        storedPlayer.ActiveSpecName = raiderIoDetails.ActiveSpecName ?? string.Empty;
-                        storedPlayer.ActiveSpecRole = raiderIoDetails.ActiveSpecRole ?? string.Empty;
-                        storedPlayer.Faction = raiderIoDetails.Faction ?? storedPlayer.Faction;
-                        storedPlayer.ThumbnailUrl = raiderIoDetails.ThumbnailUrl ?? string.Empty;
-                        storedPlayer.LastUpdated = DateTime.UtcNow;
-                        storedPlayer.ProfileUrl = raiderIoDetails.ProfileUrl ?? string.Empty;
-                        storedPlayer.GuildName = raiderIoDetails.GuildName ?? string.Empty;
-                        storedPlayer.MythicPlusScore = raiderIoDetails.MythicPlusScore;
-                        storedPlayer.ItemLevelEquipped = raiderIoDetails.ItemLevelEquipped;
-                        await _context.SaveChangesAsync();
+                        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                        var httpClient = scope.ServiceProvider.GetRequiredService<HttpClient>();
+
+                        foreach (var id in playerIds)
+                        {
+                            var player = await context.Players.FindAsync(id);
+                            if (player == null) continue;
+
+                            if ((DateTime.UtcNow - player.LastUpdated).TotalHours <= 1) continue;
+
+                            Console.WriteLine($"Background refreshing data for player: {player.Name}");
+                            var raiderIoDetails = await GetPlayerDetailsFromRaiderIO(player.Region, player.Realm, player.Name, httpClient);
+                            if (raiderIoDetails != null)
+                            {
+                                player.Race = raiderIoDetails.Race ?? player.Race;
+                                player.Class = raiderIoDetails.Class ?? player.Class;
+                                player.ActiveSpecName = raiderIoDetails.ActiveSpecName ?? string.Empty;
+                                player.ActiveSpecRole = raiderIoDetails.ActiveSpecRole ?? string.Empty;
+                                player.Faction = raiderIoDetails.Faction ?? player.Faction;
+                                player.ThumbnailUrl = raiderIoDetails.ThumbnailUrl ?? string.Empty;
+                                player.LastUpdated = DateTime.UtcNow;
+                                player.ProfileUrl = raiderIoDetails.ProfileUrl ?? string.Empty;
+                                player.GuildName = raiderIoDetails.GuildName ?? string.Empty;
+                                player.MythicPlusScore = raiderIoDetails.MythicPlusScore;
+                                player.ItemLevelEquipped = raiderIoDetails.ItemLevelEquipped;
+                                await context.SaveChangesAsync();
+                            }
+                        }
                     }
                 }
-
-                playerDtos.Add(new PlayerDto
+                catch (Exception ex)
                 {
-                    Id = storedPlayer.Id,
-                    Name = storedPlayer.Name,
-                    Race = storedPlayer.Race,
-                    Class = storedPlayer.Class,
-                    ActiveSpecName = storedPlayer.ActiveSpecName,
-                    ActiveSpecRole = storedPlayer.ActiveSpecRole,
-                    Faction = storedPlayer.Faction,
-                    Region = storedPlayer.Region,
-                    Realm = storedPlayer.Realm,
-                    ThumbnailUrl = storedPlayer.ThumbnailUrl,
-                    ProfileUrl = storedPlayer.ProfileUrl,
-                    GuildName = storedPlayer.GuildName,
-                    MythicPlusScore = storedPlayer.MythicPlusScore,
-                    Category = storedPlayer.Category,
-                    StreamLink = storedPlayer.StreamLink,
-                    ItemLevelEquipped = storedPlayer.ItemLevelEquipped
-                });
-            }
-            return playerDtos;
+                    Console.WriteLine($"Error in background refresh: {ex.Message}");
+                }
+            });
         }
 
         public async Task<bool> DeletePlayerAsync(int id)
