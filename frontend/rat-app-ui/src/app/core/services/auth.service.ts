@@ -38,12 +38,11 @@ export class AuthService {
   }
 
   login(credentials: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}/login`, credentials, { responseType: 'text' }).pipe(
-      tap((token: any) => {
-        localStorage.setItem('token', token);
-        console.log('AuthService: Token received from login:', token);
-        const decodedToken: any = jwtDecode(token);
-        console.log('AuthService: Decoded token in login:', decodedToken);
+    return this.http.post(`${this.apiUrl}/login`, credentials).pipe(
+      tap((response: any) => {
+        const { accessToken, refreshToken } = response;
+        this.saveTokens(accessToken, refreshToken);
+        const decodedToken: any = jwtDecode(accessToken);
         const user: UserDto = {
           id: decodedToken.sub?.toString() || '',
           username: decodedToken.unique_name || decodedToken.name,
@@ -59,8 +58,31 @@ export class AuthService {
     );
   }
 
+  refreshToken(): Observable<any> {
+    const accessToken = this.getToken();
+    const refreshToken = this.getRefreshToken();
+    return this.http.post(`${this.apiUrl}/refresh`, { accessToken, refreshToken }).pipe(
+      tap((response: any) => {
+        const { accessToken, refreshToken } = response;
+        this.saveTokens(accessToken, refreshToken);
+      })
+    );
+  }
+
+  private saveTokens(accessToken: string, refreshToken: string): void {
+    localStorage.setItem('token', accessToken);
+    localStorage.setItem('refreshToken', refreshToken);
+  }
+
   logout(): void {
+    const refreshToken = this.getRefreshToken();
+    if (refreshToken) {
+      this.http.post(`${this.apiUrl}/revoke`, `"${refreshToken}"`, {
+        headers: new HttpHeaders({ 'Content-Type': 'application/json' })
+      }).subscribe();
+    }
     localStorage.removeItem('token');
+    localStorage.removeItem('refreshToken');
     this.currentUserSubject.next(null);
   }
 
@@ -74,6 +96,10 @@ export class AuthService {
 
   getToken(): string | null {
     return localStorage.getItem('token');
+  }
+
+  getRefreshToken(): string | null {
+    return localStorage.getItem('refreshToken');
   }
 
   changePassword(userId: number, newPassword: string): Observable<any> {

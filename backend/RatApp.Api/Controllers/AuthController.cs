@@ -22,14 +22,34 @@ namespace RatApp.Api.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginDto loginDto)
         {
-            var token = await _authService.Login(loginDto);
+            var result = await _authService.Login(loginDto);
 
-            if (token == null)
+            if (result == null)
             {
                 return Unauthorized("Invalid credentials or inactive user.");
             }
 
-            return Ok(token);
+            return Ok(result);
+        }
+
+        [HttpPost("refresh")]
+        public async Task<IActionResult> Refresh(RefreshTokenRequestDto refreshTokenRequestDto)
+        {
+            var result = await _authService.RefreshToken(refreshTokenRequestDto);
+            if (result == null)
+            {
+                return Unauthorized("Invalid refresh token.");
+            }
+            return Ok(result);
+        }
+
+        [HttpPost("revoke")]
+        [Authorize]
+        public async Task<IActionResult> Revoke([FromBody] string refreshToken)
+        {
+            var result = await _authService.RevokeToken(refreshToken);
+            if (!result) return BadRequest("Invalid refresh token.");
+            return Ok();
         }
 
         [HttpPost("register")]

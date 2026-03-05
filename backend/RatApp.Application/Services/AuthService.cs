@@ -21,7 +21,7 @@ namespace RatApp.Application.Services
             _tokenService = tokenService;
         }
 
-        public async Task<string?> Login(LoginDto loginDto)
+        public async Task<AuthResponseDto?> Login(LoginDto loginDto)
         {
             var user = await _context.Users
                 .Include(u => u.UserRoles!)
@@ -37,9 +37,58 @@ namespace RatApp.Application.Services
                 return null;
             }
 
-            var token = _tokenService.CreateToken(user);
+            var accessToken = _tokenService.CreateToken(user);
+            var refreshToken = _tokenService.GenerateRefreshToken();
 
-            return token;
+            user.RefreshToken = refreshToken;
+            user.RefreshTokenExpiry = DateTime.UtcNow.AddDays(7);
+
+            await _context.SaveChangesAsync();
+
+            return new AuthResponseDto
+            {
+                AccessToken = accessToken,
+                RefreshToken = refreshToken,
+                Username = user.Username!
+            };
+        }
+
+        public async Task<AuthResponseDto?> RefreshToken(RefreshTokenRequestDto refreshTokenRequestDto)
+        {
+            var user = await _context.Users
+                .Include(u => u.UserRoles!)
+                .ThenInclude(ur => ur.Role!)
+                .SingleOrDefaultAsync(u => u.RefreshToken == refreshTokenRequestDto.RefreshToken);
+
+            if (user == null || user.RefreshTokenExpiry <= DateTime.UtcNow)
+            {
+                return null;
+            }
+
+            var newAccessToken = _tokenService.CreateToken(user);
+            var newRefreshToken = _tokenService.GenerateRefreshToken();
+
+            user.RefreshToken = newRefreshToken;
+            user.RefreshTokenExpiry = DateTime.UtcNow.AddDays(7);
+
+            await _context.SaveChangesAsync();
+
+            return new AuthResponseDto
+            {
+                AccessToken = newAccessToken,
+                RefreshToken = newRefreshToken,
+                Username = user.Username!
+            };
+        }
+
+        public async Task<bool> RevokeToken(string refreshToken)
+        {
+            var user = await _context.Users.SingleOrDefaultAsync(u => u.RefreshToken == refreshToken);
+            if (user == null) return false;
+
+            user.RefreshToken = null;
+            await _context.SaveChangesAsync();
+            return true;
         }
 
         public async Task<bool> UserExists(string username)
